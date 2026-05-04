@@ -21,6 +21,7 @@
       "title": "Actions rapides",
       "seeAll": "Voir tout",
       "workout": "Entraînement",
+      "nutrition": "Nutrition",
       "workoutSub": "Force haut du corps",
       "progress": "Progrès",
       "progressSub": "Semaine 8 sur 12",
@@ -81,5 +82,142 @@
     "lunch": "Déjeuner",
     "dinner": "Dîner",
     "snacks": "En-cas"
+  },
+  "onboarding": {
+    "step": "Étape {{current}} sur {{total}}",
+    "next": "Continuer",
+    "back": "Retour",
+    "goal": {
+      "title": "Quel est ton objectif principal ?",
+      "subtitle": "On va construire ton plan autour de ça.",
+      "loseWeight": "Perdre du poids",
+      "loseWeightSub": "Brûler les graisses, se sentir plus léger",
+      "gainMuscle": "Prendre du muscle",
+      "gainMuscleSub": "Gagner en force et en volume",
+      "maintain": "Maintenir son poids",
+      "maintainSub": "Rester en forme et en santé",
+      "recomposition": "Recomposition",
+      "recompositionSub": "Perdre du gras, gagner du muscle"
+    },
+    "metrics": {
+      "title": "Parle-nous de toi",
+      "subtitle": "Pour personnaliser ton plan en toute sécurité.",
+      "age": "Âge",
+      "agePlaceholder": "ex. 28",
+      "gender": "Genre",
+      "genderMale": "Homme",
+      "genderFemale": "Femme",
+      "genderOther": "Autre",
+      "height": "Taille (cm)",
+      "heightPlaceholder": "ex. 175",
+      "weight": "Poids actuel (kg)",
+      "weightPlaceholder": "ex. 75",
+      "targetWeight": "Poids cible (kg)",
+      "targetWeightPlaceholder": "ex. 68",
+      "targetWeightHint": "Laisse vide si tu n'es pas encore sûr(e).",
+      "errors": {
+        "ageTooYoung": "Tu dois avoir au moins 18 ans pour utiliser Klean AI.",
+        "ageRequired": "Merci d'entrer ton âge.",
+        "ageInvalid": "Merci d'entrer un âge valide (14–100).",
+        "heightRequired": "Merci d'entrer ta taille.",
+        "heightInvalid": "La taille doit être entre 100 et 250 cm.",
+        "weightRequired": "Merci d'entrer ton poids.",
+        "weightInvalid": "Le poids doit être entre 30 et 300 kg.",
+        "targetWeightInvalid": "Le poids cible doit être entre 30 et 300 kg.",
+        "genderRequired": "Merci de choisir un genre."
+      }
+    },
+    "training": {
+      "title": "Tes habitudes d'entraînement",
+      "subtitle": "On adaptera ton plan à ton emploi du temps.",
+      "fitnessLevel": "Niveau de forme",
+      "beginner": "Débutant(e)",
+      "beginnerSub": "Nouveau dans l'entraînement",
+      "intermediate": "Intermédiaire",
+      "intermediateSub": "Entraînement régulier",
+      "advanced": "Avancé(e)",
+      "advancedSub": "Des années d'expérience",
+      "daysPerWeek": "Jours par semaine",
+      "sessionDuration": "Durée de séance",
+      "minUnit": "min"
+    },
+    "location": {
+      "title": "Où t'entraînes-tu ?",
+      "subtitle": "On choisira les exercices adaptés à ton équipement.",
+      "gym": "Salle de sport",
+      "gymSub": "Accès à tout l'équipement",
+      "home": "À la maison",
+      "homeSub": "Peu ou pas d'équipement",
+      "both": "Les deux",
+      "bothSub": "Flexible",
+      "gymChain": "Quelle salle ?",
+      "basicFit": "Basic-Fit",
+      "fitnessPark": "Fitness Park",
+      "onAir": "ON AIR",
+      "otherGym": "Autre salle"
+    },
+    "nutritionPrefs": {
+      "title": "Préférences alimentaires",
+      "subtitle": "On ne suggérera jamais d'aliments que tu ne peux pas manger.",
+      "none": "Aucune restriction",
+      "vegetarian": "Végétarien(ne)",
+      "vegan": "Végétalien(ne)",
+      "glutenFree": "Sans gluten",
+      "lactoseFree": "Sans lactose",
+      "halal": "Halal",
+      "kosher": "Casher",
+      "hint": "Sélectionne tout ce qui s'applique. Tu pourras modifier ça à tout moment."
+    },
+    "safety": {
+      "title": "Vérification de sécurité",
+      "subtitle": "Klean AI te protège des plans dangereux.",
+      "allGood": "Tout est parfait !",
+      "allGoodSub": "Ton profil est sûr. Construisons ton plan.",
+      "hasFlags": "Quelques points à revoir",
+      "hasFlagsSub": "On a repéré des problèmes. Voici ce qu'on a trouvé :",
+      "estimatedCalories": "Calories estimées/jour",
+      "tdee": "Ta dépense quotidienne (TDEE)",
+      "kcalUnit": "kcal/jour",
+      "flags": {
+        "ageTooYoung": "Tu dois avoir au moins 18 ans pour générer un plan. Consulte un médecin ou un parent d'abord.",
+        "caloriesTooLow": "Ton objectif est en dessous du minimum calorique sécurisé. On va ajuster ça.",
+        "deficitTooHigh": "Un déficit de plus de 1 000 kcal/jour est dangereux. On va le plafonner.",
+        "weightLossTooFast": "Perdre plus de 1 kg/semaine risque de perdre du muscle et nuit à la santé.",
+        "bmiTooLow": "Ton IMC indique que tu es peut-être déjà en sous-poids. La perte de poids n'est pas recommandée."
+      },
+      "continueAnyway": "Je comprends, continuer",
+      "adjustProfile": "Modifier mon profil"
+    },
+    "summary": {
+      "title": "Ton plan est prêt",
+      "subtitle": "Voici ce qu'on a préparé pour toi.",
+      "goal": "Objectif",
+      "fitnessLevel": "Niveau",
+      "training": "Entraînement",
+      "daysPerWeek": "{{days}} jours/semaine",
+      "sessionDuration": "{{min}} min/séance",
+      "location": "Lieu",
+      "restrictions": "Alimentation",
+      "noRestrictions": "Aucune restriction",
+      "generateCta": "Générer mon plan",
+      "mockNotice": "La génération de plan arrive bientôt — ton profil est sauvegardé.",
+      "editProfile": "Modifier mon profil",
+      "goals": {
+        "lose_weight": "Perdre du poids",
+        "gain_muscle": "Prendre du muscle",
+        "maintain": "Maintenir son poids",
+        "recomposition": "Recomposition"
+      },
+      "levels": {
+        "beginner": "Débutant(e)",
+        "intermediate": "Intermédiaire",
+        "advanced": "Avancé(e)"
+      },
+      "locations": {
+        "gym": "Salle de sport",
+        "home": "Maison",
+        "both": "Salle + Maison"
+      }
+    }
   }
 }

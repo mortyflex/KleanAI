@@ -81,5 +81,142 @@
     "lunch": "Lunch",
     "dinner": "Dinner",
     "snacks": "Snacks"
+  },
+  "onboarding": {
+    "step": "Step {{current}} of {{total}}",
+    "next": "Continue",
+    "back": "Back",
+    "goal": {
+      "title": "What's your main goal?",
+      "subtitle": "We'll build your plan around this.",
+      "loseWeight": "Lose weight",
+      "loseWeightSub": "Burn fat, feel lighter",
+      "gainMuscle": "Gain muscle",
+      "gainMuscleSub": "Build strength and size",
+      "maintain": "Maintain weight",
+      "maintainSub": "Stay fit and healthy",
+      "recomposition": "Recomposition",
+      "recompositionSub": "Lose fat, gain muscle"
+    },
+    "metrics": {
+      "title": "Tell us about yourself",
+      "subtitle": "This lets us personalise your plan safely.",
+      "age": "Age",
+      "agePlaceholder": "e.g. 28",
+      "gender": "Gender",
+      "genderMale": "Male",
+      "genderFemale": "Female",
+      "genderOther": "Other",
+      "height": "Height (cm)",
+      "heightPlaceholder": "e.g. 175",
+      "weight": "Current weight (kg)",
+      "weightPlaceholder": "e.g. 75",
+      "targetWeight": "Target weight (kg)",
+      "targetWeightPlaceholder": "e.g. 68",
+      "targetWeightHint": "Leave empty if you're not sure yet.",
+      "errors": {
+        "ageTooYoung": "You must be at least 18 to use Klean AI.",
+        "ageRequired": "Please enter your age.",
+        "ageInvalid": "Please enter a valid age (14–100).",
+        "heightRequired": "Please enter your height.",
+        "heightInvalid": "Height must be between 100 and 250 cm.",
+        "weightRequired": "Please enter your weight.",
+        "weightInvalid": "Weight must be between 30 and 300 kg.",
+        "targetWeightInvalid": "Target weight must be between 30 and 300 kg.",
+        "genderRequired": "Please select a gender."
+      }
+    },
+    "training": {
+      "title": "Your training habits",
+      "subtitle": "We'll adapt your plan to your schedule.",
+      "fitnessLevel": "Fitness level",
+      "beginner": "Beginner",
+      "beginnerSub": "New to training",
+      "intermediate": "Intermediate",
+      "intermediateSub": "Training regularly",
+      "advanced": "Advanced",
+      "advancedSub": "Years of experience",
+      "daysPerWeek": "Days per week",
+      "sessionDuration": "Session duration",
+      "minUnit": "min"
+    },
+    "location": {
+      "title": "Where do you train?",
+      "subtitle": "We'll find the right exercises for your setup.",
+      "gym": "Gym",
+      "gymSub": "Full equipment access",
+      "home": "At home",
+      "homeSub": "Minimal or no equipment",
+      "both": "Both",
+      "bothSub": "Flexible",
+      "gymChain": "Which gym?",
+      "basicFit": "Basic-Fit",
+      "fitnessPark": "Fitness Park",
+      "onAir": "ON AIR",
+      "otherGym": "Other gym"
+    },
+    "nutritionPrefs": {
+      "title": "Dietary preferences",
+      "subtitle": "We'll never suggest foods you can't eat.",
+      "none": "No restrictions",
+      "vegetarian": "Vegetarian",
+      "vegan": "Vegan",
+      "glutenFree": "Gluten-free",
+      "lactoseFree": "Lactose-free",
+      "halal": "Halal",
+      "kosher": "Kosher",
+      "hint": "Select all that apply. You can update this anytime."
+    },
+    "safety": {
+      "title": "Safety check",
+      "subtitle": "Klean AI protects you from dangerous plans.",
+      "allGood": "Everything looks good!",
+      "allGoodSub": "Your profile is safe. Let's build your plan.",
+      "hasFlags": "A few things to review",
+      "hasFlagsSub": "We spotted some concerns. Here's what we found:",
+      "estimatedCalories": "Est. daily calories",
+      "tdee": "Your daily burn (TDEE)",
+      "kcalUnit": "kcal/day",
+      "flags": {
+        "ageTooYoung": "You must be at least 18 to generate a plan. Chat with a doctor or parent first.",
+        "caloriesTooLow": "Your target puts you below the safe calorie minimum. We'll adjust this for you.",
+        "deficitTooHigh": "A deficit over 1,000 kcal/day is unsafe. We'll cap it at a healthy level.",
+        "weightLossTooFast": "Losing more than 1 kg/week risks muscle loss and health issues.",
+        "bmiTooLow": "Your BMI suggests you may be underweight. Weight loss is not recommended."
+      },
+      "continueAnyway": "I understand, continue",
+      "adjustProfile": "Adjust my profile"
+    },
+    "summary": {
+      "title": "Your plan is ready",
+      "subtitle": "Here's what we've built for you.",
+      "goal": "Goal",
+      "fitnessLevel": "Level",
+      "training": "Training",
+      "daysPerWeek": "{{days}} days/week",
+      "sessionDuration": "{{min}} min/session",
+      "location": "Location",
+      "restrictions": "Diet",
+      "noRestrictions": "No restrictions",
+      "generateCta": "Generate my plan",
+      "mockNotice": "Plan generation coming soon — your profile is saved.",
+      "editProfile": "Edit my profile",
+      "goals": {
+        "lose_weight": "Lose weight",
+        "gain_muscle": "Gain muscle",
+        "maintain": "Maintain weight",
+        "recomposition": "Recomposition"
+      },
+      "levels": {
+        "beginner": "Beginner",
+        "intermediate": "Intermediate",
+        "advanced": "Advanced"
+      },
+      "locations": {
+        "gym": "Gym",
+        "home": "Home",
+        "both": "Gym + Home"
+      }
+    }
   }
 }

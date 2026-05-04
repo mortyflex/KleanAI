@@ -8,7 +8,10 @@ interface PillButtonProps extends PressableProps {
   size?: "sm" | "md" | "lg";
 }
 
-const paddings: Record<string, { paddingHorizontal: number; paddingVertical: number }> = {
+const paddings: Record<
+  string,
+  { paddingHorizontal: number; paddingVertical: number }
+> = {
   sm: { paddingHorizontal: 16, paddingVertical: 8 },
   md: { paddingHorizontal: 20, paddingVertical: 14 },
   lg: { paddingHorizontal: 24, paddingVertical: 18 },
@@ -16,7 +19,13 @@ const paddings: Record<string, { paddingHorizontal: number; paddingVertical: num
 
 const fontSizes: Record<string, number> = { sm: 13, md: 15, lg: 15 };
 
-export function PillButton({ label, variant = "filled", size = "md", style, ...props }: PillButtonProps) {
+export function PillButton({
+  label,
+  variant = "filled",
+  size = "md",
+  style,
+  ...props
+}: PillButtonProps) {
   const isFilled = variant === "filled";
   const isOutline = variant === "outline";
 
