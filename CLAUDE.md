@@ -205,3 +205,49 @@ Use this structure:
 /.claude
   /skills
 ```
+
+## Mandatory Testing Policy
+
+Every new feature must include adapted tests in the same development phase.
+
+Do not postpone tests to the end of the project.
+
+When creating or modifying functionality, always add or update tests for:
+
+- new utilities
+- reducers
+- validation rules
+- business logic
+- important UI flows
+- critical components
+- error handling
+- offline behavior when relevant
+- i18n behavior when relevant
+
+Testing rules:
+
+- Do not only rely on snapshots.
+- Prefer meaningful unit tests for business logic.
+- Add smoke tests for screens and reusable components when practical.
+- Mock external services such as Supabase, Gemini, RevenueCat, Sentry, and analytics providers.
+- Do not integration-test external services unless explicitly requested and configured.
+- Existing tests must continue to pass.
+- If a new behavior is not tested, explain why.
+
+Before finishing any development phase, always run:
+
+- npm run typecheck
+- npm run lint
+- npm test
+
+For UI phases, also run or document:
+
+- npx expo start
+
+Every phase report must include:
+
+- TypeScript result
+- lint result
+- test result
+- tests added or updated
+- untested behavior, if any

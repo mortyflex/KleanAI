@@ -50,6 +50,18 @@ Before changing files:
 
 ## Testing
 
+## Testing policy
+
+Every feature must include adapted tests in the same phase.
+
+Before finishing any task, run:
+
+- npm run typecheck
+- npm run lint
+- npm test
+
+Use the qa-mobile skill for phase validation, test planning, and commit readiness.
+
 After significant changes, suggest:
 
 ```bash
