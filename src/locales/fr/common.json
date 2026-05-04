@@ -1,0 +1,85 @@
+{
+  "tabs": {
+    "home": "Accueil",
+    "workout": "Entraînement",
+    "nutrition": "Nutrition"
+  },
+  "home": {
+    "goodMorning": "Bonjour,",
+    "overview": {
+      "title": "Aperçu du jour",
+      "burned": "Brûlées",
+      "steps": "Pas",
+      "active": "Actif",
+      "kcalUnit": "kcal",
+      "stepsUnit": "pas",
+      "minUnit": "min",
+      "goalLabel": "Objectif calorique quotidien",
+      "goalProgress": "{{current}} sur {{goal}} kcal"
+    },
+    "actions": {
+      "title": "Actions rapides",
+      "seeAll": "Voir tout",
+      "workout": "Entraînement",
+      "workoutSub": "Force haut du corps",
+      "progress": "Progrès",
+      "progressSub": "Semaine 8 sur 12",
+      "coach": "Coach IA",
+      "coachSub": "Posez une question"
+    },
+    "tip": {
+      "label": "Conseil du coach",
+      "body": "Prenez un shake protéiné après votre séance. 30g dans les 30 minutes optimisent la récupération musculaire."
+    },
+    "cta": "Commencer l'entraînement 💪"
+  },
+  "workout": {
+    "sectionTitle": "Entraînement du jour",
+    "minUnit": "min",
+    "completedLabel": "Exercices complétés",
+    "exerciseCount_one": "{{count}} exercice",
+    "exerciseCount_other": "{{count}} exercices",
+    "setsReps": "{{sets}} séries × {{reps}} rép.",
+    "filters": {
+      "all": "Tous",
+      "strength": "Force",
+      "cardio": "Cardio",
+      "mobility": "Mobilité"
+    },
+    "markComplete": "Tout marquer terminé",
+    "allDone": "Tout terminé ! 🎉"
+  },
+  "nutrition": {
+    "title": "Nutrition",
+    "goalSuffix": "/ {{goal}} kcal",
+    "pctGoal": "{{pct}}% de l'objectif",
+    "kcalLeft": "{{remaining}} kcal restantes",
+    "goalReached": "Objectif atteint 🎉",
+    "macros": {
+      "protein": "Protéines",
+      "carbs": "Glucides",
+      "fat": "Lipides"
+    },
+    "meals": {
+      "title": "Repas",
+      "logFood": "Enregistrer",
+      "notLogged": "Non enregistré",
+      "kcalUnit": "kcal"
+    },
+    "hydration": {
+      "title": "Hydratation",
+      "glassCount": "{{current}} sur {{goal}} verres",
+      "addGlass": "+ Ajouter un verre"
+    },
+    "insight": {
+      "label": "Conseil nutrition",
+      "body": "Vous êtes sur la bonne voie ! Les protéines sont à 57% — essayez une poignée d'amandes ou un œuf dur."
+    }
+  },
+  "meals": {
+    "breakfast": "Petit-déjeuner",
+    "lunch": "Déjeuner",
+    "dinner": "Dîner",
+    "snacks": "En-cas"
+  }
+}

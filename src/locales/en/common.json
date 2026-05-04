@@ -1,0 +1,85 @@
+{
+  "tabs": {
+    "home": "Home",
+    "workout": "Workout",
+    "nutrition": "Nutrition"
+  },
+  "home": {
+    "goodMorning": "Good morning,",
+    "overview": {
+      "title": "Today's Overview",
+      "burned": "Burned",
+      "steps": "Steps",
+      "active": "Active",
+      "kcalUnit": "kcal",
+      "stepsUnit": "steps",
+      "minUnit": "min",
+      "goalLabel": "Daily calorie goal",
+      "goalProgress": "{{current}} of {{goal}} kcal"
+    },
+    "actions": {
+      "title": "Quick Actions",
+      "seeAll": "See all",
+      "workout": "Workout",
+      "workoutSub": "Upper Body Power",
+      "progress": "Progress",
+      "progressSub": "Week 8 of 12",
+      "coach": "AI Coach",
+      "coachSub": "Ask anything"
+    },
+    "tip": {
+      "label": "Coach's Tip",
+      "body": "Hit a protein shake right after your session. 30g within 30 minutes maximises muscle recovery."
+    },
+    "cta": "Start Today's Workout 💪"
+  },
+  "workout": {
+    "sectionTitle": "Today's Workout",
+    "minUnit": "min",
+    "completedLabel": "Exercises completed",
+    "exerciseCount_one": "{{count}} exercise",
+    "exerciseCount_other": "{{count}} exercises",
+    "setsReps": "{{sets}} sets × {{reps}} reps",
+    "filters": {
+      "all": "All",
+      "strength": "Strength",
+      "cardio": "Cardio",
+      "mobility": "Mobility"
+    },
+    "markComplete": "Mark All Complete",
+    "allDone": "All Done! 🎉"
+  },
+  "nutrition": {
+    "title": "Nutrition",
+    "goalSuffix": "/ {{goal}} kcal",
+    "pctGoal": "{{pct}}% of daily goal",
+    "kcalLeft": "{{remaining}} kcal left",
+    "goalReached": "Goal reached 🎉",
+    "macros": {
+      "protein": "Protein",
+      "carbs": "Carbs",
+      "fat": "Fat"
+    },
+    "meals": {
+      "title": "Meals",
+      "logFood": "Log food",
+      "notLogged": "Not logged yet",
+      "kcalUnit": "kcal"
+    },
+    "hydration": {
+      "title": "Hydration",
+      "glassCount": "{{current}} of {{goal}} glasses",
+      "addGlass": "+ Add a glass"
+    },
+    "insight": {
+      "label": "Nutrition Insight",
+      "body": "You're on track! Protein is at 57% — try a handful of almonds or a boiled egg to hit your goal."
+    }
+  },
+  "meals": {
+    "breakfast": "Breakfast",
+    "lunch": "Lunch",
+    "dinner": "Dinner",
+    "snacks": "Snacks"
+  }
+}

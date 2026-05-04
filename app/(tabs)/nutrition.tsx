@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { ScrollView, View, Text, Pressable } from "react-native";
+import { useTranslation } from "react-i18next";
 import { nutrition, meals } from "../../src/data/mock";
 import { Card } from "../../src/components/ui/card";
 import { MacroBar } from "../../src/components/ui/macro-bar";
@@ -7,60 +8,49 @@ import { SectionHeader } from "../../src/components/ui/section-header";
 import { PillButton } from "../../src/components/ui/pill-button";
 import { colors, radii, shadows } from "../../src/design/tokens";
 
+const MEAL_KEYS: Record<string, string> = {
+  Breakfast: "meals.breakfast",
+  Lunch:     "meals.lunch",
+  Dinner:    "meals.dinner",
+  Snacks:    "meals.snacks",
+};
+
 function MealCard({ meal }: { meal: (typeof meals)[0] }) {
+  const { t } = useTranslation("common");
   const [expanded, setExpanded] = useState(false);
+  const mealName = t(MEAL_KEYS[meal.name] ?? meal.name);
 
   return (
     <Pressable
       onPress={() => setExpanded((v) => !v)}
       style={{
-        backgroundColor: colors.card,
-        borderRadius: radii.card,
-        overflow: "hidden",
-        boxShadow: shadows.soft,
-        borderCurve: "continuous",
+        backgroundColor: colors.card, borderRadius: radii.card, overflow: "hidden",
+        boxShadow: shadows.soft, borderCurve: "continuous",
       } as any}
     >
       <View style={{ flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingVertical: 14, gap: 12 }}>
-        <View
-          style={{
-            width: 42,
-            height: 42,
-            borderRadius: radii.icon + 2,
-            backgroundColor: meal.logged ? colors.mintLight : colors.bg,
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
+        <View style={{ width: 42, height: 42, borderRadius: radii.icon + 2, backgroundColor: meal.logged ? colors.mintLight : colors.bg, alignItems: "center", justifyContent: "center" }}>
           <Text style={{ fontSize: 20 }}>{meal.emoji}</Text>
         </View>
         <View style={{ flex: 1, gap: 3 }}>
-          <Text style={{ fontSize: 15, fontWeight: "700", color: colors.ink }}>{meal.name}</Text>
-          <Text style={{ fontSize: 12, color: colors.muted }}>{meal.logged ? meal.time : "Not logged yet"}</Text>
+          <Text style={{ fontSize: 15, fontWeight: "700", color: colors.ink }}>{mealName}</Text>
+          <Text style={{ fontSize: 12, color: colors.muted }}>
+            {meal.logged ? meal.time : t("nutrition.meals.notLogged")}
+          </Text>
         </View>
         <View style={{ alignItems: "flex-end", gap: 2 }}>
           {meal.logged ? (
             <>
               <Text style={{ fontSize: 16, fontWeight: "700", color: colors.ink }}>{meal.calories}</Text>
-              <Text style={{ fontSize: 11, color: colors.muted }}>kcal</Text>
+              <Text style={{ fontSize: 11, color: colors.muted }}>{t("nutrition.meals.kcalUnit")}</Text>
             </>
           ) : (
-            <Text style={{ fontSize: 13, fontWeight: "600", color: colors.brand }}>+ Add</Text>
+            <Text style={{ fontSize: 13, fontWeight: "600", color: colors.brand }}>{t("nutrition.meals.logFood")}</Text>
           )}
         </View>
       </View>
-
       {expanded && meal.logged && meal.items.length > 0 && (
-        <View
-          style={{
-            paddingHorizontal: 16,
-            paddingBottom: 14,
-            paddingTop: 12,
-            borderTopWidth: 1,
-            borderTopColor: colors.border,
-            gap: 7,
-          }}
-        >
+        <View style={{ paddingHorizontal: 16, paddingBottom: 14, paddingTop: 12, borderTopWidth: 1, borderTopColor: colors.border, gap: 7 }}>
           {meal.items.map((item, i) => (
             <View key={i} style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
               <View style={{ width: 5, height: 5, borderRadius: 3, backgroundColor: colors.muted }} />
@@ -75,28 +65,17 @@ function MealCard({ meal }: { meal: (typeof meals)[0] }) {
 
 function WaterDrop({ filled }: { filled: boolean }) {
   return (
-    <View
-      style={{
-        width: 32,
-        height: 32,
-        borderRadius: 16,
-        backgroundColor: filled ? colors.skyLight : colors.bg,
-        borderWidth: 1.5,
-        borderColor: filled ? colors.sky : colors.border,
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      {filled ? (
-        <Text style={{ fontSize: 14 }}>💧</Text>
-      ) : (
-        <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colors.border }} />
-      )}
+    <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: filled ? colors.skyLight : colors.bg, borderWidth: 1.5, borderColor: filled ? colors.sky : colors.border, alignItems: "center", justifyContent: "center" }}>
+      {filled
+        ? <Text style={{ fontSize: 14 }}>💧</Text>
+        : <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colors.border }} />
+      }
     </View>
   );
 }
 
 export default function NutritionScreen() {
+  const { t } = useTranslation("common");
   const cal = nutrition.calories;
   const calPct = Math.round((cal.current / cal.goal) * 100);
   const remaining = cal.goal - cal.current;
@@ -110,38 +89,38 @@ export default function NutritionScreen() {
       {/* ── Header ── */}
       <View style={{ gap: 4 }}>
         <Text style={{ fontSize: 15, color: colors.muted }}>Sunday, May 4</Text>
-        <Text style={{ fontSize: 30, fontWeight: "800", color: colors.ink }}>Nutrition</Text>
+        <Text style={{ fontSize: 30, fontWeight: "800", color: colors.ink }}>{t("nutrition.title")}</Text>
       </View>
 
       {/* ── Calorie Overview ── */}
       <Card style={{ gap: 18 }}>
-        <View>
-          <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 6 }}>
-            <Text style={{ fontSize: 42, fontWeight: "800", color: colors.ink }}>{cal.current.toLocaleString()}</Text>
-            <Text style={{ fontSize: 15, color: colors.muted, paddingBottom: 7 }}>/ {cal.goal.toLocaleString()} kcal</Text>
-          </View>
+        <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 6 }}>
+          <Text style={{ fontSize: 42, fontWeight: "800", color: colors.ink }}>{cal.current.toLocaleString()}</Text>
+          <Text style={{ fontSize: 15, color: colors.muted, paddingBottom: 7 }}>
+            {t("nutrition.goalSuffix", { goal: cal.goal.toLocaleString() })}
+          </Text>
         </View>
         <View style={{ gap: 6 }}>
           <View style={{ height: 10, borderRadius: 100, backgroundColor: colors.mintLight, overflow: "hidden" }}>
             <View style={{ width: `${calPct}%` as any, height: "100%", borderRadius: 100, backgroundColor: colors.mint }} />
           </View>
           <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-            <Text style={{ fontSize: 12, color: colors.muted }}>{calPct}% of daily goal</Text>
+            <Text style={{ fontSize: 12, color: colors.muted }}>{t("nutrition.pctGoal", { pct: calPct })}</Text>
             <Text style={{ fontSize: 12, fontWeight: "600", color: colors.mint }}>
-              {remaining > 0 ? `${remaining} kcal left` : "Goal reached 🎉"}
+              {remaining > 0 ? t("nutrition.kcalLeft", { remaining }) : t("nutrition.goalReached")}
             </Text>
           </View>
         </View>
         <View style={{ gap: 14 }}>
-          <MacroBar label="Protein" current={nutrition.protein.current} goal={nutrition.protein.goal} unit="g" color={colors.brand} trackColor={colors.brandLight} />
-          <MacroBar label="Carbs"   current={nutrition.carbs.current}   goal={nutrition.carbs.goal}   unit="g" color={colors.amber} trackColor={colors.amberLight} />
-          <MacroBar label="Fat"     current={nutrition.fat.current}     goal={nutrition.fat.goal}     unit="g" color={colors.energy} trackColor={colors.energyLight} />
+          <MacroBar label={t("nutrition.macros.protein")} current={nutrition.protein.current} goal={nutrition.protein.goal} unit="g" color={colors.brand}  trackColor={colors.brandLight}  />
+          <MacroBar label={t("nutrition.macros.carbs")}   current={nutrition.carbs.current}   goal={nutrition.carbs.goal}   unit="g" color={colors.amber}  trackColor={colors.amberLight}  />
+          <MacroBar label={t("nutrition.macros.fat")}     current={nutrition.fat.current}     goal={nutrition.fat.goal}     unit="g" color={colors.energy} trackColor={colors.energyLight} />
         </View>
       </Card>
 
       {/* ── Meals ── */}
       <View style={{ gap: 12 }}>
-        <SectionHeader title="Meals" action="Log food" />
+        <SectionHeader title={t("nutrition.meals.title")} action={t("nutrition.meals.logFood")} />
         {meals.map((meal) => (
           <MealCard key={meal.id} meal={meal} />
         ))}
@@ -152,10 +131,10 @@ export default function NutritionScreen() {
         <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
           <View style={{ gap: 3 }}>
             <Text style={{ fontSize: 11, fontWeight: "700", color: colors.muted, letterSpacing: 1, textTransform: "uppercase" }}>
-              Hydration
+              {t("nutrition.hydration.title")}
             </Text>
             <Text style={{ fontSize: 16, fontWeight: "700", color: colors.ink }}>
-              {nutrition.hydration.current} of {nutrition.hydration.goal} glasses
+              {t("nutrition.hydration.glassCount", { current: nutrition.hydration.current, goal: nutrition.hydration.goal })}
             </Text>
           </View>
           <Text style={{ fontSize: 28 }}>💧</Text>
@@ -168,7 +147,7 @@ export default function NutritionScreen() {
         <View style={{ height: 7, borderRadius: 100, backgroundColor: colors.skyLight, overflow: "hidden" }}>
           <View style={{ width: `${(nutrition.hydration.current / nutrition.hydration.goal) * 100}%` as any, height: "100%", borderRadius: 100, backgroundColor: colors.sky }} />
         </View>
-        <PillButton label="+ Add a glass" size="sm" variant="outline" />
+        <PillButton label={t("nutrition.hydration.addGlass")} size="sm" variant="outline" />
       </Card>
 
       {/* ── Insight ── */}
@@ -176,11 +155,11 @@ export default function NutritionScreen() {
         <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
           <Text style={{ fontSize: 16 }}>🌿</Text>
           <Text style={{ fontSize: 10, fontWeight: "700", color: colors.mint, letterSpacing: 1.2, textTransform: "uppercase" }}>
-            Nutrition Insight
+            {t("nutrition.insight.label")}
           </Text>
         </View>
         <Text style={{ fontSize: 14, fontWeight: "600", color: colors.ink, lineHeight: 22 }}>
-          You're on track! Protein is at 57% — try a handful of almonds or a boiled egg to hit your goal.
+          {t("nutrition.insight.body")}
         </Text>
       </View>
     </ScrollView>
