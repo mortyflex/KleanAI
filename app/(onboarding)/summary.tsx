@@ -11,7 +11,7 @@ import { Card } from '../../src/components/ui/card';
 import { colors } from '../../src/design/tokens';
 import { hasBlockingFlags } from '../../src/utils/safety';
 
-const TOTAL_STEPS = 7;
+const TOTAL_STEPS = 8;
 
 function SummaryRow({ label, value }: { label: string; value: string }) {
   return (
@@ -40,14 +40,10 @@ export default function SummaryScreen() {
 
   const isBlocked = hasBlockingFlags(profile.safetyFlags ?? []);
 
-  const goalLabel = profile.goal
-    ? t(`onboarding.summary.goals.${profile.goal}`)
-    : '—';
-
+  const goalLabel = profile.goal ? t(`onboarding.summary.goals.${profile.goal}`) : '—';
   const levelLabel = profile.fitnessLevel
     ? t(`onboarding.summary.levels.${profile.fitnessLevel}`)
     : '—';
-
   const locationLabel = profile.trainingLocation
     ? t(`onboarding.summary.locations.${profile.trainingLocation}`)
     : '—';
@@ -79,6 +75,40 @@ export default function SummaryScreen() {
           .join(', ')
       : t('onboarding.summary.noRestrictions');
 
+  const targetWeightLabel =
+    profile.targetWeightKg !== undefined
+      ? t('onboarding.summary.weightKgUnit', { kg: profile.targetWeightKg })
+      : null;
+
+  const timeframeLabel = profile.targetTimeframe
+    ? (() => {
+        const weeks = t('onboarding.summary.weeksUnit', {
+          weeks: profile.targetTimeframe.durationWeeks,
+        });
+        const event = profile.targetTimeframe.eventLabel
+          ? ` · ${t(`onboarding.summary.events.${profile.targetTimeframe.eventLabel}`)}`
+          : '';
+        return `${weeks}${event}`;
+      })()
+    : null;
+
+  const weeklyChangeLabel =
+    profile.targetWeightKg !== undefined &&
+    profile.weightKg !== undefined &&
+    profile.targetTimeframe !== undefined &&
+    profile.goal === 'lose_weight' &&
+    profile.weightKg > profile.targetWeightKg
+      ? t('onboarding.summary.kgPerWeek', {
+          kg: ((profile.weightKg - profile.targetWeightKg) / profile.targetTimeframe.durationWeeks).toFixed(
+            2
+          ),
+        })
+      : null;
+
+  const safetyStatusLabel = isBlocked
+    ? t('onboarding.summary.hasWarnings')
+    : t('onboarding.summary.safe');
+
   const handleGenerate = () => {
     Alert.alert(
       t('onboarding.summary.generateCta'),
@@ -102,7 +132,7 @@ export default function SummaryScreen() {
         contentContainerStyle={{ padding: 24, paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
       >
-        <OnboardingProgress current={7} total={TOTAL_STEPS} />
+        <OnboardingProgress current={8} total={TOTAL_STEPS} />
 
         <View style={{ marginTop: 32, marginBottom: 28, alignItems: 'center' }}>
           <Text style={{ fontSize: 40, marginBottom: 12 }}>🎉</Text>
@@ -150,6 +180,32 @@ export default function SummaryScreen() {
             <SummaryRow label={t('onboarding.summary.location')} value={locationLabel} />
             <View style={{ height: 1, backgroundColor: colors.border }} />
             <SummaryRow label={t('onboarding.summary.restrictions')} value={restrictionsLabel} />
+            {targetWeightLabel && (
+              <>
+                <View style={{ height: 1, backgroundColor: colors.border }} />
+                <SummaryRow
+                  label={t('onboarding.summary.targetWeight')}
+                  value={targetWeightLabel}
+                />
+              </>
+            )}
+            {timeframeLabel && (
+              <>
+                <View style={{ height: 1, backgroundColor: colors.border }} />
+                <SummaryRow label={t('onboarding.summary.timeframe')} value={timeframeLabel} />
+              </>
+            )}
+            {weeklyChangeLabel && (
+              <>
+                <View style={{ height: 1, backgroundColor: colors.border }} />
+                <SummaryRow
+                  label={t('onboarding.summary.weeklyChange')}
+                  value={weeklyChangeLabel}
+                />
+              </>
+            )}
+            <View style={{ height: 1, backgroundColor: colors.border }} />
+            <SummaryRow label={t('onboarding.summary.safetyStatus')} value={safetyStatusLabel} />
           </View>
         </Card>
 

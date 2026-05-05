@@ -34,9 +34,9 @@ describe('SafetyReviewScreen', () => {
     renderWithProfile(safeProfile);
   });
 
-  it('shows step 6 of 7 indicator', () => {
+  it('shows step 7 of 8 indicator', () => {
     renderWithProfile(safeProfile);
-    expect(screen.getByText(/Step 6 of 7/i)).toBeTruthy();
+    expect(screen.getByText(/Step 7 of 8/i)).toBeTruthy();
   });
 
   it('shows "Everything looks good!" for a safe profile', () => {
@@ -95,5 +95,78 @@ describe('SafetyReviewScreen', () => {
     renderWithProfile(safeProfile);
     expect(screen.getByText('Continue')).toBeTruthy();
     expect(screen.queryByText('Adjust my profile')).toBeNull();
+  });
+});
+
+describe('SafetyReviewScreen — timeframe integration', () => {
+  it('shows safe status when 4-week timeframe is realistic', () => {
+    // 70 → 69 in 4 weeks = 0.25 kg/week < 0.70 → safe
+    renderWithProfile({
+      ...safeProfile,
+      weightKg: 70,
+      targetWeightKg: 69,
+      targetTimeframe: { durationWeeks: 4 },
+    });
+    expect(screen.getByTestId('safety-all-good')).toBeTruthy();
+  });
+
+  it('shows WEIGHT_LOSS_TOO_FAST for an aggressive 4-week target', () => {
+    // 70 → 60 in 4 weeks = 2.5 kg/week > 0.70 → flagged
+    renderWithProfile({
+      ...safeProfile,
+      weightKg: 70,
+      targetWeightKg: 60,
+      targetTimeframe: { durationWeeks: 4 },
+    });
+    expect(screen.getByTestId('safety-flag-WEIGHT_LOSS_TOO_FAST')).toBeTruthy();
+  });
+
+  it('shows alternative suggestion when weight loss flags are blocking', () => {
+    renderWithProfile({
+      ...safeProfile,
+      weightKg: 70,
+      targetWeightKg: 60,
+      targetTimeframe: { durationWeeks: 4 },
+    });
+    expect(screen.getByTestId('safety-alternative')).toBeTruthy();
+  });
+
+  it('does not show alternative for age-blocked profiles', () => {
+    renderWithProfile({ ...safeProfile, age: 15 });
+    expect(screen.queryByTestId('safety-alternative')).toBeNull();
+  });
+
+  it('does not show alternative for safe profiles', () => {
+    renderWithProfile(safeProfile);
+    expect(screen.queryByTestId('safety-alternative')).toBeNull();
+  });
+
+  it('shows safe status with 12-week default when no timeframe is set', () => {
+    // No targetTimeframe → defaults to 12 weeks. 5 kg / 12 = 0.42 → safe
+    renderWithProfile({
+      ...safeProfile,
+      weightKg: 70,
+      targetWeightKg: 65,
+    });
+    expect(screen.getByTestId('safety-all-good')).toBeTruthy();
+  });
+
+  it('calories are never silently below floor — extreme short-term target is blocked', () => {
+    renderWithProfile({
+      age: 28,
+      gender: 'female',
+      weightKg: 70,
+      heightCm: 168,
+      targetWeightKg: 50,
+      trainingDaysPerWeek: 3,
+      goal: 'lose_weight',
+      targetTimeframe: { durationWeeks: 4 },
+    });
+    // Should show at least one blocking flag
+    const flag =
+      screen.queryByTestId('safety-flag-WEIGHT_LOSS_TOO_FAST') ||
+      screen.queryByTestId('safety-flag-CALORIES_TOO_LOW') ||
+      screen.queryByTestId('safety-flag-DEFICIT_TOO_HIGH');
+    expect(flag).toBeTruthy();
   });
 });

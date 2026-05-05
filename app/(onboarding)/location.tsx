@@ -14,7 +14,7 @@ import { PillButton } from '../../src/components/ui/pill-button';
 import { colors, radii } from '../../src/design/tokens';
 import type { TrainingLocation, GymChain } from '../../src/types/profile.types';
 
-const TOTAL_STEPS = 7;
+const TOTAL_STEPS = 8;
 
 const LOCATION_OPTIONS: { value: TrainingLocation; emoji: string; labelKey: string; subKey: string }[] = [
   { value: 'gym', emoji: '🏋️', labelKey: 'onboarding.location.gym', subKey: 'onboarding.location.gymSub' },

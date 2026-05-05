@@ -15,9 +15,10 @@ import {
   calorieFloor,
 } from '../../src/utils/safety';
 import { bmrMifflinStJeor, tdeeFromBMR } from '../../src/utils/calories';
+import { suggestSaferAlternatives } from '../../src/utils/timeframe';
 import type { SafetyFlag } from '../../src/types/profile.types';
 
-const TOTAL_STEPS = 7;
+const TOTAL_STEPS = 8;
 
 function FlagRow({ flag, t }: { flag: SafetyFlag; t: (key: string) => string }) {
   return (
@@ -41,18 +42,23 @@ function FlagRow({ flag, t }: { flag: SafetyFlag; t: (key: string) => string }) 
   );
 }
 
+const WEIGHT_FLAGS = new Set(['WEIGHT_LOSS_TOO_FAST', 'DEFICIT_TOO_HIGH', 'CALORIES_TOO_LOW']);
+
 export default function SafetyReviewScreen() {
   const { t } = useTranslation('common');
   const router = useRouter();
   const { profile, updateProfile } = useOnboarding();
 
   const safetyData = useMemo(() => {
+    const targetTimeframeWeeks = profile.targetTimeframe?.durationWeeks;
+
     const flags = runSafetyChecks({
       age: profile.age ?? 25,
       gender: profile.gender ?? 'other',
       weightKg: profile.weightKg ?? 70,
       heightCm: profile.heightCm ?? 170,
       targetWeightKg: profile.targetWeightKg,
+      targetTimeframeWeeks,
       trainingDaysPerWeek: profile.trainingDaysPerWeek ?? 3,
       goal: profile.goal ?? 'maintain',
     });
@@ -64,11 +70,25 @@ export default function SafetyReviewScreen() {
       profile.gender ?? 'other'
     );
     const tdee = tdeeFromBMR(bmr, profile.trainingDaysPerWeek ?? 3);
-
     const floor = calorieFloor(profile.gender ?? 'other');
     const isBlocked = hasBlockingFlags(flags);
 
-    return { flags, tdee, floor, isBlocked };
+    const showAlternative =
+      isBlocked &&
+      profile.goal === 'lose_weight' &&
+      profile.targetWeightKg !== undefined &&
+      (profile.weightKg ?? 0) > profile.targetWeightKg &&
+      flags.some((f) => WEIGHT_FLAGS.has(f.code));
+
+    const alternative = showAlternative
+      ? suggestSaferAlternatives({
+          weightKg: profile.weightKg!,
+          targetWeightKg: profile.targetWeightKg!,
+          targetTimeframeWeeks: profile.targetTimeframe?.durationWeeks,
+        })
+      : null;
+
+    return { flags, tdee, floor, isBlocked, alternative };
   }, [profile]);
 
   const handleContinue = () => {
@@ -94,7 +114,7 @@ export default function SafetyReviewScreen() {
           </Text>
         </Pressable>
 
-        <OnboardingProgress current={6} total={TOTAL_STEPS} />
+        <OnboardingProgress current={7} total={TOTAL_STEPS} />
 
         <View style={{ marginTop: 32, marginBottom: 28 }}>
           <Text style={{ fontSize: 26, fontWeight: '800', color: colors.ink, marginBottom: 8 }}>
@@ -108,7 +128,9 @@ export default function SafetyReviewScreen() {
         {/* TDEE card */}
         <Card style={{ marginBottom: 20 }}>
           <View style={{ gap: 14 }}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            <View
+              style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}
+            >
               <Text style={{ fontSize: 13, color: colors.muted, fontWeight: '600' }}>
                 {t('onboarding.safety.tdee')}
               </Text>
@@ -116,10 +138,10 @@ export default function SafetyReviewScreen() {
                 {safetyData.tdee} {t('onboarding.safety.kcalUnit')}
               </Text>
             </View>
+            <View style={{ height: 1, backgroundColor: colors.border }} />
             <View
-              style={{ height: 1, backgroundColor: colors.border }}
-            />
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}
+            >
               <Text style={{ fontSize: 13, color: colors.muted, fontWeight: '600' }}>
                 {t('onboarding.safety.estimatedCalories')}
               </Text>
@@ -171,6 +193,54 @@ export default function SafetyReviewScreen() {
           </View>
         )}
 
+        {/* Safer alternative suggestion */}
+        {safetyData.alternative && (
+          <View
+            testID="safety-alternative"
+            style={{
+              marginTop: 20,
+              padding: 18,
+              backgroundColor: colors.amberLight,
+              borderRadius: radii.card,
+              borderWidth: 1.5,
+              borderColor: colors.amber,
+              gap: 10,
+            }}
+          >
+            <Text style={{ fontSize: 14, fontWeight: '800', color: colors.ink }}>
+              💡 {t('onboarding.safety.alternatives.title')}
+            </Text>
+            <Text style={{ fontSize: 14, color: colors.ink, lineHeight: 20 }}>
+              {t('onboarding.safety.alternatives.saferWeeks', {
+                weeks: safetyData.alternative.saferWeeks,
+              })}
+            </Text>
+            <Text style={{ fontSize: 13, color: colors.muted }}>
+              {t('onboarding.safety.alternatives.saferWeeklyLoss', {
+                kg: safetyData.alternative.saferWeeklyLossKg,
+              })}
+            </Text>
+            {safetyData.alternative.suggestKickstart && (
+              <Text style={{ fontSize: 13, color: colors.ink }}>
+                🚀 {t('onboarding.safety.alternatives.kickstart')}
+              </Text>
+            )}
+            {safetyData.alternative.partialProgressPossible && (
+              <View style={{ gap: 2 }}>
+                <Text style={{ fontSize: 13, color: colors.ink }}>
+                  🎯{' '}
+                  {t('onboarding.safety.alternatives.partialProgress', {
+                    kg: safetyData.alternative.partialKgBeforeEvent,
+                  })}
+                </Text>
+                <Text style={{ fontSize: 13, color: colors.muted, paddingLeft: 18 }}>
+                  {t('onboarding.safety.alternatives.continueAfter')}
+                </Text>
+              </View>
+            )}
+          </View>
+        )}
+
         <View style={{ marginTop: 32, gap: 12 }}>
           {safetyData.isBlocked ? (
             <>
@@ -187,11 +257,7 @@ export default function SafetyReviewScreen() {
               />
             </>
           ) : (
-            <PillButton
-              label={t('onboarding.next')}
-              size="lg"
-              onPress={handleContinue}
-            />
+            <PillButton label={t('onboarding.next')} size="lg" onPress={handleContinue} />
           )}
         </View>
       </ScrollView>

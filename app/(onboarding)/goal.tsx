@@ -14,7 +14,7 @@ import { PillButton } from '../../src/components/ui/pill-button';
 import { colors } from '../../src/design/tokens';
 import type { FitnessGoal } from '../../src/types/profile.types';
 
-const TOTAL_STEPS = 7;
+const TOTAL_STEPS = 8;
 
 type GoalOption = {
   value: FitnessGoal;

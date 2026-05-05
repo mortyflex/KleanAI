@@ -13,7 +13,7 @@ import { PillButton } from '../../src/components/ui/pill-button';
 import { colors, radii } from '../../src/design/tokens';
 import type { DietaryRestriction } from '../../src/types/profile.types';
 
-const TOTAL_STEPS = 7;
+const TOTAL_STEPS = 8;
 
 const RESTRICTIONS: { value: DietaryRestriction; emoji: string; labelKey: string }[] = [
   { value: 'vegetarian', emoji: '🥦', labelKey: 'onboarding.nutritionPrefs.vegetarian' },
@@ -38,7 +38,7 @@ export default function NutritionPrefsScreen() {
 
   const onSubmit = (data: NutritionPrefsFormData) => {
     updateProfile({ dietaryRestrictions: data.dietaryRestrictions });
-    router.push('/(onboarding)/safety-review');
+    router.push('/(onboarding)/timeframe');
   };
 
   return (

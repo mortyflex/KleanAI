@@ -70,9 +70,109 @@ The app serves multiple profiles:
 - users trying to maintain weight
 - users seeking recomposition
 
+##Onboarding Requirements
+
 The onboarding must adapt the experience based on the user profile.
 
+The onboarding must collect a target timeframe whenever the user has a measurable transformation goal.
+
+Target timeframe can be:
+
+- preset duration in weeks
+- custom duration in weeks
+- target event date or event label
+
+For weight-related goals, the safety logic must combine:
+
+- current weight
+- target weight
+- target timeframe
+- requested weekly change
+
+If the requested timeline is unsafe or unrealistic, the app must refuse automatic aggressive planning pedagogically and suggest:
+
+- safer weekly target
+- more realistic timeframe
+- 7-day Kickstart
+- partial progress before the event
+
 ---
+
+## Safety Guardrails
+
+Klean AI must never generate unsafe automatic fitness or nutrition plans.
+
+The app must detect risky goals during onboarding and explain the issue pedagogically, without guilt or shame.
+
+### Automatic blocking rules
+
+Block automatic plan generation when:
+
+- user is under 18
+- pregnancy is reported
+- eating disorder history is reported
+- BMI is too low
+- medical supervision is needed
+- requested weight loss is more than 1% of current body weight per week
+- requested calorie target is below the safety floor
+- requested calorie deficit is too aggressive
+- requested training volume is excessive for the user level
+- injury, pain, or medical condition makes the plan unsafe
+
+### Weight goal timeline safety
+
+For every weight-related goal, safety validation must combine:
+
+- current weight
+- target weight
+- target timeframe
+- requested weekly weight change
+
+For weight loss:
+
+- calculate requested weekly loss from current weight, target weight, and timeframe
+- block automatic planning if requested weekly loss is above 1% of current body weight
+- block any plan requiring calories below the safety floor
+- propose a safer alternative instead of silently accepting the goal
+
+### Target timeframe requirement
+
+The onboarding must collect a target timeframe whenever the user has a measurable transformation goal.
+
+Target timeframe can be:
+
+- preset duration in weeks
+- custom duration in weeks
+- target event date
+- target event label such as wedding, vacation, competition, or other
+
+If the requested timeline is unsafe or unrealistic, the app must refuse automatic aggressive planning pedagogically and suggest:
+
+- safer weekly target
+- more realistic timeframe
+- 7-day Kickstart
+- partial progress before the event if relevant
+
+### User-facing tone
+
+When blocking an unsafe goal:
+
+- do not shame the user
+- do not use guilt-based language
+- explain the reason clearly
+- suggest a safer path
+- keep the user motivated
+
+Good example:
+
+“Ton objectif est compréhensible, mais le délai demandé forcerait un déficit trop agressif. Pour rester safe, je te propose une trajectoire plus réaliste, avec un Kickstart de 7 jours pour lancer la dynamique.”
+
+Bad examples:
+
+- “Objectif impossible.”
+- “Tu ne peux pas faire ça.”
+- “Ce n’est pas sérieux.”
+- “Tu dois être plus raisonnable.”
 
 ## Tech Stack
 

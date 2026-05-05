@@ -21,7 +21,7 @@ import { PillButton } from '../../src/components/ui/pill-button';
 import { colors, radii } from '../../src/design/tokens';
 import type { Gender } from '../../src/types/profile.types';
 
-const TOTAL_STEPS = 7;
+const TOTAL_STEPS = 8;
 
 function FieldLabel({ label }: { label: string }) {
   return (

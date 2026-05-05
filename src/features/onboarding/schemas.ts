@@ -4,6 +4,15 @@ export const GoalSchema = z.object({
   goal: z.enum(['lose_weight', 'gain_muscle', 'maintain', 'recomposition']),
 });
 
+export const TimeframeSchema = z.object({
+  durationWeeks: z
+    .number({ message: 'durationRequired' })
+    .int()
+    .min(1, 'durationInvalid')
+    .max(104, 'durationInvalid'),
+  eventLabel: z.enum(['wedding', 'vacation', 'competition', 'other']).optional(),
+});
+
 export const MetricsSchema = z.object({
   age: z.number().int().min(14, 'ageInvalid').max(100, 'ageInvalid'),
   gender: z.enum(['male', 'female', 'other']),
@@ -38,3 +47,4 @@ export type MetricsFormData = z.infer<typeof MetricsSchema>;
 export type TrainingFormData = z.infer<typeof TrainingSchema>;
 export type LocationFormData = z.infer<typeof LocationSchema>;
 export type NutritionPrefsFormData = z.infer<typeof NutritionPrefsSchema>;
+export type TimeframeFormData = z.infer<typeof TimeframeSchema>;

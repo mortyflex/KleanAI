@@ -10,6 +10,7 @@ export type DietaryRestriction =
   | 'lactose_free'
   | 'halal'
   | 'kosher';
+export type EventLabel = 'wedding' | 'vacation' | 'competition' | 'other';
 
 export type SafetyCode =
   | 'AGE_TOO_YOUNG'
@@ -26,6 +27,11 @@ export interface SafetyFlag {
   i18nKey: string;
 }
 
+export interface TargetTimeframe {
+  durationWeeks: number;
+  eventLabel?: EventLabel;
+}
+
 export interface OnboardingProfile {
   goal: FitnessGoal;
   age: number;
@@ -33,6 +39,7 @@ export interface OnboardingProfile {
   heightCm: number;
   weightKg: number;
   targetWeightKg?: number;
+  targetTimeframe?: TargetTimeframe;
   fitnessLevel: FitnessLevel;
   trainingDaysPerWeek: number;
   sessionDurationMin: number;

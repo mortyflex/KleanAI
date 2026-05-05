@@ -5,6 +5,9 @@ import {
   CALORIE_FLOOR_MALE,
   CALORIE_FLOOR_FEMALE,
   MIN_AGE,
+  MAX_WEEKLY_WEIGHT_LOSS_KG,
+  MAX_WEEKLY_WEIGHT_LOSS_PCT,
+  PROGRAM_WEEKS,
 } from '../../src/utils/safety';
 import { bmrMifflinStJeor, tdeeFromBMR } from '../../src/utils/calories';
 
@@ -82,8 +85,8 @@ describe('runSafetyChecks — AGE_TOO_YOUNG', () => {
 });
 
 describe('runSafetyChecks — WEIGHT_LOSS_TOO_FAST', () => {
-  it('flags weight loss exceeding 1 kg/week over 12 weeks', () => {
-    // 5 kg/week × 12 weeks = 60 kg to lose — clearly too fast
+  it('flags weight loss exceeding 1 kg/week for a 100 kg person over 12 weeks', () => {
+    // 100 kg → 40 kg: 60 kg over 12 weeks = 5 kg/week > min(1.0, 1.0) = 1.0
     const flags = runSafetyChecks({
       ...safeProfile,
       weightKg: 100,
@@ -93,6 +96,7 @@ describe('runSafetyChecks — WEIGHT_LOSS_TOO_FAST', () => {
   });
 
   it('does NOT flag safe weight loss rate (5 kg over 12 weeks = 0.42 kg/week)', () => {
+    // 70 kg: 1% = 0.70 kg/week. 0.42 < 0.70 → safe
     const flags = runSafetyChecks({
       ...safeProfile,
       weightKg: 70,
@@ -101,17 +105,18 @@ describe('runSafetyChecks — WEIGHT_LOSS_TOO_FAST', () => {
     expect(flags.some((f) => f.code === 'WEIGHT_LOSS_TOO_FAST')).toBe(false);
   });
 
-  it('boundary: exactly MAX_WEEKLY_WEIGHT_LOSS_KG * 12 kg total is OK', () => {
-    // 1 kg/week * 12 weeks = 12 kg total
+  it('boundary: exactly 1 kg/week for 100 kg person over 12 weeks is OK', () => {
+    // 100 kg: maxWeeklyLoss = min(1.0, 1.0) = 1.0. 12 kg / 12 = 1.0 NOT > 1.0 → safe
     const flags = runSafetyChecks({
       ...safeProfile,
-      weightKg: 82,
-      targetWeightKg: 70,
+      weightKg: 100,
+      targetWeightKg: 88,
     });
     expect(flags.some((f) => f.code === 'WEIGHT_LOSS_TOO_FAST')).toBe(false);
   });
 
-  it('boundary: just over MAX_WEEKLY_WEIGHT_LOSS_KG * 12 is flagged', () => {
+  it('boundary: just over 1 kg/week is flagged', () => {
+    // 85 kg → 70 kg: 15 kg / 12 = 1.25 kg/week > min(1.0, 0.85) = 0.85 → flagged
     const flags = runSafetyChecks({
       ...safeProfile,
       weightKg: 85,
@@ -119,17 +124,31 @@ describe('runSafetyChecks — WEIGHT_LOSS_TOO_FAST', () => {
     });
     expect(flags.some((f) => f.code === 'WEIGHT_LOSS_TOO_FAST')).toBe(true);
   });
+
+  it('applies 1% body weight rule: flags 0.72 kg/week for a 60 kg person', () => {
+    // 60 kg: 1% = 0.60 kg/week. 3 kg / 4 weeks = 0.75 > 0.60 → flagged
+    const flags = runSafetyChecks({
+      age: 25,
+      gender: 'female',
+      weightKg: 60,
+      heightCm: 165,
+      targetWeightKg: 57,
+      trainingDaysPerWeek: 3,
+      goal: 'lose_weight',
+      targetTimeframeWeeks: 4,
+    });
+    expect(flags.some((f) => f.code === 'WEIGHT_LOSS_TOO_FAST')).toBe(true);
+  });
 });
 
 describe('runSafetyChecks — CALORIES_TOO_LOW (safety floor)', () => {
   it('flags when estimated calories drop below female floor', () => {
-    // Use a small woman aiming for extreme weight loss
     const flags = runSafetyChecks({
       age: 25,
       gender: 'female',
       weightKg: 55,
       heightCm: 158,
-      targetWeightKg: 20, // extreme, unrealistic
+      targetWeightKg: 20,
       trainingDaysPerWeek: 1,
       goal: 'lose_weight',
     });
@@ -142,7 +161,7 @@ describe('runSafetyChecks — CALORIES_TOO_LOW (safety floor)', () => {
       gender: 'male',
       weightKg: 65,
       heightCm: 170,
-      targetWeightKg: 20, // extreme
+      targetWeightKg: 20,
       trainingDaysPerWeek: 1,
       goal: 'lose_weight',
     });
@@ -150,9 +169,6 @@ describe('runSafetyChecks — CALORIES_TOO_LOW (safety floor)', () => {
   });
 
   it('does NOT flag calories for a healthy loss profile', () => {
-    // TDEE for 70kg/168cm/28yo female, 3 days = ~2107 kcal
-    // 5kg over 12 weeks = 0.417 kg/week * 7700/7 = 458 kcal/day deficit
-    // estimated = 2107 - 458 = ~1649 kcal — above 1200 floor
     const flags = runSafetyChecks(safeProfile);
     expect(flags.some((f) => f.code === 'CALORIES_TOO_LOW')).toBe(false);
   });
@@ -165,8 +181,7 @@ describe('runSafetyChecks — CALORIES_TOO_LOW (safety floor)', () => {
     expect(CALORIE_FLOOR_MALE).toBeGreaterThanOrEqual(1500);
   });
 
-  it('never allows calories to drop below floor in safe profile', () => {
-    // Verify safe profile doesn't violate floor
+  it('never allows calories to drop below floor in the safe profile', () => {
     const bmr = bmrMifflinStJeor(
       safeProfile.weightKg,
       safeProfile.heightCm,
@@ -175,7 +190,7 @@ describe('runSafetyChecks — CALORIES_TOO_LOW (safety floor)', () => {
     );
     const tdee = tdeeFromBMR(bmr, safeProfile.trainingDaysPerWeek);
     const kgToLose = safeProfile.weightKg - safeProfile.targetWeightKg!;
-    const weeklyLoss = kgToLose / 12;
+    const weeklyLoss = kgToLose / PROGRAM_WEEKS;
     const dailyDeficit = (weeklyLoss * 7700) / 7;
     const estimated = tdee - dailyDeficit;
     expect(estimated).toBeGreaterThan(CALORIE_FLOOR_FEMALE);
@@ -189,7 +204,7 @@ describe('runSafetyChecks — DEFICIT_TOO_HIGH', () => {
       gender: 'male',
       weightKg: 120,
       heightCm: 180,
-      targetWeightKg: 20, // extreme
+      targetWeightKg: 20,
       trainingDaysPerWeek: 3,
       goal: 'lose_weight',
     });
@@ -204,7 +219,6 @@ describe('runSafetyChecks — DEFICIT_TOO_HIGH', () => {
 
 describe('runSafetyChecks — BMI_TOO_LOW', () => {
   it('flags BMI below 17.5 for lose_weight goal', () => {
-    // 45kg / 1.70m^2 = 15.57 BMI
     const flags = runSafetyChecks({
       ...safeProfile,
       weightKg: 45,
@@ -228,6 +242,96 @@ describe('runSafetyChecks — BMI_TOO_LOW', () => {
   it('does NOT flag healthy BMI', () => {
     const flags = runSafetyChecks({ ...safeProfile });
     expect(flags.some((f) => f.code === 'BMI_TOO_LOW')).toBe(false);
+  });
+});
+
+describe('runSafetyChecks — timeframe-aware weight loss', () => {
+  it('uses targetTimeframeWeeks when provided (too fast for 4-week deadline)', () => {
+    // 70 → 60 kg in 4 weeks = 2.5 kg/week > min(1.0, 0.70) = 0.70 → blocked
+    const flags = runSafetyChecks({
+      ...safeProfile,
+      weightKg: 70,
+      targetWeightKg: 60,
+      targetTimeframeWeeks: 4,
+    });
+    expect(flags.some((f) => f.code === 'WEIGHT_LOSS_TOO_FAST')).toBe(true);
+  });
+
+  it('safe when custom timeframe gives a realistic weekly rate', () => {
+    // 70 → 67 kg in 8 weeks = 0.375 kg/week < 0.70 → safe
+    const flags = runSafetyChecks({
+      ...safeProfile,
+      weightKg: 70,
+      targetWeightKg: 67,
+      targetTimeframeWeeks: 8,
+    });
+    expect(flags.some((f) => f.code === 'WEIGHT_LOSS_TOO_FAST')).toBe(false);
+  });
+
+  it('falls back to PROGRAM_WEEKS when no timeframe is set', () => {
+    // No targetTimeframeWeeks → uses 12 weeks. 5 kg / 12 = 0.42 kg/week < 0.70 → safe
+    const flags = runSafetyChecks({
+      ...safeProfile,
+      weightKg: 70,
+      targetWeightKg: 65,
+      targetTimeframeWeeks: undefined,
+    });
+    expect(flags.some((f) => f.code === 'WEIGHT_LOSS_TOO_FAST')).toBe(false);
+  });
+
+  it('blocks when custom duration makes weight loss too fast (6-week wedding)', () => {
+    // 70 → 62 in 6 weeks = 1.33 kg/week > 0.70 → blocked
+    const flags = runSafetyChecks({
+      ...safeProfile,
+      weightKg: 70,
+      targetWeightKg: 62,
+      targetTimeframeWeeks: 6,
+    });
+    expect(flags.some((f) => f.code === 'WEIGHT_LOSS_TOO_FAST')).toBe(true);
+  });
+
+  it('missing timeframe with target weight uses PROGRAM_WEEKS fallback silently', () => {
+    // Profile has targetWeightKg but no targetTimeframe → uses 12 weeks
+    // 70 → 65 in 12 weeks = 0.42 kg/week → no flag
+    const flags = runSafetyChecks({
+      ...safeProfile,
+      targetWeightKg: 65,
+      targetTimeframeWeeks: undefined,
+    });
+    expect(flags).toHaveLength(0);
+  });
+
+  it('calories never drop below floor even with a short unsafe timeframe', () => {
+    // A short timeframe that triggers weight loss too fast should also raise
+    // CALORIES_TOO_LOW or DEFICIT_TOO_HIGH — never silently allow below-floor calories
+    const flags = runSafetyChecks({
+      age: 28,
+      gender: 'female',
+      weightKg: 70,
+      heightCm: 168,
+      targetWeightKg: 60,
+      trainingDaysPerWeek: 3,
+      goal: 'lose_weight',
+      targetTimeframeWeeks: 4,
+    });
+    const isUnsafe = flags.some(
+      (f) =>
+        f.code === 'CALORIES_TOO_LOW' ||
+        f.code === 'WEIGHT_LOSS_TOO_FAST' ||
+        f.code === 'DEFICIT_TOO_HIGH'
+    );
+    expect(isUnsafe).toBe(true);
+    expect(flags.every((f) => f.severity === 'block')).toBe(true);
+  });
+
+  it('MAX_WEEKLY_WEIGHT_LOSS_PCT constant is 1% (0.01)', () => {
+    expect(MAX_WEEKLY_WEIGHT_LOSS_PCT).toBe(0.01);
+  });
+
+  it('max safe weekly loss for 70 kg person is 0.70 kg/week (1% rule)', () => {
+    // 0.70 < 1.0 cap → 1% rule is more restrictive for 70 kg person
+    const maxSafe = Math.min(MAX_WEEKLY_WEIGHT_LOSS_KG, 70 * MAX_WEEKLY_WEIGHT_LOSS_PCT);
+    expect(maxSafe).toBeCloseTo(0.70, 2);
   });
 });
 

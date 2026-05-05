@@ -4,6 +4,7 @@ import { bmrMifflinStJeor, tdeeFromBMR, bmi } from './calories';
 export const CALORIE_FLOOR_MALE = 1500;
 export const CALORIE_FLOOR_FEMALE = 1200;
 export const MAX_WEEKLY_WEIGHT_LOSS_KG = 1.0;
+export const MAX_WEEKLY_WEIGHT_LOSS_PCT = 0.01;
 export const MAX_DAILY_DEFICIT_KCAL = 1000;
 export const MIN_AGE = 18;
 export const MIN_BMI_FOR_WEIGHT_LOSS = 17.5;
@@ -20,12 +21,22 @@ export interface SafetyCheckParams {
   weightKg: number;
   heightCm: number;
   targetWeightKg?: number;
+  targetTimeframeWeeks?: number;
   trainingDaysPerWeek: number;
   goal: string;
 }
 
 export function runSafetyChecks(params: SafetyCheckParams): SafetyFlag[] {
-  const { age, gender, weightKg, heightCm, targetWeightKg, trainingDaysPerWeek, goal } = params;
+  const {
+    age,
+    gender,
+    weightKg,
+    heightCm,
+    targetWeightKg,
+    targetTimeframeWeeks,
+    trainingDaysPerWeek,
+    goal,
+  } = params;
   const flags: SafetyFlag[] = [];
 
   if (age < MIN_AGE) {
@@ -49,10 +60,16 @@ export function runSafetyChecks(params: SafetyCheckParams): SafetyFlag[] {
   if (goal === 'lose_weight' && targetWeightKg !== undefined) {
     const kgToLose = weightKg - targetWeightKg;
     if (kgToLose > 0) {
-      const weeklyLossKg = kgToLose / PROGRAM_WEEKS;
+      const weeks = targetTimeframeWeeks ?? PROGRAM_WEEKS;
+      const weeklyLossKg = kgToLose / weeks;
       const dailyDeficit = (weeklyLossKg * KCAL_PER_KG) / 7;
 
-      if (weeklyLossKg > MAX_WEEKLY_WEIGHT_LOSS_KG) {
+      // Block if weekly loss exceeds 1 kg/week OR 1% of body weight per week
+      const maxWeeklyLoss = Math.min(
+        MAX_WEEKLY_WEIGHT_LOSS_KG,
+        weightKg * MAX_WEEKLY_WEIGHT_LOSS_PCT
+      );
+      if (weeklyLossKg > maxWeeklyLoss) {
         flags.push({
           code: 'WEIGHT_LOSS_TOO_FAST',
           severity: 'block',

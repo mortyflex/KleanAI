@@ -14,7 +14,7 @@ import { PillButton } from '../../src/components/ui/pill-button';
 import { colors, radii } from '../../src/design/tokens';
 import type { FitnessLevel } from '../../src/types/profile.types';
 
-const TOTAL_STEPS = 7;
+const TOTAL_STEPS = 8;
 
 const LEVELS: { value: FitnessLevel; emoji: string; labelKey: string; subKey: string }[] = [
   { value: 'beginner', emoji: '🌱', labelKey: 'onboarding.training.beginner', subKey: 'onboarding.training.beginnerSub' },

@@ -167,6 +167,27 @@
       "kosher": "Kosher",
       "hint": "Select all that apply. You can update this anytime."
     },
+    "timeframe": {
+      "title": "When's your target?",
+      "subtitle": "We'll adapt your plan to your timeframe.",
+      "presetTitle": "Choose a duration",
+      "4weeks": "4 weeks",
+      "8weeks": "8 weeks",
+      "12weeks": "12 weeks",
+      "custom": "Custom",
+      "customLabel": "Number of weeks",
+      "customPlaceholder": "e.g. 6",
+      "eventTitle": "Planning for an event?",
+      "eventOptional": "(optional)",
+      "eventWedding": "Wedding",
+      "eventVacation": "Vacation",
+      "eventCompetition": "Competition",
+      "eventOther": "Other event",
+      "errors": {
+        "durationInvalid": "Please enter a valid duration (1–104 weeks).",
+        "durationRequired": "Please select or enter a duration."
+      }
+    },
     "safety": {
       "title": "Safety check",
       "subtitle": "Klean AI protects you from dangerous plans.",
@@ -184,6 +205,14 @@
         "weightLossTooFast": "Losing more than 1 kg/week risks muscle loss and health issues.",
         "bmiTooLow": "Your BMI suggests you may be underweight. Weight loss is not recommended."
       },
+      "alternatives": {
+        "title": "What we recommend instead",
+        "saferWeeks": "Reach your goal safely in {{weeks}} weeks",
+        "saferWeeklyLoss": "Safe weekly loss: {{kg}} kg/week",
+        "kickstart": "Start with a 7-day Kickstart to build momentum",
+        "partialProgress": "You can safely lose {{kg}} kg before your event",
+        "continueAfter": "then keep going — no guilt"
+      },
       "continueAnyway": "I understand, continue",
       "adjustProfile": "Adjust my profile"
     },
@@ -198,6 +227,21 @@
       "location": "Location",
       "restrictions": "Diet",
       "noRestrictions": "No restrictions",
+      "targetWeight": "Target weight",
+      "timeframe": "Timeframe",
+      "weeklyChange": "Weekly change",
+      "safetyStatus": "Safety",
+      "safe": "All clear",
+      "hasWarnings": "Review needed",
+      "weeksUnit": "{{weeks}} weeks",
+      "kgPerWeek": "~{{kg}} kg/week",
+      "weightKgUnit": "{{kg}} kg",
+      "events": {
+        "wedding": "Wedding",
+        "vacation": "Vacation",
+        "competition": "Competition",
+        "other": "Event"
+      },
       "generateCta": "Generate my plan",
       "mockNotice": "Plan generation coming soon — your profile is saved.",
       "editProfile": "Edit my profile",

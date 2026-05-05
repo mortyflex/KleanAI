@@ -168,6 +168,27 @@
       "kosher": "Casher",
       "hint": "Sélectionne tout ce qui s'applique. Tu pourras modifier ça à tout moment."
     },
+    "timeframe": {
+      "title": "Quand est ton objectif ?",
+      "subtitle": "On adaptera ton plan à ton calendrier.",
+      "presetTitle": "Choisis une durée",
+      "4weeks": "4 semaines",
+      "8weeks": "8 semaines",
+      "12weeks": "12 semaines",
+      "custom": "Personnalisé",
+      "customLabel": "Nombre de semaines",
+      "customPlaceholder": "ex. 6",
+      "eventTitle": "Tu prépares un événement ?",
+      "eventOptional": "(optionnel)",
+      "eventWedding": "Mariage",
+      "eventVacation": "Vacances",
+      "eventCompetition": "Compétition",
+      "eventOther": "Autre événement",
+      "errors": {
+        "durationInvalid": "Merci d'entrer une durée valide (1–104 semaines).",
+        "durationRequired": "Merci de sélectionner ou d'entrer une durée."
+      }
+    },
     "safety": {
       "title": "Vérification de sécurité",
       "subtitle": "Klean AI te protège des plans dangereux.",
@@ -185,6 +206,14 @@
         "weightLossTooFast": "Perdre plus de 1 kg/semaine risque de perdre du muscle et nuit à la santé.",
         "bmiTooLow": "Ton IMC indique que tu es peut-être déjà en sous-poids. La perte de poids n'est pas recommandée."
       },
+      "alternatives": {
+        "title": "Ce qu'on recommande à la place",
+        "saferWeeks": "Atteins ton objectif en toute sécurité en {{weeks}} semaines",
+        "saferWeeklyLoss": "Perte hebdomadaire sûre : {{kg}} kg/semaine",
+        "kickstart": "Commence par 7 jours de Kickstart pour prendre de l'élan",
+        "partialProgress": "Tu peux perdre {{kg}} kg en toute sécurité avant ton événement",
+        "continueAfter": "puis continue — sans culpabilité"
+      },
       "continueAnyway": "Je comprends, continuer",
       "adjustProfile": "Modifier mon profil"
     },
@@ -199,6 +228,21 @@
       "location": "Lieu",
       "restrictions": "Alimentation",
       "noRestrictions": "Aucune restriction",
+      "targetWeight": "Poids cible",
+      "timeframe": "Durée",
+      "weeklyChange": "Changement hebdo.",
+      "safetyStatus": "Sécurité",
+      "safe": "Tout est bon",
+      "hasWarnings": "À revoir",
+      "weeksUnit": "{{weeks}} semaines",
+      "kgPerWeek": "~{{kg}} kg/semaine",
+      "weightKgUnit": "{{kg}} kg",
+      "events": {
+        "wedding": "Mariage",
+        "vacation": "Vacances",
+        "competition": "Compétition",
+        "other": "Événement"
+      },
       "generateCta": "Générer mon plan",
       "mockNotice": "La génération de plan arrive bientôt — ton profil est sauvegardé.",
       "editProfile": "Modifier mon profil",
