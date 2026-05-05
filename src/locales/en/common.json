@@ -198,6 +198,88 @@
     "dinner": "Dinner",
     "snacks": "Snacks"
   },
+  "smoothing": {
+    "feedback": {
+      "title": "Let's smooth this out",
+      "subtitle": "Real life happens. We'll adjust your plan — no guilt, no punishment.",
+      "zeroGuiltBanner": "Zero guilt. We've got you.",
+      "spreadInfo_one": "Spread gently over the next {{count}} day",
+      "spreadInfo_other": "Spread gently over the next {{count}} days",
+      "compensatedKcal": "Total smoothed: {{kcal}} kcal",
+      "perDayKcal": "About {{kcal}} kcal/day",
+      "floorReachedTitle": "Kept safe",
+      "floorReachedBody": "We capped the adjustment so your daily target stays at a safe level. The rest is forgotten — focus on tomorrow.",
+      "unaddressedKcal": "{{kcal}} kcal kept off your plan to stay safe.",
+      "primaryCta": "Continue",
+      "back": "Back",
+      "actionsTitle": "Here's what we suggest",
+      "missingTimeframe": "We'll adjust your plan as soon as we have your daily target.",
+      "unknownEvent": {
+        "title": "We couldn't read that signal",
+        "message": "No worries — your plan keeps moving forward. Try again from the home screen."
+      }
+    },
+    "events": {
+      "missed_workout": {
+        "title": "Missed workout",
+        "message": "Skipping a session doesn't undo your progress. We'll fold today back into your week.",
+        "recommendation": "Pick a way back in — quick session, reschedule, or focus on the key lifts."
+      },
+      "partial_workout": {
+        "title": "Partial workout",
+        "message": "Starting is the hard part — and you did it. We'll handle the rest.",
+        "recommendation": "We can fold the missing exercises into your next session."
+      },
+      "excess_food": {
+        "title": "A bit extra today",
+        "message": "One day above target won't slow you down. We'll spread the difference gently.",
+        "recommendation": "Small adjustments over 2–3 days — never below your safe minimum."
+      },
+      "skipped_meal": {
+        "title": "Skipped meal",
+        "message": "Skipping a meal isn't a win — and we won't compensate by cutting more.",
+        "recommendation": "Eat normally at your next meal. Your daily target stays the same."
+      },
+      "ordered_food": {
+        "title": "Ordered out",
+        "message": "Ordering in is part of life. We'll smooth the extra calories over the next few days.",
+        "recommendation": "Light adjustments only — no skipping meals, no aggressive cuts."
+      },
+      "alcohol": {
+        "title": "A few drinks",
+        "message": "Enjoyed a drink? No drama. We'll absorb it gently across your week.",
+        "recommendation": "Hydrate well, sleep well, and let the next 2–3 days handle the rest."
+      },
+      "no_machine": {
+        "title": "Machine unavailable",
+        "message": "Crowded gym? We'll swap to exercises that hit the same muscles.",
+        "recommendation": "Use free weights, cables, or bodyweight alternatives."
+      },
+      "no_time": {
+        "title": "Tight on time",
+        "message": "A short session beats no session. We'll keep the most important pieces.",
+        "recommendation": "Try an express workout, then catch the rest later in the week."
+      }
+    },
+    "actions": {
+      "express_workout": {
+        "label": "Express workout",
+        "description": "A focused {{min}} min session covering the essentials."
+      },
+      "reschedule": {
+        "label": "Reschedule",
+        "description": "Move this session to your next available day."
+      },
+      "integrate_key_exercises": {
+        "label": "Keep the key lifts",
+        "description": "We'll fold the most important exercises into your next session."
+      },
+      "swap_exercises": {
+        "label": "Swap exercises",
+        "description": "We'll suggest equivalents that target the same muscles."
+      }
+    }
+  },
   "onboarding": {
     "step": "Step {{current}} of {{total}}",
     "next": "Continue",

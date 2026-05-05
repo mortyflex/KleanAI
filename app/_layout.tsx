@@ -32,6 +32,7 @@ export default function RootLayout() {
         <Stack.Screen name="(onboarding)" />
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="workout" />
+        <Stack.Screen name="smoothing" />
       </Stack>
     </OnboardingProvider>
   );

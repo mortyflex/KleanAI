@@ -199,6 +199,88 @@
     "dinner": "Dîner",
     "snacks": "En-cas"
   },
+  "smoothing": {
+    "feedback": {
+      "title": "On lisse ça ensemble",
+      "subtitle": "La vraie vie, ça arrive. On ajuste ton plan — sans culpabilité, sans punition.",
+      "zeroGuiltBanner": "Zéro culpabilité. On gère.",
+      "spreadInfo_one": "Réparti en douceur sur {{count}} jour",
+      "spreadInfo_other": "Réparti en douceur sur les {{count}} prochains jours",
+      "compensatedKcal": "Total lissé : {{kcal}} kcal",
+      "perDayKcal": "Environ {{kcal}} kcal/jour",
+      "floorReachedTitle": "Sécurité préservée",
+      "floorReachedBody": "On a plafonné l'ajustement pour garder ton apport au-dessus du minimum sécurisé. Le reste, on l'oublie — concentre-toi sur demain.",
+      "unaddressedKcal": "{{kcal}} kcal laissées de côté pour rester safe.",
+      "primaryCta": "Continuer",
+      "back": "Retour",
+      "actionsTitle": "Voici ce qu'on te propose",
+      "missingTimeframe": "On ajustera ton plan dès qu'on aura ton objectif quotidien.",
+      "unknownEvent": {
+        "title": "Signal non reconnu",
+        "message": "Pas de souci — ton plan continue. Reviens à l'accueil et réessaie."
+      }
+    },
+    "events": {
+      "missed_workout": {
+        "title": "Séance manquée",
+        "message": "Sauter une séance n'efface pas tes progrès. On replie ça dans ta semaine.",
+        "recommendation": "Choisis comment rebondir — séance express, report ou exercices clés."
+      },
+      "partial_workout": {
+        "title": "Séance partielle",
+        "message": "Le plus dur, c'était de commencer — et tu l'as fait. On s'occupe du reste.",
+        "recommendation": "On peut intégrer les exercices manquants à ta prochaine séance."
+      },
+      "excess_food": {
+        "title": "Un petit extra aujourd'hui",
+        "message": "Une journée au-dessus de la cible ne ralentit pas tes progrès. On lisse en douceur.",
+        "recommendation": "De petits ajustements sur 2 à 3 jours — jamais en dessous du minimum sécurisé."
+      },
+      "skipped_meal": {
+        "title": "Repas sauté",
+        "message": "Sauter un repas, ce n'est pas une victoire — et on ne compense pas en coupant davantage.",
+        "recommendation": "Mange normalement au prochain repas. Ton objectif quotidien ne bouge pas."
+      },
+      "ordered_food": {
+        "title": "Repas commandé",
+        "message": "Commander, ça fait partie de la vie. On lisse les calories sur les prochains jours.",
+        "recommendation": "Des ajustements légers — pas de repas sauté, pas de coupe agressive."
+      },
+      "alcohol": {
+        "title": "Quelques verres",
+        "message": "Tu as bu un verre ? Pas de drame. On absorbe ça doucement sur la semaine.",
+        "recommendation": "Hydrate-toi, dors bien, et laisse les 2–3 prochains jours faire le reste."
+      },
+      "no_machine": {
+        "title": "Machine indisponible",
+        "message": "Salle bondée ? On remplace par des exos qui sollicitent les mêmes muscles.",
+        "recommendation": "Utilise les charges libres, les câbles ou des alternatives au poids du corps."
+      },
+      "no_time": {
+        "title": "Peu de temps",
+        "message": "Une courte séance vaut mieux que rien. On garde l'essentiel.",
+        "recommendation": "Essaie une séance express, puis rattrape le reste plus tard dans la semaine."
+      }
+    },
+    "actions": {
+      "express_workout": {
+        "label": "Séance express",
+        "description": "Une séance ciblée de {{min}} min qui couvre l'essentiel."
+      },
+      "reschedule": {
+        "label": "Reporter",
+        "description": "Déplace cette séance au prochain jour disponible."
+      },
+      "integrate_key_exercises": {
+        "label": "Garde les exos clés",
+        "description": "On intègre les exercices les plus importants à ta prochaine séance."
+      },
+      "swap_exercises": {
+        "label": "Remplacer les exercices",
+        "description": "On te suggère des équivalents qui ciblent les mêmes muscles."
+      }
+    }
+  },
   "onboarding": {
     "step": "Étape {{current}} sur {{total}}",
     "next": "Continuer",
