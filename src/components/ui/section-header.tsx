@@ -1,6 +1,7 @@
 import React from "react";
-import { View, Text, Pressable } from "react-native";
+import { View, Pressable } from "react-native";
 import { colors } from "../../design/tokens";
+import { KleanText } from "./klean-text";
 
 interface SectionHeaderProps {
   title: string;
@@ -17,16 +18,14 @@ export function SectionHeader({ title, action, onAction }: SectionHeaderProps) {
         justifyContent: "space-between",
       }}
     >
-      <Text style={{ fontSize: 17, fontWeight: "700", color: colors.ink }}>
+      <KleanText variant="h3" color={colors.ink}>
         {title}
-      </Text>
+      </KleanText>
       {action && (
-        <Pressable onPress={onAction}>
-          <Text
-            style={{ fontSize: 14, fontWeight: "600", color: colors.brand }}
-          >
+        <Pressable onPress={onAction} hitSlop={8}>
+          <KleanText variant="label" color={colors.brand}>
             {action}
-          </Text>
+          </KleanText>
         </Pressable>
       )}
     </View>

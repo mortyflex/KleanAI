@@ -5,6 +5,7 @@ import { user, todaySummary, nutrition } from "../../src/data/mock";
 import { Card } from "../../src/components/ui/card";
 import { SectionHeader } from "../../src/components/ui/section-header";
 import { PillButton } from "../../src/components/ui/pill-button";
+import { KleanText } from "../../src/components/ui/klean-text";
 import { colors, radii, shadows } from "../../src/design/tokens";
 
 const PALETTES = {
@@ -39,13 +40,15 @@ function StatMini({
         gap: 2,
       }}
     >
-      <Text style={{ fontSize: 22, fontWeight: "700", color: fg }}>
+      <KleanText variant="h3" color={fg}>
         {value}
-      </Text>
-      <Text style={{ fontSize: 11, color: colors.muted }}>{unit}</Text>
-      <Text style={{ fontSize: 12, fontWeight: "500", color: colors.ink }}>
+      </KleanText>
+      <KleanText variant="caption" color={colors.muted}>
+        {unit}
+      </KleanText>
+      <KleanText variant="label" color={colors.ink}>
         {label}
-      </Text>
+      </KleanText>
     </View>
   );
 }
@@ -78,10 +81,12 @@ function QuickAction({
     >
       <Text style={{ fontSize: 26 }}>{emoji}</Text>
       <View style={{ gap: 3 }}>
-        <Text style={{ fontSize: 13, fontWeight: "700", color: fg }}>
+        <KleanText variant="bodyMedium" color={fg} weight="700">
           {title}
-        </Text>
-        <Text style={{ fontSize: 12, color: colors.muted }}>{subtitle}</Text>
+        </KleanText>
+        <KleanText variant="caption" color={colors.muted}>
+          {subtitle}
+        </KleanText>
       </View>
     </Pressable>
   );
@@ -114,14 +119,12 @@ export default function HomeScreen() {
           }}
         >
           <View style={{ gap: 3 }}>
-            <Text style={{ fontSize: 15, color: colors.muted }}>
+            <KleanText variant="secondary" color={colors.muted}>
               {t("home.goodMorning")}
-            </Text>
-            <Text
-              style={{ fontSize: 30, fontWeight: "800", color: colors.ink }}
-            >
+            </KleanText>
+            <KleanText variant="h1" color={colors.ink}>
               {user.name} 👋
-            </Text>
+            </KleanText>
           </View>
           <View
             style={
@@ -136,9 +139,9 @@ export default function HomeScreen() {
               } as any
             }
           >
-            <Text style={{ color: "#FFF", fontWeight: "700", fontSize: 16 }}>
+            <KleanText variant="bodyMedium" color="#FFFFFF" weight="700">
               {user.avatarInitials}
-            </Text>
+            </KleanText>
           </View>
         </View>
         <View style={{ flexDirection: "row", gap: 8, marginTop: 4 }}>
@@ -147,45 +150,38 @@ export default function HomeScreen() {
               backgroundColor: colors.energyLight,
               borderRadius: radii.pill,
               paddingHorizontal: 12,
-              paddingVertical: 5,
+              paddingVertical: 6,
             }}
           >
-            <Text
-              style={{ fontSize: 12, fontWeight: "600", color: colors.energy }}
-            >
+            <KleanText variant="caption" color={colors.energy}>
               🔥 {user.streak} day streak
-            </Text>
+            </KleanText>
           </View>
           <View
             style={{
               backgroundColor: colors.mintLight,
               borderRadius: radii.pill,
               paddingHorizontal: 12,
-              paddingVertical: 5,
+              paddingVertical: 6,
             }}
           >
-            <Text
-              style={{ fontSize: 12, fontWeight: "600", color: colors.mint }}
-            >
+            <KleanText variant="caption" color={colors.mint}>
               {user.level}
-            </Text>
+            </KleanText>
           </View>
         </View>
       </View>
 
       {/* ── Today's Overview ── */}
       <Card>
-        <Text
-          style={{
-            fontSize: 11,
-            fontWeight: "700",
-            color: colors.muted,
-            letterSpacing: 1,
-            textTransform: "uppercase",
-          }}
+        <KleanText
+          variant="caption"
+          color={colors.muted}
+          weight="700"
+          style={{ letterSpacing: 1, textTransform: "uppercase" }}
         >
           {t("home.overview.title")}
-        </Text>
+        </KleanText>
         <View style={{ flexDirection: "row", gap: 10, marginTop: 14 }}>
           <StatMini
             label={t("home.overview.burned")}
@@ -210,14 +206,12 @@ export default function HomeScreen() {
           <View
             style={{ flexDirection: "row", justifyContent: "space-between" }}
           >
-            <Text style={{ fontSize: 12, color: colors.muted }}>
+            <KleanText variant="caption" color={colors.muted}>
               {t("home.overview.goalLabel")}
-            </Text>
-            <Text
-              style={{ fontSize: 12, fontWeight: "700", color: colors.ink }}
-            >
+            </KleanText>
+            <KleanText variant="caption" color={colors.ink} weight="700">
               {burnedPct}%
-            </Text>
+            </KleanText>
           </View>
           <View
             style={{
@@ -236,12 +230,12 @@ export default function HomeScreen() {
               }}
             />
           </View>
-          <Text style={{ fontSize: 11, color: colors.muted }}>
+          <KleanText variant="caption" color={colors.muted}>
             {t("home.overview.goalProgress", {
               current: todaySummary.caloriesBurned,
               goal: todaySummary.caloriesGoal,
             })}
-          </Text>
+          </KleanText>
         </View>
       </Card>
 
@@ -295,28 +289,18 @@ export default function HomeScreen() {
       >
         <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
           <Text style={{ fontSize: 15 }}>💡</Text>
-          <Text
-            style={{
-              fontSize: 10,
-              fontWeight: "700",
-              color: "rgba(255,255,255,0.6)",
-              letterSpacing: 1.2,
-              textTransform: "uppercase",
-            }}
+          <KleanText
+            variant="caption"
+            color="rgba(255,255,255,0.75)"
+            weight="700"
+            style={{ letterSpacing: 1.2, textTransform: "uppercase" }}
           >
             {t("home.tip.label")}
-          </Text>
+          </KleanText>
         </View>
-        <Text
-          style={{
-            fontSize: 15,
-            fontWeight: "600",
-            color: "#FFFFFF",
-            lineHeight: 24,
-          }}
-        >
+        <KleanText variant="bodyMedium" color="#FFFFFF">
           {t("home.tip.body")}
-        </Text>
+        </KleanText>
       </View>
 
       {/* ── CTA ── */}

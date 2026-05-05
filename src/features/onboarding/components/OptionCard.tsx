@@ -1,6 +1,7 @@
-import React from 'react';
-import { Pressable, Text, View } from 'react-native';
-import { colors, radii } from '../../../design/tokens';
+import React from "react";
+import { Pressable, Text, View } from "react-native";
+import { colors, radii } from "../../../design/tokens";
+import { KleanText } from "../../../components/ui/klean-text";
 
 interface OptionCardProps {
   label: string;
@@ -11,14 +12,21 @@ interface OptionCardProps {
   testID?: string;
 }
 
-export function OptionCard({ label, subtitle, emoji, selected, onPress, testID }: OptionCardProps) {
+export function OptionCard({
+  label,
+  subtitle,
+  emoji,
+  selected,
+  onPress,
+  testID,
+}: OptionCardProps) {
   return (
     <Pressable
       testID={testID}
       onPress={onPress}
       style={{
-        flexDirection: 'row',
-        alignItems: 'center',
+        flexDirection: "row",
+        alignItems: "center",
         padding: 16,
         borderRadius: radii.chip,
         backgroundColor: selected ? colors.brandLight : colors.card,
@@ -34,25 +42,29 @@ export function OptionCard({ label, subtitle, emoji, selected, onPress, testID }
             height: 44,
             borderRadius: 22,
             backgroundColor: selected ? colors.brandMid : colors.bg,
-            alignItems: 'center',
-            justifyContent: 'center',
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
           <Text style={{ fontSize: 22 }}>{emoji}</Text>
         </View>
       ) : null}
       <View style={{ flex: 1 }}>
-        <Text
-          style={{
-            fontSize: 15,
-            fontWeight: '700',
-            color: selected ? colors.brand : colors.ink,
-          }}
+        <KleanText
+          variant="bodyMedium"
+          color={selected ? colors.brand : colors.ink}
+          weight="700"
         >
           {label}
-        </Text>
+        </KleanText>
         {subtitle ? (
-          <Text style={{ fontSize: 13, color: colors.muted, marginTop: 2 }}>{subtitle}</Text>
+          <KleanText
+            variant="caption"
+            color={colors.muted}
+            style={{ marginTop: 2 }}
+          >
+            {subtitle}
+          </KleanText>
         ) : null}
       </View>
       <View
@@ -62,13 +74,15 @@ export function OptionCard({ label, subtitle, emoji, selected, onPress, testID }
           borderRadius: 11,
           borderWidth: selected ? 0 : 2,
           borderColor: colors.border,
-          backgroundColor: selected ? colors.brand : 'transparent',
-          alignItems: 'center',
-          justifyContent: 'center',
+          backgroundColor: selected ? colors.brand : "transparent",
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
         {selected ? (
-          <Text style={{ color: '#FFFFFF', fontSize: 12, fontWeight: '700' }}>✓</Text>
+          <Text style={{ color: "#FFFFFF", fontSize: 12, fontWeight: "700" }}>
+            ✓
+          </Text>
         ) : null}
       </View>
     </Pressable>

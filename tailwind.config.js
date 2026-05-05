@@ -1,9 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: [
-    "./app/**/*.{ts,tsx}",
-    "./src/**/*.{ts,tsx}",
-  ],
+  content: ["./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
   presets: [require("nativewind/preset")],
   theme: {
     extend: {
@@ -41,7 +38,13 @@ module.exports = {
         "4xl": "28px",
       },
       fontFamily: {
-        sans: ["System"],
+        // Source of truth for font families lives in src/theme/typography.ts.
+        // These tokens mirror it for utility-class consumers.
+        sans: ["PlusJakartaSans_400Regular", "System"],
+        medium: ["PlusJakartaSans_500Medium", "System"],
+        semibold: ["PlusJakartaSans_600SemiBold", "System"],
+        bold: ["PlusJakartaSans_700Bold", "System"],
+        extrabold: ["PlusJakartaSans_800ExtraBold", "System"],
       },
     },
   },

@@ -1,6 +1,8 @@
 import React from "react";
-import { Pressable, Text, PressableProps, ViewStyle } from "react-native";
+import { Pressable, PressableProps, ViewStyle } from "react-native";
 import { colors, radii, shadows } from "../../design/tokens";
+import { KleanText } from "./klean-text";
+import { TypographyVariant } from "../../theme/typography";
 
 interface PillButtonProps extends PressableProps {
   label: string;
@@ -12,12 +14,16 @@ const paddings: Record<
   string,
   { paddingHorizontal: number; paddingVertical: number }
 > = {
-  sm: { paddingHorizontal: 16, paddingVertical: 8 },
+  sm: { paddingHorizontal: 16, paddingVertical: 10 },
   md: { paddingHorizontal: 20, paddingVertical: 14 },
   lg: { paddingHorizontal: 24, paddingVertical: 18 },
 };
 
-const fontSizes: Record<string, number> = { sm: 13, md: 15, lg: 15 };
+const textVariants: Record<string, TypographyVariant> = {
+  sm: "label",
+  md: "button",
+  lg: "button",
+};
 
 export function PillButton({
   label,
@@ -42,15 +48,12 @@ export function PillButton({
 
   return (
     <Pressable style={[containerStyle, style as any]} {...props}>
-      <Text
-        style={{
-          fontSize: fontSizes[size],
-          fontWeight: "600",
-          color: isFilled ? "#FFFFFF" : isOutline ? colors.ink : colors.muted,
-        }}
+      <KleanText
+        variant={textVariants[size]}
+        color={isFilled ? "#FFFFFF" : isOutline ? colors.ink : colors.muted}
       >
         {label}
-      </Text>
+      </KleanText>
     </Pressable>
   );
 }
@@ -67,22 +70,19 @@ export function FilterPill({ label, active, onPress }: FilterPillProps) {
       onPress={onPress}
       style={{
         paddingHorizontal: 16,
-        paddingVertical: 8,
+        paddingVertical: 10,
         borderRadius: radii.pill,
         backgroundColor: active ? colors.ink : colors.card,
         borderWidth: active ? 0 : 1,
         borderColor: colors.border,
       }}
     >
-      <Text
-        style={{
-          fontSize: 13,
-          fontWeight: "600",
-          color: active ? "#FFFFFF" : colors.muted,
-        }}
+      <KleanText
+        variant="label"
+        color={active ? "#FFFFFF" : colors.muted}
       >
         {label}
-      </Text>
+      </KleanText>
     </Pressable>
   );
 }
