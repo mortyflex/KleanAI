@@ -1,5 +1,6 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react-native';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import '../../src/lib/i18n';
 import { OnboardingProvider } from '../../src/features/onboarding/onboarding-context';
 import WorkoutDetailScreen from '../../app/workout/[weekDayIndex]';
@@ -20,72 +21,168 @@ function renderDetail() {
 }
 
 describe('WorkoutDetailScreen', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     mockBack.mockClear();
+    await AsyncStorage.clear();
   });
 
-  it('renders without crashing', () => {
+  it('renders without crashing', async () => {
     renderDetail();
+    await waitFor(() => expect(screen.getByText('Workout')).toBeTruthy());
   });
 
-  it('shows the workout header label', () => {
+  it('shows the workout header label', async () => {
     renderDetail();
-    expect(screen.getByText('Workout')).toBeTruthy();
+    await waitFor(() => expect(screen.getByText('Workout')).toBeTruthy());
   });
 
-  it('shows the day name', () => {
+  it('shows the day name', async () => {
     renderDetail();
-    // weekDayIndex 0 → full_body_3 Monday → Full Body A
-    expect(screen.getByText('Full Body A')).toBeTruthy();
+    await waitFor(() => expect(screen.getByText('Full Body A')).toBeTruthy());
   });
 
-  it('shows duration chip', () => {
+  it('shows duration chip', async () => {
     renderDetail();
-    // Contains "min" (e.g., "45 min")
-    const minLabels = screen.getAllByText(/min/i);
-    expect(minLabels.length).toBeGreaterThan(0);
+    await waitFor(() => {
+      const minLabels = screen.getAllByText(/min/i);
+      expect(minLabels.length).toBeGreaterThan(0);
+    });
   });
 
-  it('shows intensity chip', () => {
+  it('shows intensity chip', async () => {
     renderDetail();
-    // Full Body A = medium intensity
-    expect(screen.getByText('Medium')).toBeTruthy();
+    await waitFor(() => expect(screen.getByText('Medium')).toBeTruthy());
   });
 
-  it('shows exercise names (at least one)', () => {
+  it('shows exercise names (at least one)', async () => {
     renderDetail();
-    // full_body_3 Day A includes Bench Press
-    expect(screen.getByText('Bench Press')).toBeTruthy();
+    await waitFor(() => expect(screen.getByText('Bench Press')).toBeTruthy());
   });
 
-  it('shows sets × reps label for each exercise', () => {
+  it('shows sets × reps label for each exercise', async () => {
     renderDetail();
-    const setsReps = screen.getAllByText(/×.*reps/i);
-    expect(setsReps.length).toBeGreaterThan(0);
+    await waitFor(() => {
+      const setsReps = screen.getAllByText(/×.*reps/i);
+      expect(setsReps.length).toBeGreaterThan(0);
+    });
   });
 
-  it('shows the mark-all-done button', () => {
+  it('shows the Finish workout button', async () => {
     renderDetail();
-    expect(screen.getByText('Mark all done')).toBeTruthy();
+    await waitFor(() => expect(screen.getByText('Finish workout')).toBeTruthy());
   });
 
-  it('shows the exercises completed label', () => {
+  it('shows the Missed today button', async () => {
     renderDetail();
-    expect(screen.getByText('Exercises completed')).toBeTruthy();
+    await waitFor(() => expect(screen.getByText('Missed today?')).toBeTruthy());
   });
 
-  it('tapping mark-all-done updates button label', () => {
+  it('shows the exercises completed label', async () => {
     renderDetail();
-    const btn = screen.getByText('Mark all done');
-    fireEvent.press(btn);
-    expect(screen.getByText('Session complete!')).toBeTruthy();
+    await waitFor(() => expect(screen.getByText('Exercises completed')).toBeTruthy());
   });
 
-  it('back button triggers router.back()', () => {
+  it('back button triggers router.back()', async () => {
     renderDetail();
-    // "‹ Back" is the navigation back button; pick the first element containing "Back"
+    await waitFor(() => screen.getByText('Workout'));
     const backBtns = screen.getAllByText(/Back/i);
     fireEvent.press(backBtns[0]);
     expect(mockBack).toHaveBeenCalledTimes(1);
+  });
+
+  it('tapping an exercise toggles its done state', async () => {
+    renderDetail();
+    await waitFor(() => screen.getByText('Bench Press'));
+
+    const benchPressCard = screen.getByText('Bench Press');
+    fireEvent.press(benchPressCard);
+
+    // After toggle the done count increases — we can verify by presence of checkmark
+    // The check is rendered as '✓' inside the circle when done=true
+    await waitFor(() => {
+      const checks = screen.queryAllByText('✓');
+      expect(checks.length).toBeGreaterThan(0);
+    });
+  });
+
+  it('shows the offline pending badge after an exercise toggle', async () => {
+    renderDetail();
+    await waitFor(() => screen.getByText('Bench Press'));
+
+    fireEvent.press(screen.getByText('Bench Press'));
+
+    await waitFor(() => expect(screen.getByText('Saved locally')).toBeTruthy());
+  });
+
+  it('tapping Finish workout shows the completion banner', async () => {
+    renderDetail();
+    await waitFor(() => screen.getByText('Finish workout'));
+
+    fireEvent.press(screen.getByText('Finish workout'));
+
+    await waitFor(() => expect(screen.getByText('Session complete!')).toBeTruthy());
+  });
+
+  it('hides Finish workout and Missed today buttons after finishing', async () => {
+    renderDetail();
+    await waitFor(() => screen.getByText('Finish workout'));
+
+    fireEvent.press(screen.getByText('Finish workout'));
+
+    await waitFor(() => {
+      expect(screen.queryByText('Finish workout')).toBeNull();
+      expect(screen.queryByText('Missed today?')).toBeNull();
+    });
+  });
+
+  it('shows the Done chip in the header after finishing', async () => {
+    renderDetail();
+    await waitFor(() => screen.getByText('Finish workout'));
+
+    fireEvent.press(screen.getByText('Finish workout'));
+
+    await waitFor(() => expect(screen.getByText('Done')).toBeTruthy());
+  });
+
+  it('tapping Missed today shows the missed banner', async () => {
+    renderDetail();
+    await waitFor(() => screen.getByText('Missed today?'));
+
+    fireEvent.press(screen.getByText('Missed today?'));
+
+    await waitFor(() =>
+      expect(
+        screen.getByText('No worries — every day is a fresh start.'),
+      ).toBeTruthy(),
+    );
+  });
+
+  it('shows the Missed chip in the header after marking as missed', async () => {
+    renderDetail();
+    await waitFor(() => screen.getByText('Missed today?'));
+
+    fireEvent.press(screen.getByText('Missed today?'));
+
+    await waitFor(() => expect(screen.getByText('Missed')).toBeTruthy());
+  });
+
+  it('restores a previously saved completed session', async () => {
+    // Pre-populate storage with a completed session for day-0
+    await AsyncStorage.setItem(
+      '@klean_workout_session_day-0',
+      JSON.stringify({
+        dayId: 'day-0',
+        weekDayIndex: 0,
+        status: 'completed',
+        syncStatus: 'pending',
+        exercises: [],
+        startedAt: '2026-05-05T08:00:00.000Z',
+        updatedAt: '2026-05-05T08:45:00.000Z',
+      }),
+    );
+
+    renderDetail();
+
+    await waitFor(() => expect(screen.getByText('Session complete!')).toBeTruthy());
   });
 });

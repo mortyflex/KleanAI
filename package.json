@@ -19,12 +19,14 @@
     ],
     "moduleNameMapper": {
       "^expo-localization$": "<rootDir>/__mocks__/expo-localization.ts",
+      "^@react-native-async-storage/async-storage$": "@react-native-async-storage/async-storage/jest/async-storage-mock",
       "^@/(.*)$": "<rootDir>/src/$1"
     }
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
     "@hookform/resolvers": "^5.2.2",
+    "@react-native-async-storage/async-storage": "^2.2.0",
     "babel-preset-expo": "~54.0.10",
     "expo": "~54.0.33",
     "expo-constants": "~18.0.13",

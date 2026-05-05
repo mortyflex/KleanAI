@@ -107,14 +107,21 @@
       "header": "Séance",
       "setsRepsLabel": "{{sets}} × {{reps}} rép.",
       "restLabel": "{{sec}}s repos",
-      "markComplete": "Tout marquer terminé",
-      "allDone": "Séance terminée !",
       "durationLabel": "{{min}} min",
       "intensityLabel": {
         "light": "Légère",
         "medium": "Modérée",
         "high": "Intense"
       }
+    },
+    "session": {
+      "finish": "Terminer la séance",
+      "markMissed": "Séance manquée ?",
+      "completedBanner": "Séance terminée !",
+      "missedBanner": "Pas de souci — chaque jour est un nouveau départ.",
+      "savedLocally": "Enregistré localement",
+      "completedChip": "Terminée",
+      "missedChip": "Manquée"
     },
     "exercises": {
       "push_ups": "Pompes",

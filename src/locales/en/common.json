@@ -106,14 +106,21 @@
       "header": "Workout",
       "setsRepsLabel": "{{sets}} × {{reps}} reps",
       "restLabel": "{{sec}}s rest",
-      "markComplete": "Mark all done",
-      "allDone": "Session complete!",
       "durationLabel": "{{min}} min",
       "intensityLabel": {
         "light": "Light",
         "medium": "Medium",
         "high": "High"
       }
+    },
+    "session": {
+      "finish": "Finish workout",
+      "markMissed": "Missed today?",
+      "completedBanner": "Session complete!",
+      "missedBanner": "No worries — every day is a fresh start.",
+      "savedLocally": "Saved locally",
+      "completedChip": "Done",
+      "missedChip": "Missed"
     },
     "exercises": {
       "push_ups": "Push-Ups",

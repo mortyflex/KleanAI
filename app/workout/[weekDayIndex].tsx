@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { ScrollView, View, Text, Pressable } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -6,6 +6,7 @@ import { Card } from '../../src/components/ui/card';
 import { PillButton } from '../../src/components/ui/pill-button';
 import { colors, radii, shadows } from '../../src/design/tokens';
 import { useWorkoutProgram } from '../../src/features/workout/hooks/useWorkoutProgram';
+import { useWorkoutSession } from '../../src/features/workout/hooks/useWorkoutSession';
 import type { WorkoutExercise, MuscleGroup, WorkoutIntensity } from '../../src/types/workout.types';
 
 const MUSCLE_COLOR_MAP: Partial<Record<MuscleGroup, { bg: string; fg: string }>> = {
@@ -31,9 +32,11 @@ const INTENSITY_COLORS: Record<WorkoutIntensity, { bg: string; fg: string }> = {
 function ExerciseCard({
   exercise,
   onToggle,
+  disabled,
 }: {
   exercise: WorkoutExercise;
   onToggle: () => void;
+  disabled: boolean;
 }) {
   const { t } = useTranslation('common');
   const primaryMuscle = exercise.muscleGroups[0];
@@ -42,13 +45,14 @@ function ExerciseCard({
 
   return (
     <Pressable
-      onPress={onToggle}
+      onPress={disabled ? undefined : onToggle}
       style={{
         backgroundColor: colors.card,
         borderRadius: radii.card,
         overflow: 'hidden',
         boxShadow: shadows.soft,
         borderCurve: 'continuous',
+        opacity: disabled ? 0.6 : 1,
       } as any}
     >
       {/* muscle accent bar */}
@@ -144,24 +148,13 @@ export default function WorkoutDetailScreen() {
   const day = program.days[parseInt(weekDayIndex ?? '0', 10)];
   const intensity = INTENSITY_COLORS[day?.intensity ?? 'medium'];
 
-  const [exercises, setExercises] = useState<WorkoutExercise[]>(
-    day?.exercises ?? [],
-  );
+  const { exercises, status, syncStatus, toggleExercise, finishWorkout, markMissed } =
+    useWorkoutSession(day ?? program.days[0]);
 
   if (!day || day.isRestDay) return null;
 
   const doneCount = exercises.filter((e) => e.done).length;
-  const allDone = doneCount === exercises.length && exercises.length > 0;
-
-  function toggleExercise(exerciseId: string) {
-    setExercises((prev) =>
-      prev.map((e) => (e.exerciseId === exerciseId ? { ...e, done: !e.done } : e)),
-    );
-  }
-
-  function toggleAll() {
-    setExercises((prev) => prev.map((e) => ({ ...e, done: !allDone })));
-  }
+  const isFinished = status === 'completed' || status === 'missed';
 
   return (
     <ScrollView
@@ -175,6 +168,27 @@ export default function WorkoutDetailScreen() {
           ‹ {t('onboarding.back')}
         </Text>
       </Pressable>
+
+      {/* ── Offline pending badge ── */}
+      {syncStatus === 'pending' && (
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 6,
+            alignSelf: 'flex-start',
+            backgroundColor: colors.brandLight,
+            borderRadius: radii.pill,
+            paddingHorizontal: 10,
+            paddingVertical: 4,
+          }}
+        >
+          <Text style={{ fontSize: 11 }}>💾</Text>
+          <Text style={{ fontSize: 11, fontWeight: '600', color: colors.brand }}>
+            {t('workout.session.savedLocally')}
+          </Text>
+        </View>
+      )}
 
       {/* ── Header Card ── */}
       <Card style={{ gap: 14 }}>
@@ -196,7 +210,7 @@ export default function WorkoutDetailScreen() {
         </View>
 
         {/* chips row */}
-        <View style={{ flexDirection: 'row', gap: 8 }}>
+        <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
           <View
             style={{
               backgroundColor: colors.brandLight,
@@ -230,6 +244,36 @@ export default function WorkoutDetailScreen() {
               {t(`workout.detail.intensityLabel.${day.intensity}`)}
             </Text>
           </View>
+
+          {status === 'completed' && (
+            <View
+              style={{
+                backgroundColor: colors.mintLight,
+                borderRadius: radii.pill,
+                paddingHorizontal: 12,
+                paddingVertical: 6,
+              }}
+            >
+              <Text style={{ fontSize: 12, fontWeight: '700', color: colors.mint }}>
+                {t('workout.session.completedChip')}
+              </Text>
+            </View>
+          )}
+
+          {status === 'missed' && (
+            <View
+              style={{
+                backgroundColor: colors.amberLight,
+                borderRadius: radii.pill,
+                paddingHorizontal: 12,
+                paddingVertical: 6,
+              }}
+            >
+              <Text style={{ fontSize: 12, fontWeight: '700', color: colors.amber }}>
+                {t('workout.session.missedChip')}
+              </Text>
+            </View>
+          )}
         </View>
 
         {/* progress bar */}
@@ -270,18 +314,69 @@ export default function WorkoutDetailScreen() {
           <ExerciseCard
             key={ex.exerciseId}
             exercise={ex}
+            disabled={isFinished}
             onToggle={() => toggleExercise(ex.exerciseId)}
           />
         ))}
       </View>
 
-      {/* ── CTA ── */}
-      <PillButton
-        label={allDone ? t('workout.detail.allDone') : t('workout.detail.markComplete')}
-        size="lg"
-        variant={allDone ? 'outline' : 'filled'}
-        onPress={toggleAll}
-      />
+      {/* ── CTA Section ── */}
+      {status === 'in_progress' && (
+        <View style={{ gap: 8 }}>
+          <PillButton
+            label={t('workout.session.finish')}
+            size="lg"
+            variant="filled"
+            onPress={finishWorkout}
+          />
+          <Pressable
+            onPress={markMissed}
+            style={{ alignItems: 'center', paddingVertical: 10 }}
+          >
+            <Text style={{ fontSize: 14, color: colors.muted, fontWeight: '500' }}>
+              {t('workout.session.markMissed')}
+            </Text>
+          </Pressable>
+        </View>
+      )}
+
+      {status === 'completed' && (
+        <View
+          style={{
+            backgroundColor: colors.mintLight,
+            borderRadius: radii.card,
+            padding: 24,
+            alignItems: 'center',
+            gap: 8,
+          }}
+        >
+          <Text style={{ fontSize: 28 }}>🎉</Text>
+          <Text
+            style={{ fontSize: 17, fontWeight: '700', color: colors.mint, textAlign: 'center' }}
+          >
+            {t('workout.session.completedBanner')}
+          </Text>
+        </View>
+      )}
+
+      {status === 'missed' && (
+        <View
+          style={{
+            backgroundColor: colors.amberLight,
+            borderRadius: radii.card,
+            padding: 24,
+            alignItems: 'center',
+            gap: 8,
+          }}
+        >
+          <Text style={{ fontSize: 28 }}>☀️</Text>
+          <Text
+            style={{ fontSize: 17, fontWeight: '700', color: colors.amber, textAlign: 'center' }}
+          >
+            {t('workout.session.missedBanner')}
+          </Text>
+        </View>
+      )}
     </ScrollView>
   );
 }
