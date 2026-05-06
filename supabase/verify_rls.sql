@@ -167,3 +167,82 @@ where grantee = 'PUBLIC'
     'daily_nutrition_logs','smoothing_events'
   )
 order by table_name, privilege_type;
+
+-- 6. Single-result summary -------------------------------------------------
+--
+--    Supabase's SQL editor only displays one result set per run, so when
+--    you click "Run" on this whole file you only see the final query's
+--    output. This summary aggregates checks 1–5 into a single result
+--    table you can read at a glance: every `status` should be `OK`.
+--    If any row says `FAIL`, scroll up and run the matching section on
+--    its own to inspect the offending rows.
+
+with klean_tables(name) as (
+  values
+    ('profiles'),('goals'),('training_preferences'),('diet_preferences'),
+    ('programs'),('workout_sessions'),('workout_logs'),('nutrition_plans'),
+    ('daily_nutrition_logs'),('smoothing_events')
+),
+check_rls as (
+  select
+    count(*) filter (where c.relrowsecurity)     as rls_on,
+    count(*)                                     as total_tables
+  from pg_class c
+  join pg_namespace n on n.oid = c.relnamespace
+  where n.nspname = 'public' and c.relkind = 'r'
+    and c.relname in (select name from klean_tables)
+),
+check_policies as (
+  select count(*) as policy_count
+  from pg_policies
+  where schemaname = 'public'
+    and tablename in (select name from klean_tables)
+),
+check_authenticated as (
+  select
+    count(*) filter (where privilege_type in ('SELECT','INSERT','UPDATE','DELETE')) as crud,
+    count(*) filter (where privilege_type not in ('SELECT','INSERT','UPDATE','DELETE')) as extras
+  from information_schema.role_table_grants
+  where grantee = 'authenticated'
+    and table_schema = 'public'
+    and table_name in (select name from klean_tables)
+),
+check_anon as (
+  select count(*) as priv_count
+  from information_schema.role_table_grants
+  where grantee = 'anon'
+    and table_schema = 'public'
+    and table_name in (select name from klean_tables)
+),
+check_public as (
+  select count(*) as priv_count
+  from information_schema.role_table_grants
+  where grantee = 'PUBLIC'
+    and table_schema = 'public'
+    and table_name in (select name from klean_tables)
+)
+select 1 as section, 'RLS enabled on all 10 tables' as check_name,
+       case when r.rls_on = 10 and r.total_tables = 10 then 'OK' else 'FAIL' end as status,
+       r.rls_on || ' / ' || r.total_tables || ' tables with RLS' as detail
+from check_rls r
+union all
+select 2, '40 RLS policies present',
+       case when p.policy_count = 40 then 'OK' else 'FAIL' end,
+       p.policy_count || ' / 40 policies'
+from check_policies p
+union all
+select 3, 'authenticated holds exactly CRUD (no extras)',
+       case when a.crud = 40 and a.extras = 0 then 'OK' else 'FAIL' end,
+       a.crud || ' CRUD, ' || a.extras || ' extras (expected 40 / 0)'
+from check_authenticated a
+union all
+select 4, 'anon holds zero direct privileges',
+       case when an.priv_count = 0 then 'OK' else 'FAIL' end,
+       an.priv_count || ' direct privileges'
+from check_anon an
+union all
+select 5, 'PUBLIC holds zero privileges',
+       case when pu.priv_count = 0 then 'OK' else 'FAIL' end,
+       pu.priv_count || ' privileges'
+from check_public pu
+order by section;
