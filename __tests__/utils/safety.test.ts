@@ -49,8 +49,13 @@ describe('runSafetyChecks — safe profile', () => {
     expect(flags).toHaveLength(0);
   });
 
-  it('returns no flags for a gain muscle goal', () => {
-    const flags = runSafetyChecks({ ...safeProfile, goal: 'gain_muscle' });
+  it('returns no flags for a consistent and paced gain_muscle goal', () => {
+    // 70 kg → 73 kg in 12 weeks = 0.25 kg/week → safe gain
+    const flags = runSafetyChecks({
+      ...safeProfile,
+      goal: 'gain_muscle',
+      targetWeightKg: 73,
+    });
     expect(flags).toHaveLength(0);
   });
 

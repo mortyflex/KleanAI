@@ -1,4 +1,9 @@
-import { suggestSaferAlternatives } from '../../src/utils/timeframe';
+import {
+  suggestSaferAlternatives,
+  recommendedWeeksFor,
+  MIN_RECOMMENDED_WEEKS,
+  MAX_RECOMMENDED_WEEKS,
+} from '../../src/utils/timeframe';
 import { MAX_WEEKLY_WEIGHT_LOSS_KG } from '../../src/utils/safety';
 
 describe('suggestSaferAlternatives', () => {
@@ -113,5 +118,73 @@ describe('suggestSaferAlternatives', () => {
     });
     expect(result.partialKgBeforeEvent).toBeCloseTo(4.5, 1);
     expect(result.partialProgressPossible).toBe(true);
+  });
+});
+
+describe('recommendedWeeksFor', () => {
+  it('returns ceil(kgToLose / safe-weekly-loss) for weight loss', () => {
+    // 70 kg → 65 kg : 5 / min(1.0, 0.7) = 5 / 0.7 = 7.14 → ceil = 8
+    const weeks = recommendedWeeksFor({
+      goal: 'lose_weight',
+      weightKg: 70,
+      targetWeightKg: 65,
+    });
+    expect(weeks).toBe(8);
+  });
+
+  it('returns ceil(kgToGain / MAX_WEEKLY_GAIN_KG) for weight gain', () => {
+    // 70 kg → 75 kg : 5 / 0.5 = 10 weeks
+    const weeks = recommendedWeeksFor({
+      goal: 'gain_muscle',
+      weightKg: 70,
+      targetWeightKg: 75,
+    });
+    expect(weeks).toBe(10);
+  });
+
+  it('60 kg → 80 kg gain has a recommended timeframe far longer than 12 weeks', () => {
+    // 20 kg / 0.5 = 40 weeks
+    const weeks = recommendedWeeksFor({
+      goal: 'gain_muscle',
+      weightKg: 60,
+      targetWeightKg: 80,
+    });
+    expect(weeks).toBeGreaterThan(12);
+  });
+
+  it('clamps below MIN_RECOMMENDED_WEEKS', () => {
+    // 70 → 69 = 1 kg / 0.7 = 1.43 → ceil = 2 → clamped to MIN_RECOMMENDED_WEEKS
+    const weeks = recommendedWeeksFor({
+      goal: 'lose_weight',
+      weightKg: 70,
+      targetWeightKg: 69,
+    });
+    expect(weeks).toBe(MIN_RECOMMENDED_WEEKS);
+  });
+
+  it('falls back to 12 weeks for maintain or no target', () => {
+    expect(recommendedWeeksFor({ goal: 'maintain', weightKg: 70 })).toBe(12);
+    expect(
+      recommendedWeeksFor({ goal: 'lose_weight', weightKg: 70, targetWeightKg: undefined })
+    ).toBe(12);
+  });
+
+  it('never returns more than MAX_RECOMMENDED_WEEKS', () => {
+    const weeks = recommendedWeeksFor({
+      goal: 'lose_weight',
+      weightKg: 200,
+      targetWeightKg: 60,
+    });
+    expect(weeks).toBeLessThanOrEqual(MAX_RECOMMENDED_WEEKS);
+  });
+
+  it('respects 1% body weight rule for lighter users', () => {
+    // 50 kg → 45 kg : 5 / min(1.0, 0.5) = 5 / 0.5 = 10 weeks
+    const weeks = recommendedWeeksFor({
+      goal: 'lose_weight',
+      weightKg: 50,
+      targetWeightKg: 45,
+    });
+    expect(weeks).toBe(10);
   });
 });

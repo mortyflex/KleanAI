@@ -1,7 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
-  Text,
   TextInput,
   ScrollView,
   Pressable,
@@ -17,24 +16,29 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { MetricsSchema, type MetricsFormData } from '../../src/features/onboarding/schemas';
 import { useOnboarding } from '../../src/features/onboarding/onboarding-context';
 import { OnboardingProgress } from '../../src/features/onboarding/components/OnboardingProgress';
+import { TargetWeightDiff } from '../../src/features/onboarding/components/TargetWeightDiff';
 import { PillButton } from '../../src/components/ui/pill-button';
+import { KleanText } from '../../src/components/ui/klean-text';
 import { colors, radii } from '../../src/design/tokens';
 import type { Gender } from '../../src/types/profile.types';
+import { classifyGoal } from '../../src/utils/goal-classification';
 
-const TOTAL_STEPS = 8;
+const TOTAL_STEPS = 10;
 
 function FieldLabel({ label }: { label: string }) {
   return (
-    <Text style={{ fontSize: 13, fontWeight: '600', color: colors.muted, marginBottom: 6 }}>
+    <KleanText variant="caption" color={colors.muted} weight="700" style={{ marginBottom: 6 }}>
       {label}
-    </Text>
+    </KleanText>
   );
 }
 
 function FieldError({ message }: { message?: string }) {
   if (!message) return null;
   return (
-    <Text style={{ fontSize: 12, color: colors.energy, marginTop: 4 }}>{message}</Text>
+    <KleanText variant="caption" color={colors.energy} style={{ marginTop: 4 }} testID="field-error">
+      {message}
+    </KleanText>
   );
 }
 
@@ -85,11 +89,15 @@ export default function MetricsScreen() {
   const router = useRouter();
   const { profile, updateProfile } = useOnboarding();
 
-  const needsTarget = profile.goal === 'lose_weight' || profile.goal === 'gain_muscle';
+  const needsTarget =
+    profile.goal === 'lose_weight' ||
+    profile.goal === 'gain_muscle' ||
+    profile.goal === 'maintain';
 
   const {
     control,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<MetricsFormData>({
     resolver: zodResolver(MetricsSchema),
@@ -99,8 +107,41 @@ export default function MetricsScreen() {
       heightCm: profile.heightCm,
       weightKg: profile.weightKg,
       targetWeightKg: profile.targetWeightKg,
+      goal: profile.goal,
     },
+    mode: 'onChange',
   });
+
+  const watchedWeight = watch('weightKg');
+  const watchedTarget = watch('targetWeightKg');
+  const watchedAge = watch('age');
+  const watchedGender = watch('gender');
+  const watchedHeight = watch('heightCm');
+
+  // Live classification — shown as a status badge on the diff card.
+  const liveStatus = useMemo(() => {
+    if (
+      !profile.goal ||
+      watchedWeight === undefined ||
+      watchedTarget === undefined ||
+      watchedAge === undefined ||
+      !watchedGender ||
+      watchedHeight === undefined
+    ) {
+      return undefined;
+    }
+    const result = classifyGoal({
+      goal: profile.goal,
+      age: watchedAge,
+      gender: watchedGender,
+      weightKg: watchedWeight,
+      heightCm: watchedHeight,
+      targetWeightKg: watchedTarget,
+      targetTimeframeWeeks: profile.targetTimeframe?.durationWeeks,
+      trainingDaysPerWeek: profile.trainingDaysPerWeek ?? 3,
+    });
+    return result.kind;
+  }, [profile.goal, profile.targetTimeframe, profile.trainingDaysPerWeek, watchedAge, watchedGender, watchedHeight, watchedWeight, watchedTarget]);
 
   const onSubmit = (data: MetricsFormData) => {
     updateProfile({
@@ -110,7 +151,7 @@ export default function MetricsScreen() {
       weightKg: data.weightKg,
       targetWeightKg: data.targetWeightKg,
     });
-    router.push('/(onboarding)/training');
+    router.push('/(onboarding)/fitness-level');
   };
 
   const getErrorMessage = (errKey: string | undefined) => {
@@ -132,24 +173,23 @@ export default function MetricsScreen() {
           keyboardShouldPersistTaps="handled"
         >
           <Pressable onPress={() => router.back()} style={{ marginBottom: 24 }}>
-            <Text style={{ fontSize: 14, fontWeight: '600', color: colors.brand }}>
+            <KleanText variant="label" color={colors.brand}>
               ← {t('onboarding.back')}
-            </Text>
+            </KleanText>
           </Pressable>
 
           <OnboardingProgress current={2} total={TOTAL_STEPS} />
 
           <View style={{ marginTop: 32, marginBottom: 28 }}>
-            <Text style={{ fontSize: 26, fontWeight: '800', color: colors.ink, marginBottom: 8 }}>
+            <KleanText variant="h1" color={colors.ink} style={{ marginBottom: 8 }}>
               {t('onboarding.metrics.title')}
-            </Text>
-            <Text style={{ fontSize: 15, color: colors.muted }}>
+            </KleanText>
+            <KleanText variant="secondary" color={colors.muted}>
               {t('onboarding.metrics.subtitle')}
-            </Text>
+            </KleanText>
           </View>
 
           <View style={{ gap: 20 }}>
-            {/* Age */}
             <View>
               <FieldLabel label={t('onboarding.metrics.age')} />
               <Controller
@@ -167,7 +207,6 @@ export default function MetricsScreen() {
               <FieldError message={getErrorMessage(errors.age?.message)} />
             </View>
 
-            {/* Gender */}
             <View>
               <FieldLabel label={t('onboarding.metrics.gender')} />
               <Controller
@@ -191,15 +230,13 @@ export default function MetricsScreen() {
                           borderColor: value === g.value ? colors.brand : colors.border,
                         }}
                       >
-                        <Text
-                          style={{
-                            fontSize: 14,
-                            fontWeight: '600',
-                            color: value === g.value ? colors.brand : colors.muted,
-                          }}
+                        <KleanText
+                          variant="label"
+                          color={value === g.value ? colors.brand : colors.muted}
+                          weight="700"
                         >
                           {t(g.labelKey)}
-                        </Text>
+                        </KleanText>
                       </Pressable>
                     ))}
                   </View>
@@ -208,7 +245,6 @@ export default function MetricsScreen() {
               <FieldError message={getErrorMessage(errors.gender?.message)} />
             </View>
 
-            {/* Height */}
             <View>
               <FieldLabel label={t('onboarding.metrics.height')} />
               <Controller
@@ -226,7 +262,6 @@ export default function MetricsScreen() {
               <FieldError message={getErrorMessage(errors.heightCm?.message)} />
             </View>
 
-            {/* Weight */}
             <View>
               <FieldLabel label={t('onboarding.metrics.weight')} />
               <Controller
@@ -244,7 +279,6 @@ export default function MetricsScreen() {
               <FieldError message={getErrorMessage(errors.weightKg?.message)} />
             </View>
 
-            {/* Target weight — shown for lose/gain goals */}
             {needsTarget && (
               <View>
                 <FieldLabel label={t('onboarding.metrics.targetWeight')} />
@@ -260,10 +294,18 @@ export default function MetricsScreen() {
                     />
                   )}
                 />
-                <Text style={{ fontSize: 12, color: colors.muted, marginTop: 4 }}>
+                <KleanText variant="caption" color={colors.muted} style={{ marginTop: 4 }}>
                   {t('onboarding.metrics.targetWeightHint')}
-                </Text>
+                </KleanText>
                 <FieldError message={getErrorMessage(errors.targetWeightKg?.message)} />
+
+                <TargetWeightDiff
+                  testID="target-weight-diff"
+                  currentWeightKg={watchedWeight}
+                  targetWeightKg={watchedTarget}
+                  goal={profile.goal}
+                  status={liveStatus}
+                />
               </View>
             )}
           </View>

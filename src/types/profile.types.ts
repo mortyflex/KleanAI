@@ -17,7 +17,11 @@ export type SafetyCode =
   | 'CALORIES_TOO_LOW'
   | 'DEFICIT_TOO_HIGH'
   | 'WEIGHT_LOSS_TOO_FAST'
-  | 'BMI_TOO_LOW';
+  | 'WEIGHT_GAIN_TOO_FAST'
+  | 'BMI_TOO_LOW'
+  | 'GOAL_INCONSISTENT_LOSS'
+  | 'GOAL_INCONSISTENT_GAIN'
+  | 'GOAL_INCONSISTENT_MAINTAIN';
 
 export type SafetySeverity = 'block' | 'warn';
 
@@ -27,9 +31,28 @@ export interface SafetyFlag {
   i18nKey: string;
 }
 
+/**
+ * Deterministic classification of a user's goal pace and consistency.
+ * Computed from current weight, target weight, timeframe, goal type,
+ * and estimated calorie impact. AI is never the primary decision maker.
+ */
+export type GoalClassificationKind = 'valid' | 'ambitious' | 'unsafe' | 'inconsistent';
+
 export interface TargetTimeframe {
   durationWeeks: number;
   eventLabel?: EventLabel;
+}
+
+export type DayOfWeek = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+export type TimeSlot = 'morning' | 'midday' | 'evening';
+
+/**
+ * Structured weekly availability — used by the program generator
+ * to schedule sessions to days/slots the user has actually selected.
+ */
+export interface WeeklyAvailability {
+  /** Map dayOfWeek (0=Mon … 6=Sun) -> set of selected time slots */
+  slots: Partial<Record<DayOfWeek, TimeSlot[]>>;
 }
 
 export interface OnboardingProfile {
@@ -46,6 +69,9 @@ export interface OnboardingProfile {
   trainingLocation: TrainingLocation;
   gymChain?: GymChain;
   dietaryRestrictions: DietaryRestriction[];
+  weeklyAvailability?: WeeklyAvailability;
+  /** User explicitly accepted an "ambitious" goal classification. */
+  ambitionAccepted?: boolean;
   safetyFlags: SafetyFlag[];
   isComplete: boolean;
 }

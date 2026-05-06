@@ -1,8 +1,9 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react-native';
 import '../../src/lib/i18n';
-import { OnboardingProvider } from '../../src/features/onboarding/onboarding-context';
+import { OnboardingContext, OnboardingProvider } from '../../src/features/onboarding/onboarding-context';
 import TimeframeScreen from '../../app/(onboarding)/timeframe';
+import type { OnboardingProfile } from '../../src/types/profile.types';
 
 jest.mock('expo-router', () => ({
   useRouter: () => ({ push: jest.fn(), back: jest.fn(), replace: jest.fn() }),
@@ -16,14 +17,24 @@ function renderTimeframeScreen() {
   );
 }
 
+function renderWithProfile(profile: Partial<OnboardingProfile>) {
+  const updateProfile = jest.fn();
+  const resetProfile = jest.fn();
+  return render(
+    <OnboardingContext.Provider value={{ profile, updateProfile, resetProfile }}>
+      <TimeframeScreen />
+    </OnboardingContext.Provider>
+  );
+}
+
 describe('TimeframeScreen', () => {
   it('renders without crashing', () => {
     renderTimeframeScreen();
   });
 
-  it('shows step 6 of 8 indicator', () => {
+  it('shows step 8 of 10 indicator', () => {
     renderTimeframeScreen();
-    expect(screen.getByText(/Step 6 of 8/i)).toBeTruthy();
+    expect(screen.getByText(/Step 8 of 10/i)).toBeTruthy();
   });
 
   it('shows title', () => {
@@ -36,16 +47,20 @@ describe('TimeframeScreen', () => {
     expect(screen.getByText("We'll adapt your plan to your timeframe.")).toBeTruthy();
   });
 
-  it('shows all three preset duration buttons', () => {
+  it('renders the week slider', () => {
     renderTimeframeScreen();
-    expect(screen.getByTestId('preset-4')).toBeTruthy();
-    expect(screen.getByTestId('preset-8')).toBeTruthy();
-    expect(screen.getByTestId('preset-12')).toBeTruthy();
+    expect(screen.getByTestId('timeframe-week-slider')).toBeTruthy();
   });
 
-  it('shows custom duration button', () => {
+  it('renders the +/- stepper buttons', () => {
     renderTimeframeScreen();
-    expect(screen.getByTestId('preset-custom')).toBeTruthy();
+    expect(screen.getByTestId('week-slider-decrement')).toBeTruthy();
+    expect(screen.getByTestId('week-slider-increment')).toBeTruthy();
+  });
+
+  it('renders the recommended hint card', () => {
+    renderTimeframeScreen();
+    expect(screen.getByTestId('timeframe-recommended-hint')).toBeTruthy();
   });
 
   it('shows all event label options', () => {
@@ -54,19 +69,6 @@ describe('TimeframeScreen', () => {
     expect(screen.getByTestId('event-vacation')).toBeTruthy();
     expect(screen.getByTestId('event-competition')).toBeTruthy();
     expect(screen.getByTestId('event-other')).toBeTruthy();
-  });
-
-  it('shows custom weeks input when Custom is pressed', () => {
-    renderTimeframeScreen();
-    fireEvent.press(screen.getByTestId('preset-custom'));
-    expect(screen.getByTestId('input-custom-weeks')).toBeTruthy();
-  });
-
-  it('hides custom input when a preset is selected after Custom', () => {
-    renderTimeframeScreen();
-    fireEvent.press(screen.getByTestId('preset-custom'));
-    fireEvent.press(screen.getByTestId('preset-8'));
-    expect(screen.queryByTestId('input-custom-weeks')).toBeNull();
   });
 
   it('shows Continue button', () => {
@@ -80,21 +82,52 @@ describe('TimeframeScreen', () => {
     expect(screen.getByTestId('event-wedding')).toBeTruthy();
   });
 
-  it('can deselect an event label by pressing it again', () => {
-    renderTimeframeScreen();
-    fireEvent.press(screen.getByTestId('event-vacation'));
-    fireEvent.press(screen.getByTestId('event-vacation'));
-    expect(screen.getByTestId('event-vacation')).toBeTruthy();
-  });
-
-  it('can select a preset duration', () => {
-    renderTimeframeScreen();
-    fireEvent.press(screen.getByTestId('preset-4'));
-    expect(screen.getByTestId('preset-4')).toBeTruthy();
-  });
-
   it('shows back button', () => {
     renderTimeframeScreen();
     expect(screen.getByText(/Back/i)).toBeTruthy();
+  });
+});
+
+describe('TimeframeScreen — recommendation', () => {
+  it('defaults the slider to the recommended timeframe for a weight-loss goal', () => {
+    // 70 kg → 65 kg : recommended = ceil(5 / min(1, 0.7)) = 8 weeks
+    renderWithProfile({
+      goal: 'lose_weight',
+      weightKg: 70,
+      targetWeightKg: 65,
+      age: 28,
+      gender: 'female',
+      heightCm: 168,
+      trainingDaysPerWeek: 3,
+    });
+    expect(screen.getByText('8')).toBeTruthy();
+  });
+
+  it('shows the safer/ambitious hint when the user picks a too-short timeframe', () => {
+    renderWithProfile({
+      goal: 'lose_weight',
+      weightKg: 70,
+      targetWeightKg: 60,
+      age: 28,
+      gender: 'female',
+      heightCm: 168,
+      trainingDaysPerWeek: 3,
+      targetTimeframe: { durationWeeks: 4 },
+    });
+    // Recommendation is around 15 weeks; with 4 weeks we expect a non-empty hint card.
+    expect(screen.getByTestId('timeframe-recommended-hint')).toBeTruthy();
+  });
+
+  it('renders the recommended marker on the slider track', () => {
+    renderWithProfile({
+      goal: 'lose_weight',
+      weightKg: 70,
+      targetWeightKg: 65,
+      age: 28,
+      gender: 'female',
+      heightCm: 168,
+      trainingDaysPerWeek: 3,
+    });
+    expect(screen.getByTestId('week-slider-recommended-marker')).toBeTruthy();
   });
 });

@@ -34,23 +34,20 @@ describe('SafetyReviewScreen', () => {
     renderWithProfile(safeProfile);
   });
 
-  it('shows step 7 of 8 indicator', () => {
+  it('shows step 9 of 10 indicator', () => {
     renderWithProfile(safeProfile);
-    expect(screen.getByText(/Step 7 of 8/i)).toBeTruthy();
+    expect(screen.getByText(/Step 9 of 10/i)).toBeTruthy();
   });
 
-  it('shows "Everything looks good!" for a safe profile', () => {
+  it('shows valid kind for a calm goal', () => {
     renderWithProfile(safeProfile);
     expect(screen.getByTestId('safety-all-good')).toBeTruthy();
+    expect(screen.getByTestId('safety-cta-primary')).toBeTruthy();
   });
 
-  it('shows TDEE label', () => {
+  it('shows the calorie preview card', () => {
     renderWithProfile(safeProfile);
-    expect(screen.getByText('Your daily burn (TDEE)')).toBeTruthy();
-  });
-
-  it('shows estimated calories element', () => {
-    renderWithProfile(safeProfile);
+    expect(screen.getByTestId('calorie-preview')).toBeTruthy();
     expect(screen.getByTestId('estimated-calories')).toBeTruthy();
   });
 
@@ -59,59 +56,7 @@ describe('SafetyReviewScreen', () => {
     expect(screen.getByTestId('safety-flag-AGE_TOO_YOUNG')).toBeTruthy();
   });
 
-  it('shows WEIGHT_LOSS_TOO_FAST flag for extreme weight loss target', () => {
-    renderWithProfile({
-      ...safeProfile,
-      weightKg: 100,
-      targetWeightKg: 40,
-    });
-    expect(screen.getByTestId('safety-flag-WEIGHT_LOSS_TOO_FAST')).toBeTruthy();
-  });
-
-  it('shows CALORIES_TOO_LOW flag when deficit is extreme', () => {
-    renderWithProfile({
-      age: 25,
-      gender: 'female',
-      weightKg: 55,
-      heightCm: 158,
-      targetWeightKg: 20,
-      trainingDaysPerWeek: 1,
-      goal: 'lose_weight',
-    });
-    expect(screen.getByTestId('safety-flag-CALORIES_TOO_LOW')).toBeTruthy();
-  });
-
-  it('shows adjust profile button when blocked', () => {
-    renderWithProfile({ ...safeProfile, age: 15 });
-    expect(screen.getByText('Adjust my profile')).toBeTruthy();
-  });
-
-  it('shows "I understand, continue" option when blocked', () => {
-    renderWithProfile({ ...safeProfile, age: 15 });
-    expect(screen.getByText('I understand, continue')).toBeTruthy();
-  });
-
-  it('shows Continue (not adjust) for safe profile', () => {
-    renderWithProfile(safeProfile);
-    expect(screen.getByText('Continue')).toBeTruthy();
-    expect(screen.queryByText('Adjust my profile')).toBeNull();
-  });
-});
-
-describe('SafetyReviewScreen — timeframe integration', () => {
-  it('shows safe status when 4-week timeframe is realistic', () => {
-    // 70 → 69 in 4 weeks = 0.25 kg/week < 0.70 → safe
-    renderWithProfile({
-      ...safeProfile,
-      weightKg: 70,
-      targetWeightKg: 69,
-      targetTimeframe: { durationWeeks: 4 },
-    });
-    expect(screen.getByTestId('safety-all-good')).toBeTruthy();
-  });
-
-  it('shows WEIGHT_LOSS_TOO_FAST for an aggressive 4-week target', () => {
-    // 70 → 60 in 4 weeks = 2.5 kg/week > 0.70 → flagged
+  it('shows WEIGHT_LOSS_TOO_FAST flag for an aggressive 4-week target', () => {
     renderWithProfile({
       ...safeProfile,
       weightKg: 70,
@@ -121,7 +66,68 @@ describe('SafetyReviewScreen — timeframe integration', () => {
     expect(screen.getByTestId('safety-flag-WEIGHT_LOSS_TOO_FAST')).toBeTruthy();
   });
 
-  it('shows alternative suggestion when weight loss flags are blocking', () => {
+  it('shows ambitious-but-allowed CTAs when goal is ambitious', () => {
+    // 70 → 62 in 12 weeks = 0.667 kg/week → ambitious
+    renderWithProfile({
+      ...safeProfile,
+      weightKg: 70,
+      targetWeightKg: 62,
+      targetTimeframe: { durationWeeks: 12 },
+    });
+    expect(screen.getByTestId('safety-cta-follow-klean')).toBeTruthy();
+    expect(screen.getByTestId('safety-cta-continue-mine')).toBeTruthy();
+  });
+
+  it('shows unsafe CTAs (follow safer + edit) when goal is unsafe', () => {
+    renderWithProfile({
+      ...safeProfile,
+      weightKg: 70,
+      targetWeightKg: 60,
+      targetTimeframe: { durationWeeks: 4 },
+    });
+    expect(screen.getByTestId('safety-cta-follow-klean')).toBeTruthy();
+    expect(screen.getByTestId('safety-cta-edit-goal')).toBeTruthy();
+    expect(screen.queryByTestId('safety-cta-continue-mine')).toBeNull();
+  });
+
+  it('shows inconsistent CTA when target weight contradicts goal', () => {
+    renderWithProfile({
+      ...safeProfile,
+      goal: 'lose_weight',
+      weightKg: 70,
+      targetWeightKg: 80,
+    });
+    expect(screen.getByTestId('safety-cta-fix-goal')).toBeTruthy();
+    expect(screen.queryByTestId('safety-cta-continue-mine')).toBeNull();
+    expect(screen.queryByTestId('safety-cta-follow-klean')).toBeNull();
+  });
+
+  it('shows the GOAL_INCONSISTENT_GAIN flag when gain target is below current', () => {
+    renderWithProfile({
+      ...safeProfile,
+      goal: 'gain_muscle',
+      weightKg: 70,
+      targetWeightKg: 65,
+    });
+    expect(screen.getByTestId('safety-flag-GOAL_INCONSISTENT_GAIN')).toBeTruthy();
+  });
+
+  it('does not classify 60→80 kg in 12 weeks as valid', () => {
+    renderWithProfile({
+      goal: 'gain_muscle',
+      age: 28,
+      gender: 'male',
+      weightKg: 60,
+      heightCm: 175,
+      targetWeightKg: 80,
+      trainingDaysPerWeek: 4,
+      targetTimeframe: { durationWeeks: 12 },
+    });
+    expect(screen.queryByTestId('safety-all-good')).toBeNull();
+    expect(screen.getByTestId('safety-flag-WEIGHT_GAIN_TOO_FAST')).toBeTruthy();
+  });
+
+  it('shows alternative suggestion when weight loss is unsafe', () => {
     renderWithProfile({
       ...safeProfile,
       weightKg: 70,
@@ -136,13 +142,12 @@ describe('SafetyReviewScreen — timeframe integration', () => {
     expect(screen.queryByTestId('safety-alternative')).toBeNull();
   });
 
-  it('does not show alternative for safe profiles', () => {
+  it('does not show alternative for valid profiles', () => {
     renderWithProfile(safeProfile);
     expect(screen.queryByTestId('safety-alternative')).toBeNull();
   });
 
-  it('shows safe status with 12-week default when no timeframe is set', () => {
-    // No targetTimeframe → defaults to 12 weeks. 5 kg / 12 = 0.42 → safe
+  it('shows valid kind with 12-week default when no timeframe is set', () => {
     renderWithProfile({
       ...safeProfile,
       weightKg: 70,
@@ -151,7 +156,7 @@ describe('SafetyReviewScreen — timeframe integration', () => {
     expect(screen.getByTestId('safety-all-good')).toBeTruthy();
   });
 
-  it('calories are never silently below floor — extreme short-term target is blocked', () => {
+  it('blocks calories below floor — extreme short-term target is flagged unsafe', () => {
     renderWithProfile({
       age: 28,
       gender: 'female',
@@ -162,7 +167,6 @@ describe('SafetyReviewScreen — timeframe integration', () => {
       goal: 'lose_weight',
       targetTimeframe: { durationWeeks: 4 },
     });
-    // Should show at least one blocking flag
     const flag =
       screen.queryByTestId('safety-flag-WEIGHT_LOSS_TOO_FAST') ||
       screen.queryByTestId('safety-flag-CALORIES_TOO_LOW') ||

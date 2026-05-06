@@ -1,8 +1,6 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   View,
-  Text,
-  TextInput,
   ScrollView,
   Pressable,
   KeyboardAvoidingView,
@@ -11,19 +9,18 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 
-import { TimeframeSchema, type TimeframeFormData } from '../../src/features/onboarding/schemas';
 import { useOnboarding } from '../../src/features/onboarding/onboarding-context';
 import { OnboardingProgress } from '../../src/features/onboarding/components/OnboardingProgress';
+import { WeekSlider } from '../../src/features/onboarding/components/WeekSlider';
 import { PillButton } from '../../src/components/ui/pill-button';
+import { KleanText } from '../../src/components/ui/klean-text';
 import { colors, radii } from '../../src/design/tokens';
 import type { EventLabel } from '../../src/types/profile.types';
+import { recommendedWeeksFor } from '../../src/utils/timeframe';
+import { classifyGoal } from '../../src/utils/goal-classification';
 
-const TOTAL_STEPS = 8;
-const PRESET_DURATIONS = [4, 8, 12] as const;
-type PresetDuration = (typeof PRESET_DURATIONS)[number];
+const TOTAL_STEPS = 10;
 
 const EVENT_LABELS: { value: EventLabel; labelKey: string }[] = [
   { value: 'wedding', labelKey: 'onboarding.timeframe.eventWedding' },
@@ -32,47 +29,86 @@ const EVENT_LABELS: { value: EventLabel; labelKey: string }[] = [
   { value: 'other', labelKey: 'onboarding.timeframe.eventOther' },
 ];
 
-function isPresetDuration(v: number | undefined): v is PresetDuration {
-  return PRESET_DURATIONS.includes(v as PresetDuration);
-}
-
 export default function TimeframeScreen() {
   const { t } = useTranslation('common');
   const router = useRouter();
   const { profile, updateProfile } = useOnboarding();
 
-  const existingDuration = profile.targetTimeframe?.durationWeeks;
-  const [useCustom, setUseCustom] = useState(
-    existingDuration !== undefined && !isPresetDuration(existingDuration)
+  const recommended = useMemo(
+    () =>
+      recommendedWeeksFor({
+        goal: profile.goal ?? 'maintain',
+        weightKg: profile.weightKg ?? 70,
+        targetWeightKg: profile.targetWeightKg,
+      }),
+    [profile.goal, profile.weightKg, profile.targetWeightKg]
   );
 
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<TimeframeFormData>({
-    resolver: zodResolver(TimeframeSchema),
-    defaultValues: {
-      durationWeeks: existingDuration ?? 12,
-      eventLabel: profile.targetTimeframe?.eventLabel,
-    },
-  });
+  const [weeks, setWeeks] = useState<number>(
+    profile.targetTimeframe?.durationWeeks ?? recommended
+  );
+  const [eventLabel, setEventLabel] = useState<EventLabel | undefined>(
+    profile.targetTimeframe?.eventLabel
+  );
 
-  const onSubmit = (data: TimeframeFormData) => {
+  const previewKind = useMemo(() => {
+    if (
+      !profile.goal ||
+      profile.weightKg === undefined ||
+      profile.age === undefined ||
+      !profile.gender ||
+      profile.heightCm === undefined
+    ) {
+      return undefined;
+    }
+    return classifyGoal({
+      goal: profile.goal,
+      age: profile.age,
+      gender: profile.gender,
+      weightKg: profile.weightKg,
+      heightCm: profile.heightCm,
+      targetWeightKg: profile.targetWeightKg,
+      targetTimeframeWeeks: weeks,
+      trainingDaysPerWeek: profile.trainingDaysPerWeek ?? 3,
+    }).kind;
+  }, [profile, weeks]);
+
+  const hint = useMemo(() => {
+    if (profile.targetWeightKg === undefined) {
+      return { text: t('onboarding.timeframe.noTargetHint'), color: colors.muted };
+    }
+    if (previewKind === 'inconsistent') {
+      return {
+        text: t('onboarding.timeframe.recommendedHint', { weeks: recommended }),
+        color: colors.muted,
+      };
+    }
+    if (previewKind === 'unsafe') {
+      return { text: t('onboarding.timeframe.shorterUnsafeHint'), color: colors.energy };
+    }
+    if (previewKind === 'ambitious') {
+      return { text: t('onboarding.timeframe.shorterAmbitiousHint'), color: colors.amber };
+    }
+    if (weeks > recommended + 2) {
+      return { text: t('onboarding.timeframe.longerHint'), color: colors.muted };
+    }
+    if (Math.abs(weeks - recommended) <= 1) {
+      return { text: t('onboarding.timeframe.matchHint'), color: colors.mint };
+    }
+    return {
+      text: t('onboarding.timeframe.recommendedHint', { weeks: recommended }),
+      color: colors.muted,
+    };
+  }, [t, weeks, recommended, previewKind, profile.targetWeightKg]);
+
+  const onSubmit = () => {
     updateProfile({
       targetTimeframe: {
-        durationWeeks: data.durationWeeks,
-        eventLabel: data.eventLabel,
+        durationWeeks: weeks,
+        eventLabel,
       },
     });
     router.push('/(onboarding)/safety-review');
-  };
-
-  const getErrorMessage = (errKey: string | undefined) => {
-    if (!errKey) return undefined;
-    const key = `onboarding.timeframe.errors.${errKey}`;
-    const msg = t(key);
-    return msg !== key ? msg : errKey;
   };
 
   return (
@@ -87,200 +123,96 @@ export default function TimeframeScreen() {
           keyboardShouldPersistTaps="handled"
         >
           <Pressable onPress={() => router.back()} style={{ marginBottom: 24 }}>
-            <Text style={{ fontSize: 14, fontWeight: '600', color: colors.brand }}>
+            <KleanText variant="label" color={colors.brand}>
               ← {t('onboarding.back')}
-            </Text>
+            </KleanText>
           </Pressable>
 
-          <OnboardingProgress current={6} total={TOTAL_STEPS} />
+          <OnboardingProgress current={8} total={TOTAL_STEPS} />
 
-          <View style={{ marginTop: 32, marginBottom: 28 }}>
-            <Text style={{ fontSize: 26, fontWeight: '800', color: colors.ink, marginBottom: 8 }}>
+          <View style={{ marginTop: 32, marginBottom: 24 }}>
+            <KleanText variant="h1" color={colors.ink} style={{ marginBottom: 8 }}>
               {t('onboarding.timeframe.title')}
-            </Text>
-            <Text style={{ fontSize: 15, color: colors.muted }}>
+            </KleanText>
+            <KleanText variant="secondary" color={colors.muted}>
               {t('onboarding.timeframe.subtitle')}
-            </Text>
+            </KleanText>
           </View>
 
-          {/* Duration presets */}
-          <Text
-            style={{ fontSize: 13, fontWeight: '600', color: colors.muted, marginBottom: 12 }}
+          {/* Recommended hint */}
+          <View
+            testID="timeframe-recommended-hint"
+            style={{
+              padding: 14,
+              borderRadius: radii.card,
+              backgroundColor: colors.card,
+              borderWidth: 1.5,
+              borderColor: colors.border,
+              marginBottom: 18,
+            }}
           >
-            {t('onboarding.timeframe.presetTitle')}
-          </Text>
+            <KleanText variant="label" color={hint.color}>
+              {hint.text}
+            </KleanText>
+          </View>
 
-          <Controller
-            control={control}
-            name="durationWeeks"
-            render={({ field: { value, onChange } }) => (
-              <View style={{ gap: 12 }}>
-                <View style={{ flexDirection: 'row', gap: 10 }}>
-                  {PRESET_DURATIONS.map((d) => {
-                    const isActive = !useCustom && value === d;
-                    return (
-                      <Pressable
-                        key={d}
-                        testID={`preset-${d}`}
-                        onPress={() => {
-                          setUseCustom(false);
-                          onChange(d);
-                        }}
-                        style={{
-                          flex: 1,
-                          height: 52,
-                          borderRadius: radii.chip,
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          backgroundColor: isActive ? colors.brandLight : colors.card,
-                          borderWidth: 1.5,
-                          borderColor: isActive ? colors.brand : colors.border,
-                        }}
-                      >
-                        <Text
-                          style={{
-                            fontSize: 14,
-                            fontWeight: '700',
-                            color: isActive ? colors.brand : colors.ink,
-                          }}
-                        >
-                          {t(`onboarding.timeframe.${d}weeks`)}
-                        </Text>
-                      </Pressable>
-                    );
-                  })}
-                </View>
-
-                {/* Custom option */}
-                <Pressable
-                  testID="preset-custom"
-                  onPress={() => {
-                    setUseCustom(true);
-                    if (isPresetDuration(value)) {
-                      onChange(undefined);
-                    }
-                  }}
-                  style={{
-                    height: 52,
-                    borderRadius: radii.chip,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: useCustom ? colors.brandLight : colors.card,
-                    borderWidth: 1.5,
-                    borderColor: useCustom ? colors.brand : colors.border,
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontSize: 14,
-                      fontWeight: '700',
-                      color: useCustom ? colors.brand : colors.ink,
-                    }}
-                  >
-                    {t('onboarding.timeframe.custom')}
-                  </Text>
-                </Pressable>
-
-                {useCustom && (
-                  <View>
-                    <Text
-                      style={{
-                        fontSize: 13,
-                        fontWeight: '600',
-                        color: colors.muted,
-                        marginBottom: 6,
-                      }}
-                    >
-                      {t('onboarding.timeframe.customLabel')}
-                    </Text>
-                    <TextInput
-                      testID="input-custom-weeks"
-                      keyboardType="numeric"
-                      placeholder={t('onboarding.timeframe.customPlaceholder')}
-                      placeholderTextColor={colors.muted}
-                      value={value !== undefined ? String(value) : ''}
-                      onChangeText={(text) => {
-                        const n = parseInt(text, 10);
-                        onChange(isNaN(n) ? undefined : n);
-                      }}
-                      style={{
-                        height: 52,
-                        backgroundColor: colors.card,
-                        borderRadius: radii.chip,
-                        borderWidth: 1.5,
-                        borderColor: errors.durationWeeks ? colors.energy : colors.border,
-                        paddingHorizontal: 16,
-                        fontSize: 16,
-                        color: colors.ink,
-                      }}
-                    />
-                    {errors.durationWeeks && (
-                      <Text style={{ fontSize: 12, color: colors.energy, marginTop: 4 }}>
-                        {getErrorMessage(errors.durationWeeks.message)}
-                      </Text>
-                    )}
-                  </View>
-                )}
-              </View>
-            )}
+          <WeekSlider
+            testID="timeframe-week-slider"
+            value={weeks}
+            onChange={setWeeks}
+            recommended={recommended}
           />
 
-          {/* Event label (optional) */}
+          {/* Event label */}
           <View style={{ marginTop: 28 }}>
             <View
               style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 12 }}
             >
-              <Text style={{ fontSize: 13, fontWeight: '600', color: colors.muted }}>
+              <KleanText variant="caption" color={colors.muted} weight="700">
                 {t('onboarding.timeframe.eventTitle')}
-              </Text>
-              <Text style={{ fontSize: 12, color: colors.muted }}>
+              </KleanText>
+              <KleanText variant="caption" color={colors.muted}>
                 {t('onboarding.timeframe.eventOptional')}
-              </Text>
+              </KleanText>
             </View>
 
-            <Controller
-              control={control}
-              name="eventLabel"
-              render={({ field: { value, onChange } }) => (
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
-                  {EVENT_LABELS.map((e) => {
-                    const isActive = value === e.value;
-                    return (
-                      <Pressable
-                        key={e.value}
-                        testID={`event-${e.value}`}
-                        onPress={() => onChange(isActive ? undefined : e.value)}
-                        style={{
-                          paddingHorizontal: 16,
-                          paddingVertical: 10,
-                          borderRadius: radii.pill,
-                          backgroundColor: isActive ? colors.brandLight : colors.card,
-                          borderWidth: 1.5,
-                          borderColor: isActive ? colors.brand : colors.border,
-                        }}
-                      >
-                        <Text
-                          style={{
-                            fontSize: 14,
-                            fontWeight: '600',
-                            color: isActive ? colors.brand : colors.ink,
-                          }}
-                        >
-                          {t(e.labelKey)}
-                        </Text>
-                      </Pressable>
-                    );
-                  })}
-                </View>
-              )}
-            />
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+              {EVENT_LABELS.map((e) => {
+                const isActive = eventLabel === e.value;
+                return (
+                  <Pressable
+                    key={e.value}
+                    testID={`event-${e.value}`}
+                    onPress={() =>
+                      setEventLabel((prev) => (prev === e.value ? undefined : e.value))
+                    }
+                    style={{
+                      paddingHorizontal: 16,
+                      paddingVertical: 10,
+                      borderRadius: radii.pill,
+                      backgroundColor: isActive ? colors.brandLight : colors.card,
+                      borderWidth: 1.5,
+                      borderColor: isActive ? colors.brand : colors.border,
+                    }}
+                  >
+                    <KleanText
+                      variant="label"
+                      color={isActive ? colors.brand : colors.ink}
+                      weight="700"
+                    >
+                      {t(e.labelKey)}
+                    </KleanText>
+                  </Pressable>
+                );
+              })}
+            </View>
           </View>
 
           <View style={{ marginTop: 32 }}>
             <PillButton
               label={t('onboarding.next')}
               size="lg"
-              onPress={handleSubmit(onSubmit)}
+              onPress={onSubmit}
             />
           </View>
         </ScrollView>

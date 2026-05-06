@@ -11,7 +11,7 @@ import { Card } from '../../src/components/ui/card';
 import { colors } from '../../src/design/tokens';
 import { hasBlockingFlags } from '../../src/utils/safety';
 
-const TOTAL_STEPS = 8;
+const TOTAL_STEPS = 10;
 
 function SummaryRow({ label, value }: { label: string; value: string }) {
   return (
@@ -132,7 +132,7 @@ export default function SummaryScreen() {
         contentContainerStyle={{ padding: 24, paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
       >
-        <OnboardingProgress current={8} total={TOTAL_STEPS} />
+        <OnboardingProgress current={10} total={TOTAL_STEPS} />
 
         <View style={{ marginTop: 32, marginBottom: 28, alignItems: 'center' }}>
           <Text style={{ fontSize: 40, marginBottom: 12 }}>🎉</Text>

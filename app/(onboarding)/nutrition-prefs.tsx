@@ -13,7 +13,7 @@ import { PillButton } from '../../src/components/ui/pill-button';
 import { colors, radii } from '../../src/design/tokens';
 import type { DietaryRestriction } from '../../src/types/profile.types';
 
-const TOTAL_STEPS = 8;
+const TOTAL_STEPS = 10;
 
 const RESTRICTIONS: { value: DietaryRestriction; emoji: string; labelKey: string }[] = [
   { value: 'vegetarian', emoji: '🥦', labelKey: 'onboarding.nutritionPrefs.vegetarian' },
@@ -53,7 +53,7 @@ export default function NutritionPrefsScreen() {
           </Text>
         </Pressable>
 
-        <OnboardingProgress current={5} total={TOTAL_STEPS} />
+        <OnboardingProgress current={7} total={TOTAL_STEPS} />
 
         <View style={{ marginTop: 32, marginBottom: 28 }}>
           <Text style={{ fontSize: 26, fontWeight: '800', color: colors.ink, marginBottom: 8 }}>

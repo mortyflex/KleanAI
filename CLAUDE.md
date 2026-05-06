@@ -153,6 +153,78 @@ If the requested timeline is unsafe or unrealistic, the app must refuse automati
 - 7-day Kickstart
 - partial progress before the event if relevant
 
+### Goal consistency rules
+
+The onboarding must enforce goal/target-weight consistency before any safety
+classification runs:
+
+- `lose_weight` → target weight must be **strictly lower** than current weight.
+- `gain_muscle` → target weight must be **strictly higher** than current weight.
+- `maintain` → target weight must be within ±3 kg of current weight.
+
+When these rules are violated, the goal is classified as **inconsistent**:
+
+- Show a clear, translated, zero-guilt error message.
+- Block progression until the user fixes the goal or the target weight.
+- The recommendation screen offers only the "edit my goal" path.
+
+### Deterministic safety classification
+
+Every onboarding profile produces a deterministic classification —
+**never** computed by an LLM:
+
+- `valid` — calm, safe pace. Allow continuation.
+- `ambitious` — above the safe threshold but not unsafe. Allow continuation
+  *only with explicit user confirmation* (two CTAs: follow Klean / continue
+  with my goal).
+- `unsafe` — blocking flag (loss/gain too fast, deficit too high, calories
+  below floor, BMI too low, age under 18). Block progression. Two CTAs:
+  follow safer recommendation / edit my goal.
+- `inconsistent` — goal/target mismatch (see above). Block progression.
+  Single CTA: edit my goal.
+
+The classifier lives in `src/utils/goal-classification.ts`. AI must **not** be
+the primary safety decision maker. AI may later be used only to generate
+personalized explanation copy around an already-classified result.
+
+### Weight-gain pace
+
+For `gain_muscle` goals, the deterministic classifier evaluates pace:
+
+- ≤ `MAX_WEEKLY_GAIN_KG` (0.5 kg/week) → valid.
+- Above safe but ≤ `UNSAFE_WEEKLY_GAIN_KG` (1.0 kg/week) → ambitious.
+- Above 1.0 kg/week → unsafe (blocked). Faster gain primarily increases
+  fat gain and reduces the quality of progress.
+
+Aggressive transformation targets (e.g. 60 kg → 80 kg in 12 weeks) must
+**never** be classified as valid or "perfect".
+
+### Calorie preview rules
+
+The onboarding shows an estimated daily calorie target on the safety review.
+The estimate must:
+
+- Be derived from current weight, goal, weekly pace and activity level
+  (Mifflin-St Jeor BMR + PAL by training days).
+- React to changes in target weight, goal, weekly pace and activity.
+- Be clearly labeled as an estimate (not as a final calculated plan target).
+- **Never** display a value below the safety floor — clamp visually and raise
+  a `CALORIES_TOO_LOW` blocking flag.
+
+### Availability grid
+
+The onboarding includes a dedicated availability screen with a 7-day × 3-slot
+grid (morning / midday / evening). Selected slots are stored as
+`WeeklyAvailability { slots: { [day]: TimeSlot[] } }` so the program generator
+can later schedule sessions only into slots the user explicitly selected.
+
+### Typography & design system
+
+All onboarding text must use the centralized `KleanText` typography system
+(`src/components/ui/klean-text.tsx`) and the design tokens from
+`src/design/tokens.ts`. Avoid inline `fontSize`/`fontWeight` on raw `<Text>`
+when a `KleanText` variant fits.
+
 ### User-facing tone
 
 When blocking an unsafe goal:

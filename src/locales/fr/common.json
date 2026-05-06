@@ -313,6 +313,20 @@
       "targetWeight": "Poids cible (kg)",
       "targetWeightPlaceholder": "ex. 68",
       "targetWeightHint": "Laisse vide si tu n'es pas encore sûr(e).",
+      "diff": {
+        "current": "Actuel",
+        "target": "Cible",
+        "deltaLose": "−{{kg}} kg à perdre",
+        "deltaGain": "+{{kg}} kg à prendre",
+        "deltaNeutral": "Identique au poids actuel",
+        "directionLose": "Vers le bas",
+        "directionGain": "Vers le haut",
+        "directionMaintain": "On stabilise",
+        "statusValid": "Sain",
+        "statusAmbitious": "Ambitieux — faisable",
+        "statusUnsafe": "Trop agressif",
+        "statusInconsistent": "Incohérent avec ton objectif"
+      },
       "errors": {
         "ageTooYoung": "Tu dois avoir au moins 18 ans pour utiliser Klean AI.",
         "ageRequired": "Merci d'entrer ton âge.",
@@ -322,6 +336,9 @@
         "weightRequired": "Merci d'entrer ton poids.",
         "weightInvalid": "Le poids doit être entre 30 et 300 kg.",
         "targetWeightInvalid": "Le poids cible doit être entre 30 et 300 kg.",
+        "targetMustBeLower": "Pour un objectif de perte de poids, le poids cible doit être inférieur au poids actuel.",
+        "targetMustBeHigher": "Pour une prise de muscle, le poids cible doit être supérieur au poids actuel.",
+        "targetMustBeClose": "Pour un maintien, le poids cible doit être à ±3 kg du poids actuel.",
         "genderRequired": "Merci de choisir un genre."
       }
     },
@@ -338,6 +355,51 @@
       "daysPerWeek": "Jours par semaine",
       "sessionDuration": "Durée de séance",
       "minUnit": "min"
+    },
+    "fitnessLevel": {
+      "title": "Quel est ton niveau ?",
+      "subtitle": "On calibrera le volume et l'intensité en fonction.",
+      "beginnerTitle": "Débutant(e)",
+      "beginnerDescription": "Moins de 6 mois d'entraînement régulier, ou tu reprends. On commence en douceur et on progresse pas à pas.",
+      "intermediateTitle": "Intermédiaire",
+      "intermediateDescription": "Entre 6 mois et 2 ans d'entraînement régulier. À l'aise avec les mouvements de base et capable de pousser fort.",
+      "advancedTitle": "Avancé(e)",
+      "advancedDescription": "Plus de 2 ans d'entraînement structuré. Bonne technique, bonne récupération, surcharge progressive maîtrisée."
+    },
+    "sessionDuration": {
+      "title": "Combien de temps par séance ?",
+      "subtitle": "Choisis le créneau que tu peux vraiment tenir.",
+      "minUnit": "min",
+      "30Title": "30 minutes",
+      "30Description": "Format express — focus sur la régularité, parfait quand le temps manque.",
+      "45Title": "45 minutes",
+      "45Description": "Équilibré et efficace — l'essentiel avec assez de volume pour progresser.",
+      "60Title": "60 minutes",
+      "60Description": "Séance complète — échauffement, mouvements principaux et exercices d'isolation.",
+      "75Title": "75+ minutes",
+      "75Description": "Volume avancé — pour une progression sérieuse et les pratiquants assidus."
+    },
+    "availability": {
+      "title": "Quand peux-tu t'entraîner ?",
+      "subtitle": "Sélectionne les créneaux qui s'intègrent vraiment à ta semaine.",
+      "morning": "Matin",
+      "midday": "Midi",
+      "evening": "Soir",
+      "selectedSlots_one": "{{count}} créneau sélectionné",
+      "selectedSlots_other": "{{count}} créneaux sélectionnés",
+      "selectedDays_one": "{{count}} jour par semaine",
+      "selectedDays_other": "{{count}} jours par semaine",
+      "minOneRequired": "Sélectionne au moins un créneau pour continuer.",
+      "tip": "On programmera tes séances uniquement dans les créneaux choisis.",
+      "days": {
+        "0": "Lun",
+        "1": "Mar",
+        "2": "Mer",
+        "3": "Jeu",
+        "4": "Ven",
+        "5": "Sam",
+        "6": "Dim"
+      }
     },
     "location": {
       "title": "Où t'entraînes-tu ?",
@@ -370,6 +432,18 @@
       "title": "Quand est ton objectif ?",
       "subtitle": "On adaptera ton plan à ton calendrier.",
       "presetTitle": "Choisis une durée",
+      "weeksUnit_one": "{{count}} semaine",
+      "weeksUnit_other": "{{count}} semaines",
+      "sliderLabel": "Glisse pour choisir le nombre de semaines",
+      "recommendedHint": "Pour cet objectif, l'idéal est environ {{weeks}} semaines.",
+      "shorterAmbitiousHint": "Plus court que recommandé — ton plan sera plus ambitieux.",
+      "shorterUnsafeHint": "Cette durée force un rythme dangereux. On te proposera une alternative plus sûre.",
+      "longerHint": "Délai confortable — un rythme calme et durable.",
+      "matchHint": "Pile bon — calme, sûr et efficace.",
+      "noTargetHint": "Choisis la durée qui colle à ton rythme.",
+      "presetShort": "Court ({{weeks}}sem)",
+      "presetIdeal": "Idéal ({{weeks}}sem)",
+      "presetLong": "Long ({{weeks}}sem)",
       "4weeks": "4 semaines",
       "8weeks": "8 semaines",
       "12weeks": "12 semaines",
@@ -402,7 +476,11 @@
         "caloriesTooLow": "Ton objectif est en dessous du minimum calorique sécurisé. On va ajuster ça.",
         "deficitTooHigh": "Un déficit de plus de 1 000 kcal/jour est dangereux. On va le plafonner.",
         "weightLossTooFast": "Perdre plus de 1 kg/semaine risque de perdre du muscle et nuit à la santé.",
-        "bmiTooLow": "Ton IMC indique que tu es peut-être déjà en sous-poids. La perte de poids n'est pas recommandée."
+        "weightGainTooFast": "Prendre du poids aussi vite, c'est surtout du gras et peu de muscle. On te propose un rythme plus régulier.",
+        "bmiTooLow": "Ton IMC indique que tu es peut-être déjà en sous-poids. La perte de poids n'est pas recommandée.",
+        "goalInconsistentLoss": "Ton poids cible est plus haut que ton poids actuel, mais ton objectif est la perte de poids. Choisis une cible plus basse — ou change d'objectif.",
+        "goalInconsistentGain": "Ton poids cible est plus bas que ton poids actuel, mais ton objectif est la prise de muscle. Choisis une cible plus haute — ou change d'objectif.",
+        "goalInconsistentMaintain": "Ta cible est trop éloignée de ton poids actuel pour un objectif de maintien. Choisis une cible plus proche — ou change d'objectif."
       },
       "alternatives": {
         "title": "Ce qu'on recommande à la place",
@@ -413,7 +491,22 @@
         "continueAfter": "puis continue — sans culpabilité"
       },
       "continueAnyway": "Je comprends, continuer",
-      "adjustProfile": "Modifier mon profil"
+      "adjustProfile": "Modifier mon profil",
+      "kinds": {
+        "validTitle": "Ton plan est parfait",
+        "validSub": "On va construire un plan calme, sûr et efficace.",
+        "ambitiousTitle": "Ambitieux — mais autorisé",
+        "ambitiousSub": "Ton plan est plus exigeant que d'habitude. Tu peux le garder, mais on recommande l'alternative plus calme.",
+        "ambitiousFollowKlean": "Suivre la recommandation Klean",
+        "ambitiousContinueMine": "Continuer avec mon objectif",
+        "unsafeTitle": "On ne peut pas générer ce plan",
+        "unsafeSub": "Cet objectif force un rythme dangereux. Choisis une voie plus sûre pour qu'on construise le plan ensemble.",
+        "unsafeFollowKlean": "Suivre l'alternative plus sûre",
+        "unsafeEdit": "Modifier mon objectif",
+        "inconsistentTitle": "Aligne ton objectif",
+        "inconsistentSub": "Ton objectif et ton poids cible ne correspondent pas. Ajuste l'un des deux pour continuer.",
+        "inconsistentEdit": "Corriger mon objectif"
+      }
     },
     "summary": {
       "title": "Ton plan est prêt",

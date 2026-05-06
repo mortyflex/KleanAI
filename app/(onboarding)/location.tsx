@@ -14,7 +14,7 @@ import { PillButton } from '../../src/components/ui/pill-button';
 import { colors, radii } from '../../src/design/tokens';
 import type { TrainingLocation, GymChain } from '../../src/types/profile.types';
 
-const TOTAL_STEPS = 8;
+const TOTAL_STEPS = 10;
 
 const LOCATION_OPTIONS: { value: TrainingLocation; emoji: string; labelKey: string; subKey: string }[] = [
   { value: 'gym', emoji: '🏋️', labelKey: 'onboarding.location.gym', subKey: 'onboarding.location.gymSub' },
@@ -65,7 +65,7 @@ export default function LocationScreen() {
           </Text>
         </Pressable>
 
-        <OnboardingProgress current={4} total={TOTAL_STEPS} />
+        <OnboardingProgress current={6} total={TOTAL_STEPS} />
 
         <View style={{ marginTop: 32, marginBottom: 28 }}>
           <Text style={{ fontSize: 26, fontWeight: '800', color: colors.ink, marginBottom: 8 }}>

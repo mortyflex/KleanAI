@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { View, Text, ScrollView, Pressable } from 'react-native';
+import { View, ScrollView, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -7,18 +7,15 @@ import { useTranslation } from 'react-i18next';
 import { useOnboarding } from '../../src/features/onboarding/onboarding-context';
 import { OnboardingProgress } from '../../src/features/onboarding/components/OnboardingProgress';
 import { PillButton } from '../../src/components/ui/pill-button';
+import { KleanText } from '../../src/components/ui/klean-text';
 import { colors, radii } from '../../src/design/tokens';
 import { Card } from '../../src/components/ui/card';
-import {
-  runSafetyChecks,
-  hasBlockingFlags,
-  calorieFloor,
-} from '../../src/utils/safety';
-import { bmrMifflinStJeor, tdeeFromBMR } from '../../src/utils/calories';
+import { hasBlockingFlags, calorieFloor } from '../../src/utils/safety';
+import { classifyGoal } from '../../src/utils/goal-classification';
 import { suggestSaferAlternatives } from '../../src/utils/timeframe';
-import type { SafetyFlag } from '../../src/types/profile.types';
+import type { GoalClassificationKind, SafetyFlag } from '../../src/types/profile.types';
 
-const TOTAL_STEPS = 8;
+const TOTAL_STEPS = 10;
 
 function FlagRow({ flag, t }: { flag: SafetyFlag; t: (key: string) => string }) {
   return (
@@ -28,16 +25,16 @@ function FlagRow({ flag, t }: { flag: SafetyFlag; t: (key: string) => string }) 
         flexDirection: 'row',
         gap: 12,
         padding: 14,
-        backgroundColor: '#FFF5F5',
+        backgroundColor: colors.energyLight,
         borderRadius: radii.chip,
         borderLeftWidth: 3,
         borderLeftColor: colors.energy,
       }}
     >
-      <Text style={{ fontSize: 16 }}>⚠️</Text>
-      <Text style={{ flex: 1, fontSize: 14, color: colors.ink, lineHeight: 20 }}>
+      <KleanText variant="bodyLarge">⚠️</KleanText>
+      <KleanText variant="label" color={colors.ink} style={{ flex: 1 }}>
         {t(flag.i18nKey)}
-      </Text>
+      </KleanText>
     </View>
   );
 }
@@ -49,10 +46,15 @@ export default function SafetyReviewScreen() {
   const router = useRouter();
   const { profile, updateProfile } = useOnboarding();
 
-  const safetyData = useMemo(() => {
+  const data = useMemo(() => {
     const targetTimeframeWeeks = profile.targetTimeframe?.durationWeeks;
+    const supportedGoals = ['lose_weight', 'gain_muscle', 'maintain', 'recomposition'] as const;
+    const goal = supportedGoals.includes(profile.goal as (typeof supportedGoals)[number])
+      ? (profile.goal as (typeof supportedGoals)[number])
+      : 'maintain';
 
-    const flags = runSafetyChecks({
+    const result = classifyGoal({
+      goal,
       age: profile.age ?? 25,
       gender: profile.gender ?? 'other',
       weightKg: profile.weightKg ?? 70,
@@ -60,47 +62,81 @@ export default function SafetyReviewScreen() {
       targetWeightKg: profile.targetWeightKg,
       targetTimeframeWeeks,
       trainingDaysPerWeek: profile.trainingDaysPerWeek ?? 3,
-      goal: profile.goal ?? 'maintain',
     });
 
-    const bmr = bmrMifflinStJeor(
-      profile.weightKg ?? 70,
-      profile.heightCm ?? 170,
-      profile.age ?? 25,
-      profile.gender ?? 'other'
-    );
-    const tdee = tdeeFromBMR(bmr, profile.trainingDaysPerWeek ?? 3);
     const floor = calorieFloor(profile.gender ?? 'other');
-    const isBlocked = hasBlockingFlags(flags);
 
     const showAlternative =
-      isBlocked &&
-      profile.goal === 'lose_weight' &&
+      result.kind === 'unsafe' &&
+      goal === 'lose_weight' &&
       profile.targetWeightKg !== undefined &&
       (profile.weightKg ?? 0) > profile.targetWeightKg &&
-      flags.some((f) => WEIGHT_FLAGS.has(f.code));
+      result.flags.some((f) => WEIGHT_FLAGS.has(f.code));
 
     const alternative = showAlternative
       ? suggestSaferAlternatives({
           weightKg: profile.weightKg!,
           targetWeightKg: profile.targetWeightKg!,
-          targetTimeframeWeeks: profile.targetTimeframe?.durationWeeks,
+          targetTimeframeWeeks,
         })
       : null;
 
-    return { flags, tdee, floor, isBlocked, alternative };
+    return {
+      result,
+      floor,
+      alternative,
+    };
   }, [profile]);
 
-  const handleContinue = () => {
-    updateProfile({ safetyFlags: safetyData.flags, isComplete: true });
+  const kind: GoalClassificationKind = data.result.kind;
+  const isBlocked = hasBlockingFlags(data.result.flags);
+
+  const handleContinueWithMyGoal = () => {
+    updateProfile({
+      safetyFlags: data.result.flags,
+      ambitionAccepted: kind === 'ambitious',
+      isComplete: true,
+    });
     router.push('/(onboarding)/summary');
+  };
+
+  const handleFollowKlean = () => {
+    if (data.alternative) {
+      updateProfile({
+        targetTimeframe: {
+          durationWeeks: data.alternative.saferWeeks,
+          eventLabel: profile.targetTimeframe?.eventLabel,
+        },
+      });
+    }
+    router.back();
+  };
+
+  const handleEditGoal = () => {
+    router.push('/(onboarding)/goal');
   };
 
   const handleAdjust = () => {
     router.back();
   };
 
-  const allGood = safetyData.flags.length === 0;
+  const titleKey =
+    kind === 'unsafe'
+      ? 'onboarding.safety.kinds.unsafeTitle'
+      : kind === 'ambitious'
+        ? 'onboarding.safety.kinds.ambitiousTitle'
+        : kind === 'inconsistent'
+          ? 'onboarding.safety.kinds.inconsistentTitle'
+          : 'onboarding.safety.kinds.validTitle';
+
+  const subKey =
+    kind === 'unsafe'
+      ? 'onboarding.safety.kinds.unsafeSub'
+      : kind === 'ambitious'
+        ? 'onboarding.safety.kinds.ambitiousSub'
+        : kind === 'inconsistent'
+          ? 'onboarding.safety.kinds.inconsistentSub'
+          : 'onboarding.safety.kinds.validSub';
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
@@ -109,58 +145,57 @@ export default function SafetyReviewScreen() {
         showsVerticalScrollIndicator={false}
       >
         <Pressable onPress={() => router.back()} style={{ marginBottom: 24 }}>
-          <Text style={{ fontSize: 14, fontWeight: '600', color: colors.brand }}>
+          <KleanText variant="label" color={colors.brand}>
             ← {t('onboarding.back')}
-          </Text>
+          </KleanText>
         </Pressable>
 
-        <OnboardingProgress current={7} total={TOTAL_STEPS} />
+        <OnboardingProgress current={9} total={TOTAL_STEPS} />
 
         <View style={{ marginTop: 32, marginBottom: 28 }}>
-          <Text style={{ fontSize: 26, fontWeight: '800', color: colors.ink, marginBottom: 8 }}>
-            {t('onboarding.safety.title')}
-          </Text>
-          <Text style={{ fontSize: 15, color: colors.muted }}>
-            {t('onboarding.safety.subtitle')}
-          </Text>
+          <KleanText variant="h1" color={colors.ink} style={{ marginBottom: 8 }} testID="safety-kind-title">
+            {t(titleKey)}
+          </KleanText>
+          <KleanText variant="secondary" color={colors.muted}>
+            {t(subKey)}
+          </KleanText>
         </View>
 
-        {/* TDEE card */}
-        <Card style={{ marginBottom: 20 }}>
+        {/* Calorie preview card */}
+        <Card style={{ marginBottom: 20 }} testID="calorie-preview">
           <View style={{ gap: 14 }}>
             <View
               style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}
             >
-              <Text style={{ fontSize: 13, color: colors.muted, fontWeight: '600' }}>
+              <KleanText variant="caption" color={colors.muted} weight="700">
                 {t('onboarding.safety.tdee')}
-              </Text>
-              <Text style={{ fontSize: 16, fontWeight: '800', color: colors.ink }}>
-                {safetyData.tdee} {t('onboarding.safety.kcalUnit')}
-              </Text>
+              </KleanText>
+              <KleanText variant="bodyMedium" color={colors.ink} weight="800">
+                {data.result.estimatedDailyCalories ?? '—'} {t('onboarding.safety.kcalUnit')}
+              </KleanText>
             </View>
             <View style={{ height: 1, backgroundColor: colors.border }} />
             <View
               style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}
             >
-              <Text style={{ fontSize: 13, color: colors.muted, fontWeight: '600' }}>
+              <KleanText variant="caption" color={colors.muted} weight="700">
                 {t('onboarding.safety.estimatedCalories')}
-              </Text>
-              <Text
-                style={{
-                  fontSize: 16,
-                  fontWeight: '800',
-                  color: safetyData.isBlocked ? colors.energy : colors.mint,
-                }}
+              </KleanText>
+              <KleanText
+                variant="bodyMedium"
+                color={isBlocked ? colors.energy : colors.mint}
+                weight="800"
                 testID="estimated-calories"
               >
-                ≥ {safetyData.floor} {t('onboarding.safety.kcalUnit')}
-              </Text>
+                {data.result.estimatedDailyCalories
+                  ? `${Math.max(data.result.estimatedDailyCalories, data.floor)} ${t('onboarding.safety.kcalUnit')}`
+                  : `≥ ${data.floor} ${t('onboarding.safety.kcalUnit')}`}
+              </KleanText>
             </View>
           </View>
         </Card>
 
-        {/* Safety status */}
-        {allGood ? (
+        {kind === 'valid' && (
           <View
             testID="safety-all-good"
             style={{
@@ -172,29 +207,30 @@ export default function SafetyReviewScreen() {
               gap: 6,
             }}
           >
-            <Text style={{ fontSize: 17, fontWeight: '700', color: colors.mint }}>
+            <KleanText variant="bodyMedium" color={colors.mint} weight="700">
               {t('onboarding.safety.allGood')}
-            </Text>
-            <Text style={{ fontSize: 14, color: colors.ink }}>
+            </KleanText>
+            <KleanText variant="label" color={colors.ink}>
               {t('onboarding.safety.allGoodSub')}
-            </Text>
+            </KleanText>
           </View>
-        ) : (
+        )}
+
+        {data.result.flags.length > 0 && (
           <View style={{ gap: 12 }}>
-            <Text style={{ fontSize: 15, fontWeight: '700', color: colors.energy }}>
+            <KleanText variant="bodyMedium" color={colors.energy} weight="700">
               {t('onboarding.safety.hasFlags')}
-            </Text>
-            <Text style={{ fontSize: 14, color: colors.muted, marginBottom: 4 }}>
+            </KleanText>
+            <KleanText variant="label" color={colors.muted}>
               {t('onboarding.safety.hasFlagsSub')}
-            </Text>
-            {safetyData.flags.map((flag) => (
+            </KleanText>
+            {data.result.flags.map((flag) => (
               <FlagRow key={flag.code} flag={flag} t={t} />
             ))}
           </View>
         )}
 
-        {/* Safer alternative suggestion */}
-        {safetyData.alternative && (
+        {data.alternative && (
           <View
             testID="safety-alternative"
             style={{
@@ -207,57 +243,90 @@ export default function SafetyReviewScreen() {
               gap: 10,
             }}
           >
-            <Text style={{ fontSize: 14, fontWeight: '800', color: colors.ink }}>
+            <KleanText variant="label" color={colors.ink} weight="800">
               💡 {t('onboarding.safety.alternatives.title')}
-            </Text>
-            <Text style={{ fontSize: 14, color: colors.ink, lineHeight: 20 }}>
+            </KleanText>
+            <KleanText variant="label" color={colors.ink}>
               {t('onboarding.safety.alternatives.saferWeeks', {
-                weeks: safetyData.alternative.saferWeeks,
+                weeks: data.alternative.saferWeeks,
               })}
-            </Text>
-            <Text style={{ fontSize: 13, color: colors.muted }}>
+            </KleanText>
+            <KleanText variant="caption" color={colors.muted}>
               {t('onboarding.safety.alternatives.saferWeeklyLoss', {
-                kg: safetyData.alternative.saferWeeklyLossKg,
+                kg: data.alternative.saferWeeklyLossKg,
               })}
-            </Text>
-            {safetyData.alternative.suggestKickstart && (
-              <Text style={{ fontSize: 13, color: colors.ink }}>
+            </KleanText>
+            {data.alternative.suggestKickstart && (
+              <KleanText variant="caption" color={colors.ink}>
                 🚀 {t('onboarding.safety.alternatives.kickstart')}
-              </Text>
+              </KleanText>
             )}
-            {safetyData.alternative.partialProgressPossible && (
+            {data.alternative.partialProgressPossible && (
               <View style={{ gap: 2 }}>
-                <Text style={{ fontSize: 13, color: colors.ink }}>
+                <KleanText variant="caption" color={colors.ink}>
                   🎯{' '}
                   {t('onboarding.safety.alternatives.partialProgress', {
-                    kg: safetyData.alternative.partialKgBeforeEvent,
+                    kg: data.alternative.partialKgBeforeEvent,
                   })}
-                </Text>
-                <Text style={{ fontSize: 13, color: colors.muted, paddingLeft: 18 }}>
+                </KleanText>
+                <KleanText variant="caption" color={colors.muted} style={{ paddingLeft: 18 }}>
                   {t('onboarding.safety.alternatives.continueAfter')}
-                </Text>
+                </KleanText>
               </View>
             )}
           </View>
         )}
 
         <View style={{ marginTop: 32, gap: 12 }}>
-          {safetyData.isBlocked ? (
+          {kind === 'valid' && (
+            <PillButton
+              testID="safety-cta-primary"
+              label={t('onboarding.next')}
+              size="lg"
+              onPress={handleContinueWithMyGoal}
+            />
+          )}
+          {kind === 'ambitious' && (
             <>
               <PillButton
-                label={t('onboarding.safety.adjustProfile')}
+                testID="safety-cta-follow-klean"
+                label={t('onboarding.safety.kinds.ambitiousFollowKlean')}
                 size="lg"
-                onPress={handleAdjust}
+                onPress={handleFollowKlean}
               />
               <PillButton
-                label={t('onboarding.safety.continueAnyway')}
+                testID="safety-cta-continue-mine"
+                label={t('onboarding.safety.kinds.ambitiousContinueMine')}
                 size="lg"
                 variant="outline"
-                onPress={handleContinue}
+                onPress={handleContinueWithMyGoal}
               />
             </>
-          ) : (
-            <PillButton label={t('onboarding.next')} size="lg" onPress={handleContinue} />
+          )}
+          {kind === 'unsafe' && (
+            <>
+              <PillButton
+                testID="safety-cta-follow-klean"
+                label={t('onboarding.safety.kinds.unsafeFollowKlean')}
+                size="lg"
+                onPress={handleFollowKlean}
+              />
+              <PillButton
+                testID="safety-cta-edit-goal"
+                label={t('onboarding.safety.kinds.unsafeEdit')}
+                size="lg"
+                variant="outline"
+                onPress={handleAdjust}
+              />
+            </>
+          )}
+          {kind === 'inconsistent' && (
+            <PillButton
+              testID="safety-cta-fix-goal"
+              label={t('onboarding.safety.kinds.inconsistentEdit')}
+              size="lg"
+              onPress={handleEditGoal}
+            />
           )}
         </View>
       </ScrollView>

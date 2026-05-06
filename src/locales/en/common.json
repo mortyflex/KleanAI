@@ -312,6 +312,20 @@
       "targetWeight": "Target weight (kg)",
       "targetWeightPlaceholder": "e.g. 68",
       "targetWeightHint": "Leave empty if you're not sure yet.",
+      "diff": {
+        "current": "Now",
+        "target": "Target",
+        "deltaLose": "−{{kg}} kg to lose",
+        "deltaGain": "+{{kg}} kg to gain",
+        "deltaNeutral": "Same as today",
+        "directionLose": "Heading down",
+        "directionGain": "Heading up",
+        "directionMaintain": "Holding steady",
+        "statusValid": "Looks healthy",
+        "statusAmbitious": "Ambitious — doable",
+        "statusUnsafe": "Too aggressive",
+        "statusInconsistent": "Doesn't match your goal"
+      },
       "errors": {
         "ageTooYoung": "You must be at least 18 to use Klean AI.",
         "ageRequired": "Please enter your age.",
@@ -321,6 +335,9 @@
         "weightRequired": "Please enter your weight.",
         "weightInvalid": "Weight must be between 30 and 300 kg.",
         "targetWeightInvalid": "Target weight must be between 30 and 300 kg.",
+        "targetMustBeLower": "For a weight-loss goal, your target should be lower than your current weight.",
+        "targetMustBeHigher": "For a muscle-gain goal, your target should be higher than your current weight.",
+        "targetMustBeClose": "For maintenance, your target should be within ±3 kg of your current weight.",
         "genderRequired": "Please select a gender."
       }
     },
@@ -337,6 +354,51 @@
       "daysPerWeek": "Days per week",
       "sessionDuration": "Session duration",
       "minUnit": "min"
+    },
+    "fitnessLevel": {
+      "title": "What's your fitness level?",
+      "subtitle": "We'll calibrate volume and intensity around this.",
+      "beginnerTitle": "Beginner",
+      "beginnerDescription": "Less than 6 months of regular training, or just getting back into it. We'll start gentle and build progressively.",
+      "intermediateTitle": "Intermediate",
+      "intermediateDescription": "6 months to 2 years of consistent training. Comfortable with the main lifts and able to push moderately hard.",
+      "advancedTitle": "Advanced",
+      "advancedDescription": "2+ years of structured training. Strong technique, recovers well from intense sessions, and follows progressive overload."
+    },
+    "sessionDuration": {
+      "title": "How long can you train per session?",
+      "subtitle": "Pick the time you can realistically protect.",
+      "minUnit": "min",
+      "30Title": "30 minutes",
+      "30Description": "Express format — focused on consistency, perfect when life is busy.",
+      "45Title": "45 minutes",
+      "45Description": "Balanced and efficient — covers the essentials with enough volume to progress.",
+      "60Title": "60 minutes",
+      "60Description": "Complete session — full warm-up, all main lifts, and dedicated accessory work.",
+      "75Title": "75+ minutes",
+      "75Description": "Advanced or high-volume training — for serious progression and dedicated athletes."
+    },
+    "availability": {
+      "title": "When can you train?",
+      "subtitle": "Pick the slots that actually work for your week.",
+      "morning": "Morning",
+      "midday": "Midday",
+      "evening": "Evening",
+      "selectedSlots_one": "{{count}} slot selected",
+      "selectedSlots_other": "{{count}} slots selected",
+      "selectedDays_one": "{{count}} day per week",
+      "selectedDays_other": "{{count}} days per week",
+      "minOneRequired": "Pick at least one slot to continue.",
+      "tip": "We'll only schedule sessions during the slots you've selected.",
+      "days": {
+        "0": "Mon",
+        "1": "Tue",
+        "2": "Wed",
+        "3": "Thu",
+        "4": "Fri",
+        "5": "Sat",
+        "6": "Sun"
+      }
     },
     "location": {
       "title": "Where do you train?",
@@ -369,6 +431,18 @@
       "title": "When's your target?",
       "subtitle": "We'll adapt your plan to your timeframe.",
       "presetTitle": "Choose a duration",
+      "weeksUnit_one": "{{count}} week",
+      "weeksUnit_other": "{{count}} weeks",
+      "sliderLabel": "Slide to pick how many weeks",
+      "recommendedHint": "For this goal, the ideal timeframe is around {{weeks}} weeks.",
+      "shorterAmbitiousHint": "Shorter than recommended — your plan will be more ambitious.",
+      "shorterUnsafeHint": "This timeframe forces an unsafe pace. We'll suggest a safer alternative.",
+      "longerHint": "Comfortable timeframe — a calm and sustainable pace.",
+      "matchHint": "Right on target — calm, safe, and effective.",
+      "noTargetHint": "Pick the duration that matches your routine.",
+      "presetShort": "Short ({{weeks}}w)",
+      "presetIdeal": "Ideal ({{weeks}}w)",
+      "presetLong": "Long ({{weeks}}w)",
       "4weeks": "4 weeks",
       "8weeks": "8 weeks",
       "12weeks": "12 weeks",
@@ -401,7 +475,11 @@
         "caloriesTooLow": "Your target puts you below the safe calorie minimum. We'll adjust this for you.",
         "deficitTooHigh": "A deficit over 1,000 kcal/day is unsafe. We'll cap it at a healthy level.",
         "weightLossTooFast": "Losing more than 1 kg/week risks muscle loss and health issues.",
-        "bmiTooLow": "Your BMI suggests you may be underweight. Weight loss is not recommended."
+        "weightGainTooFast": "Gaining this fast leads to mostly fat gain, not muscle. We'll suggest a steadier pace.",
+        "bmiTooLow": "Your BMI suggests you may be underweight. Weight loss is not recommended.",
+        "goalInconsistentLoss": "Your target weight is higher than your current weight, but your goal is weight loss. Pick a lower target — or change your goal.",
+        "goalInconsistentGain": "Your target weight is lower than your current weight, but your goal is muscle gain. Pick a higher target — or change your goal.",
+        "goalInconsistentMaintain": "Your target is far from your current weight, but your goal is maintenance. Pick a closer target — or change your goal."
       },
       "alternatives": {
         "title": "What we recommend instead",
@@ -412,7 +490,22 @@
         "continueAfter": "then keep going — no guilt"
       },
       "continueAnyway": "I understand, continue",
-      "adjustProfile": "Adjust my profile"
+      "adjustProfile": "Adjust my profile",
+      "kinds": {
+        "validTitle": "Your plan looks great",
+        "validSub": "We'll build a calm, safe and effective plan around this.",
+        "ambitiousTitle": "Ambitious — but allowed",
+        "ambitiousSub": "Your plan is more demanding than usual. You can stick with it, but we recommend the calmer alternative.",
+        "ambitiousFollowKlean": "Follow Klean's recommendation",
+        "ambitiousContinueMine": "Continue with my goal",
+        "unsafeTitle": "We can't generate this plan",
+        "unsafeSub": "This goal would force an unsafe pace. Pick a safer path so we can build the plan together.",
+        "unsafeFollowKlean": "Follow the safer recommendation",
+        "unsafeEdit": "Edit my goal",
+        "inconsistentTitle": "Let's align your goal",
+        "inconsistentSub": "Your goal and your target weight don't match. Adjust one of them to continue.",
+        "inconsistentEdit": "Fix my goal"
+      }
     },
     "summary": {
       "title": "Your plan is ready",

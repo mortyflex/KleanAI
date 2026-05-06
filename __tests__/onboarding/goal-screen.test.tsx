@@ -23,7 +23,7 @@ describe('GoalScreen', () => {
 
   it('shows step indicator', () => {
     renderGoalScreen();
-    expect(screen.getByText(/Step 1 of 8/i)).toBeTruthy();
+    expect(screen.getByText(/Step 1 of 10/i)).toBeTruthy();
   });
 
   it('shows all four goal options', () => {
