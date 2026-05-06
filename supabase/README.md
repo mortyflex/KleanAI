@@ -31,7 +31,21 @@ Copy `.env.example` to `.env` at the repo root and fill in the two values.
 `migrations/0002_rls_policies.sql`
 : Adds per-user RLS policies. The pattern across every table: a row is
   readable / writable only when `auth.uid() = user_id` (or `= id` for the
-  `profiles` table whose primary key is the user id).
+  `profiles` table whose primary key is the user id). Idempotent — every
+  `CREATE POLICY` is preceded by `DROP POLICY IF EXISTS`, so the file is
+  safe to re-apply after a partial first run.
+
+`migrations/0003_grants.sql`
+: Grants `select / insert / update / delete` on every Klean AI table to the
+  `authenticated` role. Required because the project has "Automatically
+  expose new tables" disabled, so PostgREST would otherwise return
+  `permission denied` before RLS is even evaluated. `anon` is intentionally
+  not granted anything — every table holds private user data.
+
+`verify_rls.sql` (not a migration)
+: Diagnostic script. Run it from the SQL editor any time you want to
+  confirm RLS is on, all 40 policies exist, `authenticated` has CRUD on
+  every table, and `anon` has no privileges.
 
 ## Applying migrations (later)
 
