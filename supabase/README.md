@@ -36,16 +36,55 @@ Copy `.env.example` to `.env` at the repo root and fill in the two values.
   safe to re-apply after a partial first run.
 
 `migrations/0003_grants.sql`
-: Grants `select / insert / update / delete` on every Klean AI table to the
-  `authenticated` role. Required because the project has "Automatically
-  expose new tables" disabled, so PostgREST would otherwise return
-  `permission denied` before RLS is even evaluated. `anon` is intentionally
-  not granted anything — every table holds private user data.
+: (a) Revokes ALL privileges on every Klean AI table from `PUBLIC` and
+  from `anon`. (b) Grants only `select / insert / update / delete` on
+  those tables to the `authenticated` role. (c) Grants `usage` on the
+  `public` schema to both `anon` and `authenticated` (PostgREST needs it
+  to introspect; USAGE alone exposes no data). Required because the
+  project has "Automatically expose new tables" disabled, so PostgREST
+  would otherwise return `permission denied` before RLS is even
+  evaluated. `anon` is intentionally never granted anything table-level —
+  every table holds private user data.
 
 `verify_rls.sql` (not a migration)
 : Diagnostic script. Run it from the SQL editor any time you want to
-  confirm RLS is on, all 40 policies exist, `authenticated` has CRUD on
-  every table, and `anon` has no privileges.
+  confirm RLS is on, all 40 policies exist, `authenticated` has exactly
+  CRUD on every table (no REFERENCES / TRIGGER / TRUNCATE), and neither
+  `anon` nor `PUBLIC` holds any privilege on the private tables.
+
+### Why we revoke from `PUBLIC` and not just from `anon`
+
+PostgreSQL has a pseudo-role called `PUBLIC` that represents every role
+in the cluster. Any privilege held by `PUBLIC` is automatically inherited
+by `anon`, `authenticated`, and every other role — there is no way to
+opt a single role out of that inheritance.
+
+Concretely: revoking `REFERENCES / TRIGGER / TRUNCATE` from `anon` alone
+does nothing if those privileges are still sitting on `PUBLIC`, because
+`anon` keeps inheriting them. The fix is to revoke from `PUBLIC` first,
+then revoke from `anon` as belt-and-braces. `0003_grants.sql` does both,
+in that order, before granting anything to `authenticated`.
+
+This is the most common cause of `anon` retaining stray privileges after
+a security-tightening pass on a Supabase project, and `verify_rls.sql`
+explicitly checks for it (sections 4 and 5).
+
+### Why we also revoke from `authenticated` before granting
+
+Supabase historically ran `GRANT ALL ON TABLES TO authenticated` by
+default at table creation, which granted not just SELECT / INSERT /
+UPDATE / DELETE but also `REFERENCES`, `TRIGGER`, and `TRUNCATE`.
+
+Disabling "Automatically expose new tables" prevents *new* such grants
+but does **not** revoke ones already in place — so even after granting
+the minimal CRUD set, `authenticated` may still hold those three extras.
+End users must never have them: TRUNCATE in particular bypasses RLS
+(it operates at the table level, not row level).
+
+`0003_grants.sql` therefore does `REVOKE ALL FROM authenticated` first,
+then `GRANT SELECT, INSERT, UPDATE, DELETE TO authenticated`. Section 3
+of `verify_rls.sql` checks the count, and section 3b lists any stray
+non-CRUD privilege so you can see exactly what's left.
 
 ## Applying migrations (later)
 

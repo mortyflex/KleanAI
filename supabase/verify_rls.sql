@@ -11,8 +11,8 @@
 -- 1. RLS is enabled on every Klean AI table --------------------------------
 --    Expected: 10 rows, every `rls_enabled` = true.
 
-select n.nspname as schema,
-       c.relname as table_name,
+select n.nspname        as schema,
+       c.relname        as table_name,
        c.relrowsecurity as rls_enabled
 from pg_class c
 join pg_namespace n on n.oid = c.relnamespace
@@ -76,14 +76,47 @@ select e.table_name,
        (p.policyname is not null) as exists
 from expected e
 left join pg_policies p
-  on p.schemaname = 'public'
- and p.tablename  = e.table_name
- and p.policyname = e.policy_name
+  on  p.schemaname = 'public'
+  and p.tablename  = e.table_name
+  and p.policyname = e.policy_name
 order by e.table_name, e.policy_name;
 
--- 3. The `authenticated` role has SELECT/INSERT/UPDATE/DELETE on every -----
---    Klean AI table.
---    Expected: 40 rows (4 privileges × 10 tables).
+-- 3. `authenticated` has EXACTLY SELECT/INSERT/UPDATE/DELETE on every ------
+--    Klean AI table — and nothing else (no REFERENCES / TRIGGER / TRUNCATE).
+--
+--    Expected:
+--      - `crud_count`        = 4 for every table (S/I/U/D).
+--      - `extra_privileges`  = 0 for every table.
+--    Any other shape is a misconfiguration and must be fixed.
+
+with grants as (
+  select table_name, privilege_type
+  from information_schema.role_table_grants
+  where grantee = 'authenticated'
+    and table_schema = 'public'
+    and table_name in (
+      'profiles','goals','training_preferences','diet_preferences',
+      'programs','workout_sessions','workout_logs','nutrition_plans',
+      'daily_nutrition_logs','smoothing_events'
+    )
+)
+select table_name,
+       count(*) filter (
+         where privilege_type in ('SELECT','INSERT','UPDATE','DELETE')
+       ) as crud_count,
+       count(*) filter (
+         where privilege_type not in ('SELECT','INSERT','UPDATE','DELETE')
+       ) as extra_privileges
+from grants
+group by table_name
+order by table_name;
+
+-- 3b. (Diagnostic) which non-CRUD privileges does `authenticated` still ---
+--     hold, if any?
+--     Expected: 0 rows. If anything appears, the printed `privilege_type`
+--     column tells you exactly what to revoke (typically REFERENCES /
+--     TRIGGER / TRUNCATE inherited from older Supabase defaults). Running
+--     `0003_grants.sql` again clears them.
 
 select table_name, privilege_type
 from information_schema.role_table_grants
@@ -94,16 +127,39 @@ where grantee = 'authenticated'
     'programs','workout_sessions','workout_logs','nutrition_plans',
     'daily_nutrition_logs','smoothing_events'
   )
-  and privilege_type in ('SELECT','INSERT','UPDATE','DELETE')
+  and privilege_type not in ('SELECT','INSERT','UPDATE','DELETE')
 order by table_name, privilege_type;
 
--- 4. Defense-in-depth: `anon` must NOT have privileges on private tables ---
---    Expected: 0 rows. If any appear, revoke them immediately —
---    unauthenticated users must not be able to touch user data.
+-- 4. `anon` has ZERO direct privileges on private tables -------------------
+--    Expected: 0 rows. If anything appears, revoke it — unauthenticated
+--    users must not have any direct privileges.
+--    NB: this only checks DIRECT grants to anon. Inherited privileges
+--    from PUBLIC are checked separately in section 5.
 
 select table_name, privilege_type
 from information_schema.role_table_grants
 where grantee = 'anon'
+  and table_schema = 'public'
+  and table_name in (
+    'profiles','goals','training_preferences','diet_preferences',
+    'programs','workout_sessions','workout_logs','nutrition_plans',
+    'daily_nutrition_logs','smoothing_events'
+  )
+order by table_name, privilege_type;
+
+-- 5. `PUBLIC` has ZERO privileges on private tables ------------------------
+--
+--    PostgreSQL inherits PUBLIC privileges to every role automatically,
+--    including `anon`. Any GRANT to PUBLIC silently leaks to anon, even
+--    if anon was directly revoked. This is the most common cause of
+--    residual REFERENCES / TRIGGER / TRUNCATE on `anon` after a tightening
+--    pass.
+--
+--    Expected: 0 rows.
+
+select table_name, privilege_type
+from information_schema.role_table_grants
+where grantee = 'PUBLIC'
   and table_schema = 'public'
   and table_name in (
     'profiles','goals','training_preferences','diet_preferences',
