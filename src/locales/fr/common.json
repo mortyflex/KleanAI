@@ -2,7 +2,92 @@
   "tabs": {
     "home": "Accueil",
     "workout": "Entraînement",
-    "nutrition": "Nutrition"
+    "nutrition": "Nutrition",
+    "profile": "Profil"
+  },
+  "authLanding": {
+    "brandTag": "Klean AI",
+    "title": "Ton plan fitness, taillé pour la vraie vie.",
+    "subtitle": "Un pote de salle expert qui s'adapte quand la vie se complique — sans culpabilité, sans pression.",
+    "highlights": {
+      "adapt": {
+        "title": "S'adapte à ta semaine",
+        "body": "Séance manquée, repas commandé, journée chargée ? On lisse ton plan, on ne te punit jamais."
+      },
+      "safe": {
+        "title": "Sûr par défaut",
+        "body": "Ton rythme reste dans la zone safe — Klean bloque tout ce qui est risqué et te propose une voie plus douce."
+      },
+      "zeroGuilt": {
+        "title": "Zéro culpabilité",
+        "body": "Même quand tu déraille, le plan continue avec toi. On gère pour toi."
+      }
+    },
+    "startCta": "Commencer",
+    "signInCta": "J'ai déjà un compte",
+    "signInHint": "On ne te demandera jamais de refaire l'onboarding pour accéder à ton compte."
+  },
+  "profile": {
+    "title": "Profil",
+    "subtitle": "Ton compte, ton plan et tes préférences au même endroit.",
+    "signOut": "Se déconnecter",
+    "account": {
+      "title": "Compte",
+      "connected": "Connecté(e)",
+      "unknownEmail": "E-mail indisponible"
+    },
+    "profile": {
+      "title": "À propos de toi",
+      "age": "Âge",
+      "height": "Taille",
+      "weight": "Poids actuel",
+      "fitnessLevel": "Niveau",
+      "location": "Lieu d'entraînement",
+      "missing": "Pas encore renseigné"
+    },
+    "goal": {
+      "title": "Ton objectif",
+      "type": "Objectif",
+      "targetWeight": "Poids cible",
+      "timeframe": "Durée",
+      "classification": "Sécurité",
+      "empty": "Pas d'objectif sauvegardé — termine l'onboarding pour en définir un.",
+      "classifications": {
+        "valid": "Rythme sain",
+        "ambitious": "Ambitieux — accepté",
+        "unsafe": "Trop agressif",
+        "inconsistent": "À aligner"
+      }
+    },
+    "preferences": {
+      "title": "Préférences",
+      "language": "Langue",
+      "languageEn": "English",
+      "languageFr": "Français",
+      "units": "Unités",
+      "unitsMetric": "Métriques (kg / cm)",
+      "unitsImperial": "Impériales (lb / ft)",
+      "unitsHint": "Affichage uniquement — les valeurs restent en métrique pour le moment."
+    },
+    "about": {
+      "title": "À propos",
+      "appName": "Klean AI",
+      "version": "Version {{version}}",
+      "tagline": "Ton coach expert et bienveillant. Klean ajuste ton plan fitness et nutrition quand la vraie vie s'emmêle — sans culpabilité."
+    },
+    "signOutConfirm": {
+      "title": "Se déconnecter pour le moment ?",
+      "body": "On garde ton plan en sécurité. Tu pourras te reconnecter quand tu veux, pile là où tu étais.",
+      "cancel": "Rester connecté(e)",
+      "confirm": "Oui, me déconnecter",
+      "confirming": "Déconnexion…"
+    },
+    "units": {
+      "kg": "{{kg}} kg",
+      "lb": "{{lb}} lb",
+      "cm": "{{cm}} cm",
+      "ftIn": "{{ft}}′{{in}}″"
+    }
   },
   "home": {
     "goodMorning": "Bonjour,",
@@ -288,23 +373,65 @@
       "password": "Mot de passe",
       "passwordPlaceholder": "8 caractères minimum"
     },
+    "errors": {
+      "emailRequired": "Merci d'entrer ton e-mail.",
+      "emailInvalid": "Cet e-mail n'a pas l'air valide.",
+      "passwordRequired": "Merci d'entrer un mot de passe.",
+      "passwordTooShort": "Le mot de passe doit faire au moins 8 caractères."
+    },
     "login": {
       "title": "Bon retour",
       "subtitle": "Connecte-toi pour reprendre là où tu en étais.",
       "submit": "Se connecter",
       "submitting": "Connexion…",
-      "noAccount": "Pas encore de compte ?",
+      "noAccount": "Nouveau ici ?",
       "toRegister": "En créer un",
-      "errorTitle": "Connexion impossible"
+      "toOnboarding": "Commencer l'onboarding",
+      "errorTitle": "Connexion impossible",
+      "saveOnboardingHint": "Connecte-toi pour sauvegarder ton plan et le suivre."
     },
     "register": {
       "title": "Créer ton compte",
       "subtitle": "On garde ton plan pour que tu puisses revenir quand tu veux.",
+      "postOnboardingTitle": "Sauvegarde ton plan",
+      "postOnboardingSubtitle": "Crée ton compte pour verrouiller ton plan et ne jamais perdre tes progrès.",
+      "almostThereTag": "Presque fini",
+      "benefitsTitle": "Pourquoi créer un compte",
+      "benefits": {
+        "save": "Sauvegarde ton plan et reprends là où tu en étais",
+        "track": "Suis ton objectif et ta progression dans le temps",
+        "sync": "Synchronise tes données en sécurité sur tes appareils",
+        "adapt": "Débloque les ajustements intelligents quand la vie s'emmêle",
+        "resume": "Ne perds jamais ton plan ni ton objectif"
+      },
       "submit": "Créer le compte",
       "submitting": "Création…",
-      "haveAccount": "Déjà inscrit ?",
+      "haveAccount": "Déjà un compte ?",
       "toLogin": "Se connecter",
-      "errorTitle": "Création impossible"
+      "errorTitle": "Création impossible",
+      "saveOnboardingHint": "Crée ton compte pour sauvegarder ton plan et le suivre.",
+      "checkEmailTitle": "Vérifie ta boîte mail",
+      "checkEmailBody": "On t'a envoyé un lien de confirmation. Une fois confirmé, tu pourras te connecter et sauvegarder ton plan."
+    },
+    "signOutErrorTitle": "Déconnexion impossible",
+    "status": {
+      "title": "Compte",
+      "loading": "Chargement de ta session…",
+      "loggedOut": "Tu n'es pas connecté(e).",
+      "loggedOutHint": "Termine l'onboarding puis appuie sur Suivre ce programme pour sauvegarder ton plan.",
+      "loggedInAs": "Connecté(e) en tant que {{email}}",
+      "signOut": "Se déconnecter",
+      "signingOut": "Déconnexion…",
+      "reload": "Recharger mes données",
+      "loadingData": "Chargement…",
+      "found": "Sauvegardé",
+      "missing": "Pas encore",
+      "rows": {
+        "profile": "Profil",
+        "goal": "Objectif",
+        "training": "Entraînement",
+        "diet": "Alimentation"
+      }
     }
   },
   "onboarding": {
@@ -534,6 +661,11 @@
         "inconsistentEdit": "Corriger mon objectif"
       }
     },
+    "gate": {
+      "saving": "Sauvegarde de ton plan…",
+      "saveErrorTitle": "Sauvegarde impossible",
+      "saveErrorBody": "Quelque chose s'est mal passé. Réessaie."
+    },
     "summary": {
       "title": "Ton plan est prêt",
       "subtitle": "Voici ce qu'on a préparé pour toi.",
@@ -560,7 +692,7 @@
         "competition": "Compétition",
         "other": "Événement"
       },
-      "generateCta": "Générer mon plan",
+      "generateCta": "Suivre ce programme",
       "mockNotice": "La génération de plan arrive bientôt — ton profil est sauvegardé.",
       "editProfile": "Modifier mon profil",
       "goals": {

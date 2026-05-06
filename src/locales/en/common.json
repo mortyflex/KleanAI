@@ -2,7 +2,92 @@
   "tabs": {
     "home": "Home",
     "workout": "Workout",
-    "nutrition": "Nutrition"
+    "nutrition": "Nutrition",
+    "profile": "Profile"
+  },
+  "authLanding": {
+    "brandTag": "Klean AI",
+    "title": "Your fitness plan, made for real life.",
+    "subtitle": "A friendly expert coach that adapts when life gets messy — no guilt, no pressure.",
+    "highlights": {
+      "adapt": {
+        "title": "Adapts to your week",
+        "body": "Missed a workout, ate out, lost time? We smooth your plan, never punish you."
+      },
+      "safe": {
+        "title": "Safe by default",
+        "body": "Your goal pace stays in the safe zone — Klean blocks anything risky and shows a kinder path."
+      },
+      "zeroGuilt": {
+        "title": "Zero guilt",
+        "body": "Even when you slip, the plan moves forward with you. We've got your back."
+      }
+    },
+    "startCta": "Get started",
+    "signInCta": "I already have an account",
+    "signInHint": "We'll never ask you to redo onboarding to reach your account."
+  },
+  "profile": {
+    "title": "Profile",
+    "subtitle": "Your account, plan, and preferences in one place.",
+    "signOut": "Sign out",
+    "account": {
+      "title": "Account",
+      "connected": "Connected",
+      "unknownEmail": "Email unavailable"
+    },
+    "profile": {
+      "title": "About you",
+      "age": "Age",
+      "height": "Height",
+      "weight": "Current weight",
+      "fitnessLevel": "Fitness level",
+      "location": "Training location",
+      "missing": "Not set yet"
+    },
+    "goal": {
+      "title": "Your goal",
+      "type": "Goal",
+      "targetWeight": "Target weight",
+      "timeframe": "Timeframe",
+      "classification": "Safety status",
+      "empty": "No goal saved yet — finish onboarding to set one.",
+      "classifications": {
+        "valid": "Healthy pace",
+        "ambitious": "Ambitious — accepted",
+        "unsafe": "Too aggressive",
+        "inconsistent": "Needs alignment"
+      }
+    },
+    "preferences": {
+      "title": "Preferences",
+      "language": "Language",
+      "languageEn": "English",
+      "languageFr": "Français",
+      "units": "Units",
+      "unitsMetric": "Metric (kg / cm)",
+      "unitsImperial": "Imperial (lb / ft)",
+      "unitsHint": "Display only — saved values stay in metric for now."
+    },
+    "about": {
+      "title": "About",
+      "appName": "Klean AI",
+      "version": "Version {{version}}",
+      "tagline": "Your friendly expert coach. Klean adjusts your fitness and nutrition plan when real life gets messy — without guilt."
+    },
+    "signOutConfirm": {
+      "title": "Sign out for now?",
+      "body": "We'll keep your plan safe. You can sign back in anytime to pick up exactly where you left off.",
+      "cancel": "Stay signed in",
+      "confirm": "Yes, sign out",
+      "confirming": "Signing out…"
+    },
+    "units": {
+      "kg": "{{kg}} kg",
+      "lb": "{{lb}} lb",
+      "cm": "{{cm}} cm",
+      "ftIn": "{{ft}}′{{in}}″"
+    }
   },
   "home": {
     "goodMorning": "Good morning,",
@@ -287,23 +372,65 @@
       "password": "Password",
       "passwordPlaceholder": "At least 8 characters"
     },
+    "errors": {
+      "emailRequired": "Please enter your email.",
+      "emailInvalid": "That doesn't look like a valid email.",
+      "passwordRequired": "Please enter a password.",
+      "passwordTooShort": "Password must be at least 8 characters."
+    },
     "login": {
       "title": "Welcome back",
       "subtitle": "Sign in to pick up where you left off.",
       "submit": "Sign in",
       "submitting": "Signing in…",
-      "noAccount": "No account yet?",
+      "noAccount": "New here?",
       "toRegister": "Create one",
-      "errorTitle": "Couldn't sign in"
+      "toOnboarding": "Start the onboarding",
+      "errorTitle": "Couldn't sign in",
+      "saveOnboardingHint": "Sign in to save your plan and follow it."
     },
     "register": {
       "title": "Create your account",
       "subtitle": "We'll save your plan so you can come back anytime.",
+      "postOnboardingTitle": "Save your plan",
+      "postOnboardingSubtitle": "Create your account to lock in your plan and never lose your progress.",
+      "almostThereTag": "Almost there",
+      "benefitsTitle": "Why create an account",
+      "benefits": {
+        "save": "Save your plan and pick up where you left off",
+        "track": "Track your progress and goal over time",
+        "sync": "Sync your data securely across devices",
+        "adapt": "Unlock smart adjustments when life gets messy",
+        "resume": "Never lose your plan or your goal"
+      },
       "submit": "Create account",
       "submitting": "Creating…",
-      "haveAccount": "Already with us?",
+      "haveAccount": "Already have an account?",
       "toLogin": "Sign in",
-      "errorTitle": "Couldn't create account"
+      "errorTitle": "Couldn't create account",
+      "saveOnboardingHint": "Create your account to save your plan and follow it.",
+      "checkEmailTitle": "Check your inbox",
+      "checkEmailBody": "We've sent you a confirmation link. Once you confirm, you can sign in and save your plan."
+    },
+    "signOutErrorTitle": "Couldn't sign out",
+    "status": {
+      "title": "Account",
+      "loading": "Loading your session…",
+      "loggedOut": "You're not signed in.",
+      "loggedOutHint": "Finish onboarding and tap Follow this program to save your plan.",
+      "loggedInAs": "Signed in as {{email}}",
+      "signOut": "Sign out",
+      "signingOut": "Signing out…",
+      "reload": "Reload my data",
+      "loadingData": "Loading…",
+      "found": "Saved",
+      "missing": "Not yet",
+      "rows": {
+        "profile": "Profile",
+        "goal": "Goal",
+        "training": "Training",
+        "diet": "Diet"
+      }
     }
   },
   "onboarding": {
@@ -533,6 +660,11 @@
         "inconsistentEdit": "Fix my goal"
       }
     },
+    "gate": {
+      "saving": "Saving your plan…",
+      "saveErrorTitle": "Couldn't save your plan",
+      "saveErrorBody": "Something went wrong. Please try again."
+    },
     "summary": {
       "title": "Your plan is ready",
       "subtitle": "Here's what we've built for you.",
@@ -559,7 +691,7 @@
         "competition": "Competition",
         "other": "Event"
       },
-      "generateCta": "Generate my plan",
+      "generateCta": "Follow this program",
       "mockNotice": "Plan generation coming soon — your profile is saved.",
       "editProfile": "Edit my profile",
       "goals": {

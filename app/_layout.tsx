@@ -9,6 +9,7 @@ import {
   PlusJakartaSans_800ExtraBold,
 } from "@expo-google-fonts/plus-jakarta-sans";
 import { OnboardingProvider } from "../src/features/onboarding/onboarding-context";
+import { AuthProvider } from "../src/features/auth";
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
@@ -26,15 +27,17 @@ export default function RootLayout() {
   }
 
   return (
-    <OnboardingProvider>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="index" />
-        <Stack.Screen name="(auth)" />
-        <Stack.Screen name="(onboarding)" />
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="workout" />
-        <Stack.Screen name="smoothing" />
-      </Stack>
-    </OnboardingProvider>
+    <AuthProvider>
+      <OnboardingProvider>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="index" />
+          <Stack.Screen name="(auth)" />
+          <Stack.Screen name="(onboarding)" />
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="workout" />
+          <Stack.Screen name="smoothing" />
+        </Stack>
+      </OnboardingProvider>
+    </AuthProvider>
   );
 }

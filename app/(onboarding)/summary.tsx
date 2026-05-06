@@ -1,7 +1,7 @@
-import React from 'react';
-import { View, Text, ScrollView, Alert } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import { useOnboarding } from '../../src/features/onboarding/onboarding-context';
@@ -10,6 +10,8 @@ import { PillButton } from '../../src/components/ui/pill-button';
 import { Card } from '../../src/components/ui/card';
 import { colors } from '../../src/design/tokens';
 import { hasBlockingFlags } from '../../src/utils/safety';
+import { useAuth } from '../../src/features/auth';
+import { onboardingPersistenceService } from '../../src/features/onboarding/onboarding-persistence.service';
 
 const TOTAL_STEPS = 10;
 
@@ -34,9 +36,13 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
 }
 
 export default function SummaryScreen() {
-  const { t } = useTranslation('common');
+  const { t, i18n } = useTranslation('common');
   const router = useRouter();
   const { profile } = useOnboarding();
+  const { status, user } = useAuth();
+  const { autoSave } = useLocalSearchParams<{ autoSave?: string }>();
+  const [saving, setSaving] = useState(false);
+  const autoSaveTriggered = useRef(false);
 
   const isBlocked = hasBlockingFlags(profile.safetyFlags ?? []);
 
@@ -109,18 +115,44 @@ export default function SummaryScreen() {
     ? t('onboarding.summary.hasWarnings')
     : t('onboarding.summary.safe');
 
-  const handleGenerate = () => {
-    Alert.alert(
-      t('onboarding.summary.generateCta'),
-      t('onboarding.summary.mockNotice'),
-      [
-        {
-          text: 'OK',
-          onPress: () => router.replace('/(tabs)'),
-        },
-      ]
-    );
+  const persistAndContinue = async (userId: string) => {
+    setSaving(true);
+    try {
+      await onboardingPersistenceService.saveOnboardingProfile(userId, profile, {
+        locale: i18n.language ?? null,
+      });
+      router.replace('/(tabs)');
+    } catch (e) {
+      Alert.alert(
+        t('onboarding.gate.saveErrorTitle'),
+        (e as Error).message ?? t('onboarding.gate.saveErrorBody')
+      );
+    } finally {
+      setSaving(false);
+    }
   };
+
+  const handleFollowProgram = () => {
+    if (status === 'loading') return;
+    if (status === 'unauthenticated' || !user) {
+      // New users always go to dedicated post-onboarding sign-up screen,
+      // not login. Returning users sign in via the auth landing screen
+      // before starting onboarding, so they should never land here.
+      router.push('/(auth)/register?intent=save-onboarding');
+      return;
+    }
+    persistAndContinue(user.id);
+  };
+
+  useEffect(() => {
+    if (autoSave !== '1') return;
+    if (autoSaveTriggered.current) return;
+    if (status !== 'authenticated' || !user) return;
+    autoSaveTriggered.current = true;
+    persistAndContinue(user.id);
+    // persistAndContinue is stable enough for this single-shot effect.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoSave, status, user]);
 
   const handleEdit = () => {
     router.push('/(onboarding)/goal');
@@ -212,15 +244,26 @@ export default function SummaryScreen() {
         <View style={{ marginTop: 32, gap: 12 }}>
           <PillButton
             testID="generate-plan-cta"
-            label={t('onboarding.summary.generateCta')}
+            label={
+              saving
+                ? t('onboarding.gate.saving')
+                : t('onboarding.summary.generateCta')
+            }
             size="lg"
-            onPress={handleGenerate}
+            onPress={handleFollowProgram}
+            disabled={saving || status === 'loading'}
           />
+          {saving && (
+            <View style={{ alignItems: 'center' }}>
+              <ActivityIndicator color={colors.brand} />
+            </View>
+          )}
           <PillButton
             label={t('onboarding.summary.editProfile')}
             size="lg"
             variant="outline"
             onPress={handleEdit}
+            disabled={saving}
           />
         </View>
       </ScrollView>
