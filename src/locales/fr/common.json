@@ -281,6 +281,32 @@
       }
     }
   },
+  "auth": {
+    "fields": {
+      "email": "E-mail",
+      "emailPlaceholder": "toi@exemple.com",
+      "password": "Mot de passe",
+      "passwordPlaceholder": "8 caractères minimum"
+    },
+    "login": {
+      "title": "Bon retour",
+      "subtitle": "Connecte-toi pour reprendre là où tu en étais.",
+      "submit": "Se connecter",
+      "submitting": "Connexion…",
+      "noAccount": "Pas encore de compte ?",
+      "toRegister": "En créer un",
+      "errorTitle": "Connexion impossible"
+    },
+    "register": {
+      "title": "Créer ton compte",
+      "subtitle": "On garde ton plan pour que tu puisses revenir quand tu veux.",
+      "submit": "Créer le compte",
+      "submitting": "Création…",
+      "haveAccount": "Déjà inscrit ?",
+      "toLogin": "Se connecter",
+      "errorTitle": "Création impossible"
+    }
+  },
   "onboarding": {
     "step": "Étape {{current}} sur {{total}}",
     "next": "Continuer",
