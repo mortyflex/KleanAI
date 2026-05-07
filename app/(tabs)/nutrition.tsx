@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useCallback } from "react";
 import { ScrollView, View, Text, Pressable } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { nutrition, meals } from "../../src/data/mock";
 import { Card } from "../../src/components/ui/card";
@@ -141,10 +141,20 @@ export default function NutritionScreen() {
   const router = useRouter();
   const { profile } = useOnboarding();
   const smoothingContext = useSmoothingContext();
-  const { ingredientIds: fridgeIds } = useConfirmedFridge();
+  const { ingredientIds: fridgeIds, reload: reloadFridge } = useConfirmedFridge();
   const handleScanFridge = useCallback(() => {
     router.push("/vision/fridge");
   }, [router]);
+
+  // Re-read AsyncStorage on every focus so confirmations made on the Fridge
+  // Vision screen propagate back to the meal suggestions without requiring a
+  // full app restart. The tab stays mounted between navigations, so the
+  // hook's mount-only effect would otherwise serve stale data.
+  useFocusEffect(
+    useCallback(() => {
+      reloadFridge().catch(() => {});
+    }, [reloadFridge]),
+  );
 
   const plan = useMemo(() => {
     const input = planInputFromProfile(profile);

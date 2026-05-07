@@ -1,5 +1,6 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react-native';
+import { render, screen, waitFor } from '@testing-library/react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import '../../src/lib/i18n';
 import NutritionScreen from '../../app/(tabs)/nutrition';
@@ -8,6 +9,19 @@ import {
   type AuthContextValue,
 } from '../../src/features/auth';
 import { OnboardingContext } from '../../src/features/onboarding/onboarding-context';
+import { saveConfirmedFridge } from '../../src/features/vision/store/fridge-storage';
+
+jest.mock('expo-router', () => {
+  const actualReact = jest.requireActual('react');
+  return {
+    useRouter: () => ({ push: jest.fn(), back: jest.fn(), replace: jest.fn() }),
+    useFocusEffect: (cb: () => void | (() => void)) => {
+      // Run the focus callback once at mount — enough to exercise reload-on-focus
+      // logic in tests without pulling in the full navigator.
+      actualReact.useEffect(() => cb(), [cb]);
+    },
+  };
+});
 
 jest.mock('../../src/features/nutrition/services/nutrition-sync', () => ({
   queueNutritionSync: jest.fn(() => new Promise(() => {})),
@@ -43,6 +57,10 @@ function renderScreen(profile: Record<string, unknown> = {}) {
 }
 
 describe('NutritionScreen', () => {
+  beforeEach(async () => {
+    await AsyncStorage.clear();
+  });
+
   it('renders without crashing on an empty profile (incomplete state)', () => {
     renderScreen({});
     expect(screen.getByText('Finish your profile')).toBeTruthy();
@@ -84,5 +102,35 @@ describe('NutritionScreen', () => {
     });
     // Header subtitle (visible only when plan exists)
     expect(screen.getByText('A simple target. Not a strict diet.')).toBeTruthy();
+  });
+
+  it('exposes a CTA to scan the fridge when none is confirmed yet', async () => {
+    renderScreen({});
+    expect(screen.getByTestId('nutrition-fridge-scan-cta')).toBeTruthy();
+    expect(screen.getByText('Scan my fridge')).toBeTruthy();
+  });
+
+  it('biases meal suggestions toward confirmed fridge ingredients', async () => {
+    // Default catalog order (no fridge) picks oatmeal_berries / chicken_rice_bowl
+    // / turkey_meatballs / fruit_almonds. With these ingredients, the scoring
+    // shifts breakfast to greek_yogurt_bowl, dinner to chickpea_curry, snack to
+    // cottage_cheese_fruit — giving us a clear signal the fridge is wired in.
+    await saveConfirmedFridge([
+      'greek_yogurt',
+      'spinach',
+      'brown_rice',
+      'banana',
+    ]);
+
+    renderScreen({});
+
+    await waitFor(() => {
+      expect(screen.getByText('Greek yogurt bowl')).toBeTruthy();
+      expect(screen.getByText('Chickpea curry')).toBeTruthy();
+      expect(screen.getByText('Cottage cheese & fruit')).toBeTruthy();
+    });
+
+    // CTA copy switches once a fridge is on file.
+    expect(screen.getByText('Update my fridge')).toBeTruthy();
   });
 });
