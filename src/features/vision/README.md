@@ -35,7 +35,8 @@ persist.
 
 1. `npx expo start --clear`
 2. Open the app on a device or simulator with the Expo Go client.
-3. Navigate to the Fridge Vision screen (`/vision/fridge`).
+3. Open the **Nutrition** tab and tap the **Scan my fridge** card. (Direct
+   route: `/vision/fridge`.)
 4. Tap **Take a photo** or **Pick from library**. Grant permissions when iOS
    or Android prompts you.
 5. Confirm a thumbnail appears in the preview row.

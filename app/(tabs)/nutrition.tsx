@@ -1,5 +1,6 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useCallback } from "react";
 import { ScrollView, View, Text, Pressable } from "react-native";
+import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { nutrition, meals } from "../../src/data/mock";
 import { Card } from "../../src/components/ui/card";
@@ -86,11 +87,64 @@ function WaterDrop({ filled }: { filled: boolean }) {
   );
 }
 
+function FridgeScanCard({
+  ingredientCount,
+  onPress,
+}: {
+  ingredientCount: number;
+  onPress: () => void;
+}) {
+  const { t } = useTranslation("common");
+  const hasFridge = ingredientCount > 0;
+  return (
+    <Card style={{ gap: 12 }}>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+        <View
+          style={{
+            width: 44,
+            height: 44,
+            borderRadius: radii.icon + 2,
+            backgroundColor: colors.brandLight,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Text style={{ fontSize: 22 }}>🥗</Text>
+        </View>
+        <View style={{ flex: 1, gap: 2 }}>
+          <Text style={{ fontSize: 16, fontWeight: "700", color: colors.ink }}>
+            {t("nutrition.fridgeScan.title")}
+          </Text>
+          <Text style={{ fontSize: 13, color: colors.muted }}>
+            {hasFridge
+              ? t("nutrition.fridgeScan.confirmedBody", { count: ingredientCount })
+              : t("nutrition.fridgeScan.emptyBody")}
+          </Text>
+        </View>
+      </View>
+      <PillButton
+        label={t(
+          hasFridge
+            ? "nutrition.fridgeScan.updateCta"
+            : "nutrition.fridgeScan.scanCta",
+        )}
+        variant={hasFridge ? "outline" : "filled"}
+        onPress={onPress}
+        testID="nutrition-fridge-scan-cta"
+      />
+    </Card>
+  );
+}
+
 export default function NutritionScreen() {
   const { t } = useTranslation("common");
+  const router = useRouter();
   const { profile } = useOnboarding();
   const smoothingContext = useSmoothingContext();
   const { ingredientIds: fridgeIds } = useConfirmedFridge();
+  const handleScanFridge = useCallback(() => {
+    router.push("/vision/fridge");
+  }, [router]);
 
   const plan = useMemo(() => {
     const input = planInputFromProfile(profile);
@@ -155,6 +209,12 @@ export default function NutritionScreen() {
           <MacroBar label={t("nutrition.macros.fat")}     current={nutrition.fat.current}     goal={fatGoal}     unit="g" color={colors.energy} trackColor={colors.energyLight} />
         </View>
       </Card>
+
+      {/* ── Fridge scan entry point ── */}
+      <FridgeScanCard
+        ingredientCount={fridgeIds?.length ?? 0}
+        onPress={handleScanFridge}
+      />
 
       {/* ── Event reporter (zero-guilt, connects to smoothing) ── */}
       <NutritionEventReporter context={smoothingContext} />

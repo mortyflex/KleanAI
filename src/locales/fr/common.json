@@ -275,6 +275,14 @@
       "notLogged": "Non enregistré",
       "kcalUnit": "kcal"
     },
+    "fridgeScan": {
+      "title": "Ton frigo",
+      "emptyBody": "Montre-nous ce qu'il y a dans tes étagères et on adapte les idées du jour.",
+      "confirmedBody_one": "{{count}} ingrédient confirmé — les repas s'adaptent à ce que tu as.",
+      "confirmedBody_other": "{{count}} ingrédients confirmés — les repas s'adaptent à ce que tu as.",
+      "scanCta": "Scanner mon frigo",
+      "updateCta": "Mettre à jour mon frigo"
+    },
     "plan": {
       "title": "Ton plan du jour",
       "subtitle": "Un objectif simple. Pas un régime strict.",

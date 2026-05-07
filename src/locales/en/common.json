@@ -274,6 +274,14 @@
       "notLogged": "Not logged yet",
       "kcalUnit": "kcal"
     },
+    "fridgeScan": {
+      "title": "Your fridge",
+      "emptyBody": "Show us what's on your shelves and we'll tailor today's ideas around it.",
+      "confirmedBody_one": "{{count}} ingredient confirmed — meals adapt to what you have.",
+      "confirmedBody_other": "{{count}} ingredients confirmed — meals adapt to what you have.",
+      "scanCta": "Scan my fridge",
+      "updateCta": "Update my fridge"
+    },
     "plan": {
       "title": "Today's plan",
       "subtitle": "A simple target. Not a strict diet.",
