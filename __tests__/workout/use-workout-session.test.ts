@@ -199,6 +199,57 @@ describe('useWorkoutSession', () => {
     });
   });
 
+  describe('auto-complete on last toggle', () => {
+    it('flips status to completed once every exercise is ticked', async () => {
+      const { result } = renderHook(() => useWorkoutSession(MOCK_DAY));
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      act(() => { result.current.toggleExercise('bench_press'); });
+      expect(result.current.status).toBe('in_progress');
+
+      act(() => { result.current.toggleExercise('barbell_row'); });
+
+      await waitFor(() => expect(result.current.status).toBe('completed'));
+      expect(result.current.exercises.every((e) => e.done)).toBe(true);
+    });
+
+    it('records a finishedAt timestamp on auto-complete', async () => {
+      const { result } = renderHook(() => useWorkoutSession(MOCK_DAY));
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      act(() => { result.current.toggleExercise('bench_press'); });
+      act(() => { result.current.toggleExercise('barbell_row'); });
+
+      await waitFor(async () => {
+        const saved = await storage.getSession('day-0');
+        expect(saved?.status).toBe('completed');
+        expect(saved?.finishedAt).toBeDefined();
+      });
+    });
+
+    it('does NOT auto-complete a saved session loaded from storage', async () => {
+      const saved: WorkoutSessionRecord = {
+        dayId: 'day-0',
+        weekDayIndex: 0,
+        status: 'in_progress',
+        syncStatus: 'pending',
+        // All exercises already done from a previous run, but no fresh user
+        // interaction → we must not retroactively flip to completed.
+        exercises: MOCK_DAY.exercises.map((e) => ({ ...e, done: true })),
+        startedAt: '2026-05-05T08:00:00.000Z',
+        updatedAt: '2026-05-05T08:00:00.000Z',
+      };
+      await storage.saveSession(saved);
+
+      const { result } = renderHook(() => useWorkoutSession(MOCK_DAY));
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      // Give any latent effect a chance to run before asserting
+      await new Promise((r) => setTimeout(r, 10));
+      expect(result.current.status).toBe('in_progress');
+    });
+  });
+
   describe('finishWorkout', () => {
     it('sets status to completed', async () => {
       const { result } = renderHook(() => useWorkoutSession(MOCK_DAY));
@@ -207,6 +258,25 @@ describe('useWorkoutSession', () => {
       act(() => { result.current.finishWorkout(); });
 
       expect(result.current.status).toBe('completed');
+    });
+
+    it('ticks every remaining exercise when finishing early', async () => {
+      const { result } = renderHook(() => useWorkoutSession(MOCK_DAY));
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      act(() => { result.current.finishWorkout(); });
+
+      expect(result.current.exercises.every((e) => e.done)).toBe(true);
+    });
+
+    it('keeps already-done exercises done (idempotent)', async () => {
+      const { result } = renderHook(() => useWorkoutSession(MOCK_DAY));
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      act(() => { result.current.toggleExercise('bench_press'); });
+      act(() => { result.current.finishWorkout(); });
+
+      expect(result.current.exercises.every((e) => e.done)).toBe(true);
     });
 
     it('sets syncStatus to pending', async () => {

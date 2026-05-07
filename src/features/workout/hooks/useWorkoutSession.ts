@@ -109,6 +109,20 @@ export function useWorkoutSession(day: WorkoutDay): UseWorkoutSessionResult {
     [day.id, day.weekDayIndex],
   );
 
+  // Auto-complete: as soon as the user has ticked the last remaining exercise,
+  // flip the session to `completed` without waiting for an explicit Finish tap.
+  // Guarded by `hasUserInteracted` so a saved-but-already-full session loaded
+  // from storage doesn't retroactively re-mark itself completed on mount.
+  useEffect(() => {
+    if (isLoading || !hasUserInteracted.current) return;
+    if (status !== 'in_progress') return;
+    if (exercises.length === 0) return;
+    if (!exercises.every((e) => e.done)) return;
+    finishedAtRef.current = new Date().toISOString();
+    setStatus('completed');
+    setSyncStatus('pending');
+  }, [exercises, status, isLoading]);
+
   // Persist + enqueue sync after every user action. The runner awaits Supabase
   // and we then update syncStatus + lastSyncError to reflect the outcome. The
   // UI never blocks: the user keeps interacting while the promise resolves.
@@ -162,9 +176,14 @@ export function useWorkoutSession(day: WorkoutDay): UseWorkoutSessionResult {
     setSyncStatus('pending');
   }, []);
 
+  // Tapping Finish from the UI implies "I'm done with everything" — so any
+  // box left unchecked gets ticked here. Keeps the workout history consistent
+  // with what the user actually completed (a fully-done session, not a
+  // half-checked one with status=completed).
   const finishWorkout = useCallback(() => {
     hasUserInteracted.current = true;
     finishedAtRef.current = new Date().toISOString();
+    setExercises((prev) => prev.map((e) => (e.done ? e : { ...e, done: true })));
     setStatus('completed');
     setSyncStatus('pending');
   }, []);
