@@ -5,7 +5,7 @@ jest.mock('../../src/features/auth', () => ({
   useAuth: () => ({ user: { id: 'test-user' } }),
 }));
 
-const mockQueueNutritionSync = jest.fn().mockResolvedValue(undefined);
+const mockQueueNutritionSync = jest.fn();
 jest.mock('../../src/features/nutrition/services/nutrition-sync', () => ({
   queueNutritionSync: (...args: unknown[]) => mockQueueNutritionSync(...args),
 }));
@@ -20,8 +20,11 @@ const TODAY = '2026-05-07';
 describe('useNutritionLogger', () => {
   beforeEach(async () => {
     await AsyncStorage.clear();
-    mockQueueNutritionSync.mockClear();
-    mockQueueNutritionSync.mockResolvedValue(undefined);
+    mockQueueNutritionSync.mockReset();
+    // Default: never resolve. Tests that care about post-sync transitions
+    // override this in their own block to avoid race-y assertions on the
+    // optimistic 'pending' state.
+    mockQueueNutritionSync.mockReturnValue(new Promise<never>(() => {}));
   });
 
   it('starts with zeros and local syncStatus', async () => {
@@ -29,6 +32,7 @@ describe('useNutritionLogger', () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.record.calories).toBe(0);
     expect(result.current.syncStatus).toBe('local');
+    expect(result.current.lastSyncError).toBeNull();
   });
 
   it('addEntry updates totals optimistically and flips syncStatus to pending', async () => {
@@ -70,6 +74,73 @@ describe('useNutritionLogger', () => {
     };
     expect(lastCall?.userId).toBe('test-user');
     expect(lastCall?.record.calories).toBe(400);
+  });
+
+  it('transitions to synced when the queue reports success', async () => {
+    mockQueueNutritionSync.mockResolvedValueOnce({ outcome: 'synced' });
+
+    const { result } = renderHook(() => useNutritionLogger(TODAY));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    act(() => result.current.addEntry({ calories: 100 }));
+
+    await waitFor(() => expect(result.current.syncStatus).toBe('synced'));
+    expect(result.current.lastSyncError).toBeNull();
+  });
+
+  it('transitions to failed and surfaces the error message from the queue', async () => {
+    mockQueueNutritionSync.mockResolvedValueOnce({
+      outcome: 'failed',
+      error: 'rls denied',
+    });
+
+    const { result } = renderHook(() => useNutritionLogger(TODAY));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    act(() => result.current.addEntry({ calories: 100 }));
+
+    await waitFor(() => expect(result.current.syncStatus).toBe('failed'));
+    expect(result.current.lastSyncError).toBe('rls denied');
+  });
+
+  it('transitions to failed when the queue throws', async () => {
+    mockQueueNutritionSync.mockRejectedValueOnce(new Error('network down'));
+
+    const { result } = renderHook(() => useNutritionLogger(TODAY));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    act(() => result.current.addEntry({ calories: 100 }));
+
+    await waitFor(() => expect(result.current.syncStatus).toBe('failed'));
+    expect(result.current.lastSyncError).toBe('network down');
+  });
+
+  it('retrySync re-queues the day and reports synced', async () => {
+    mockQueueNutritionSync.mockResolvedValueOnce({ outcome: 'failed', error: 'first' });
+    mockQueueNutritionSync.mockResolvedValueOnce({ outcome: 'synced' });
+
+    const { result } = renderHook(() => useNutritionLogger(TODAY));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    act(() => result.current.addEntry({ calories: 100 }));
+    await waitFor(() => expect(result.current.syncStatus).toBe('failed'));
+
+    act(() => result.current.retrySync());
+    await waitFor(() => expect(result.current.syncStatus).toBe('synced'));
+    expect(mockQueueNutritionSync).toHaveBeenCalledTimes(2);
+  });
+
+  it('retrySync is a noop when the record is already synced', async () => {
+    mockQueueNutritionSync.mockResolvedValueOnce({ outcome: 'synced' });
+
+    const { result } = renderHook(() => useNutritionLogger(TODAY));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    act(() => result.current.addEntry({ calories: 100 }));
+    await waitFor(() => expect(result.current.syncStatus).toBe('synced'));
+
+    act(() => result.current.retrySync());
+    expect(mockQueueNutritionSync).toHaveBeenCalledTimes(1);
   });
 
   it('reset zeroes the record and persists the empty state', async () => {

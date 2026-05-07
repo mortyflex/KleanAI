@@ -8,7 +8,7 @@ jest.mock('../../src/features/auth', () => ({
   useAuth: () => ({ user: { id: 'test-user' } }),
 }));
 
-const mockQueueSmoothingSync = jest.fn().mockResolvedValue(undefined);
+const mockQueueSmoothingSync = jest.fn();
 jest.mock('../../src/features/smoothing/services/smoothing-sync', () => ({
   queueSmoothingSync: (...args: unknown[]) => mockQueueSmoothingSync(...args),
 }));
@@ -38,17 +38,18 @@ const result: NutritionSmoothingResult = {
 
 describe('useSmoothingLogger', () => {
   beforeEach(() => {
-    mockQueueSmoothingSync.mockClear();
-    mockQueueSmoothingSync.mockResolvedValue(undefined);
+    mockQueueSmoothingSync.mockReset();
+    mockQueueSmoothingSync.mockResolvedValue({ outcome: 'synced' });
   });
 
   it('starts in idle state with no last id', async () => {
     const { result: hook } = renderHook(() => useSmoothingLogger());
     expect(hook.current.status).toBe('idle');
     expect(hook.current.lastEventId).toBeNull();
+    expect(hook.current.lastSyncError).toBeNull();
   });
 
-  it('logEvent enqueues a smoothing event and reports an id', async () => {
+  it('logEvent flips to synced when the queue reports success', async () => {
     const { result: hook } = renderHook(() => useSmoothingLogger());
 
     let returnedId: string | null = null;
@@ -57,7 +58,7 @@ describe('useSmoothingLogger', () => {
     });
 
     expect(returnedId).toBeTruthy();
-    expect(hook.current.status).toBe('pending');
+    expect(hook.current.status).toBe('synced');
     expect(hook.current.lastEventId).toBe(returnedId);
     expect(mockQueueSmoothingSync).toHaveBeenCalledTimes(1);
     const call = mockQueueSmoothingSync.mock.calls[0]?.[0] as {
@@ -84,6 +85,21 @@ describe('useSmoothingLogger', () => {
     expect(call.eventId).toBe('fixed-event-id');
   });
 
+  it('flips to failed and surfaces the error when the queue reports failure', async () => {
+    mockQueueSmoothingSync.mockResolvedValueOnce({
+      outcome: 'failed',
+      error: 'rls denied',
+    });
+    const { result: hook } = renderHook(() => useSmoothingLogger());
+
+    await act(async () => {
+      await hook.current.logEvent(event, result);
+    });
+
+    await waitFor(() => expect(hook.current.status).toBe('failed'));
+    expect(hook.current.lastSyncError).toBe('rls denied');
+  });
+
   it('flips to failed when the queue throws', async () => {
     mockQueueSmoothingSync.mockRejectedValueOnce(new Error('storage broken'));
     const { result: hook } = renderHook(() => useSmoothingLogger());
@@ -93,5 +109,6 @@ describe('useSmoothingLogger', () => {
     });
 
     await waitFor(() => expect(hook.current.status).toBe('failed'));
+    expect(hook.current.lastSyncError).toBe('storage broken');
   });
 });

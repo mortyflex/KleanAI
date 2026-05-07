@@ -24,6 +24,7 @@ export {
 } from './sync-handlers';
 
 export { useSyncQueue } from './hooks/useSyncQueue';
+export { useSyncBootstrap } from './hooks/useSyncBootstrap';
 export { syncQueryKeys, syncMutationKeys } from './queries/sync-query-keys';
 
 export type {
