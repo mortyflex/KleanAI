@@ -205,6 +205,10 @@
       "completedBanner": "Séance terminée !",
       "missedBanner": "Pas de souci — chaque jour est un nouveau départ.",
       "savedLocally": "Enregistré localement",
+      "syncing": "Synchronisation…",
+      "synced": "Synchronisé",
+      "syncFailed": "Échec de la synchro — appuie pour réessayer",
+      "retrySync": "Réessayer la synchro",
       "completedChip": "Terminée",
       "missedChip": "Manquée"
     },

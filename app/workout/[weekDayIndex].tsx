@@ -148,8 +148,15 @@ export default function WorkoutDetailScreen() {
   const day = program.days[parseInt(weekDayIndex ?? '0', 10)];
   const intensity = INTENSITY_COLORS[day?.intensity ?? 'medium'];
 
-  const { exercises, status, syncStatus, toggleExercise, finishWorkout, markMissed } =
-    useWorkoutSession(day ?? program.days[0]);
+  const {
+    exercises,
+    status,
+    syncStatus,
+    toggleExercise,
+    finishWorkout,
+    markMissed,
+    retrySync,
+  } = useWorkoutSession(day ?? program.days[0]);
 
   if (!day || day.isRestDay) return null;
 
@@ -169,7 +176,7 @@ export default function WorkoutDetailScreen() {
         </Text>
       </Pressable>
 
-      {/* ── Offline pending badge ── */}
+      {/* ── Sync state badge ── */}
       {syncStatus === 'pending' && (
         <View
           style={{
@@ -188,6 +195,65 @@ export default function WorkoutDetailScreen() {
             {t('workout.session.savedLocally')}
           </Text>
         </View>
+      )}
+      {syncStatus === 'syncing' && (
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 6,
+            alignSelf: 'flex-start',
+            backgroundColor: colors.skyLight,
+            borderRadius: radii.pill,
+            paddingHorizontal: 10,
+            paddingVertical: 4,
+          }}
+        >
+          <Text style={{ fontSize: 11 }}>↻</Text>
+          <Text style={{ fontSize: 11, fontWeight: '600', color: colors.sky }}>
+            {t('workout.session.syncing')}
+          </Text>
+        </View>
+      )}
+      {syncStatus === 'synced' && (
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 6,
+            alignSelf: 'flex-start',
+            backgroundColor: colors.mintLight,
+            borderRadius: radii.pill,
+            paddingHorizontal: 10,
+            paddingVertical: 4,
+          }}
+        >
+          <Text style={{ fontSize: 11 }}>✓</Text>
+          <Text style={{ fontSize: 11, fontWeight: '600', color: colors.mint }}>
+            {t('workout.session.synced')}
+          </Text>
+        </View>
+      )}
+      {syncStatus === 'failed' && (
+        <Pressable
+          accessibilityRole="button"
+          onPress={retrySync}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 6,
+            alignSelf: 'flex-start',
+            backgroundColor: colors.energyLight,
+            borderRadius: radii.pill,
+            paddingHorizontal: 10,
+            paddingVertical: 4,
+          }}
+        >
+          <Text style={{ fontSize: 11 }}>⚠️</Text>
+          <Text style={{ fontSize: 11, fontWeight: '600', color: colors.energy }}>
+            {t('workout.session.syncFailed')}
+          </Text>
+        </Pressable>
       )}
 
       {/* ── Header Card ── */}

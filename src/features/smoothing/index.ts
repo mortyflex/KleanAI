@@ -11,3 +11,10 @@ export {
   WORKOUT_SMOOTHING,
 } from './utils/workout-smoothing';
 export { EVENT_COPY, UNKNOWN_EVENT_MESSAGE_KEY } from './utils/messages';
+export { useSmoothingLogger } from './hooks/useSmoothingLogger';
+export { queueSmoothingSync } from './services/smoothing-sync';
+export {
+  smoothingQueryKeys,
+  smoothingMutationKeys,
+} from './queries/smoothing-query-keys';
+export type { SmoothingLogStatus } from './hooks/useSmoothingLogger';

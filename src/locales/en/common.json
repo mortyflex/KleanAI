@@ -204,6 +204,10 @@
       "completedBanner": "Session complete!",
       "missedBanner": "No worries — every day is a fresh start.",
       "savedLocally": "Saved locally",
+      "syncing": "Syncing…",
+      "synced": "Synced",
+      "syncFailed": "Sync failed — tap to retry",
+      "retrySync": "Retry sync",
       "completedChip": "Done",
       "missedChip": "Missed"
     },

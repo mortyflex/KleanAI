@@ -1,6 +1,6 @@
 import type { WorkoutExercise } from './workout.types';
 
-export type WorkoutSyncStatus = 'local' | 'pending' | 'synced';
+export type WorkoutSyncStatus = 'local' | 'pending' | 'syncing' | 'synced' | 'failed';
 export type WorkoutSessionStatus = 'in_progress' | 'completed' | 'missed';
 
 export interface WorkoutSessionRecord {

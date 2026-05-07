@@ -1,9 +1,36 @@
 import { renderHook, act, waitFor } from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// useAuth is called inside the hook; in unit tests we don't mount AuthProvider,
+// so we stub it with a fixed authenticated user. Keeping `user` non-null lets
+// the sync path execute, which is the very thing we want to assert.
+jest.mock('../../src/features/auth', () => ({
+  useAuth: () => ({ user: { id: 'test-user' } }),
+}));
+
+// The sync service reaches out to Supabase via getSupabase(); we replace the
+// whole service so tests stay deterministic and never hit the network.
+jest.mock(
+  '../../src/features/workout/services/workout-sync',
+  () => ({
+    queueWorkoutSessionSync: jest.fn().mockResolvedValue('synced'),
+  }),
+);
+
+// eslint-disable-next-line import/first
 import { useWorkoutSession } from '../../src/features/workout/hooks/useWorkoutSession';
+// eslint-disable-next-line import/first
 import * as storage from '../../src/features/workout/store/workout-session-storage';
+// eslint-disable-next-line import/first
+import { queueWorkoutSessionSync } from '../../src/features/workout/services/workout-sync';
+// eslint-disable-next-line import/first
 import type { WorkoutDay } from '../../src/types/workout.types';
+// eslint-disable-next-line import/first
 import type { WorkoutSessionRecord } from '../../src/types/workout-session.types';
+
+const mockedQueueSync = queueWorkoutSessionSync as jest.MockedFunction<
+  typeof queueWorkoutSessionSync
+>;
 
 const MOCK_DAY: WorkoutDay = {
   id: 'day-0',
@@ -40,6 +67,12 @@ const MOCK_DAY: WorkoutDay = {
 describe('useWorkoutSession', () => {
   beforeEach(async () => {
     await AsyncStorage.clear();
+    mockedQueueSync.mockReset();
+    // Default: never resolve. Tests that care about the post-sync transition
+    // (synced / failed) override this in their own `it` block. This keeps
+    // the "syncStatus becomes pending" assertions deterministic — without it,
+    // the microtask from .then() could flip the state before the assertion.
+    mockedQueueSync.mockReturnValue(new Promise(() => {}));
   });
 
   describe('initial state', () => {
@@ -282,6 +315,57 @@ describe('useWorkoutSession', () => {
       await waitFor(() => expect(result.current.isLoading).toBe(false));
 
       expect(result.current.syncStatus).toBe('synced');
+    });
+  });
+
+  describe('sync outcome transitions', () => {
+    it('transitions to synced when the queue reports success', async () => {
+      mockedQueueSync.mockResolvedValueOnce('synced');
+
+      const { result } = renderHook(() => useWorkoutSession(MOCK_DAY));
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      act(() => { result.current.finishWorkout(); });
+
+      await waitFor(() => expect(result.current.syncStatus).toBe('synced'));
+      expect(mockedQueueSync).toHaveBeenCalledTimes(1);
+    });
+
+    it('transitions to failed when the queue reports failure', async () => {
+      mockedQueueSync.mockResolvedValueOnce('failed');
+
+      const { result } = renderHook(() => useWorkoutSession(MOCK_DAY));
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      act(() => { result.current.finishWorkout(); });
+
+      await waitFor(() => expect(result.current.syncStatus).toBe('failed'));
+    });
+
+    it('transitions to failed when the queue throws', async () => {
+      mockedQueueSync.mockRejectedValueOnce(new Error('network down'));
+
+      const { result } = renderHook(() => useWorkoutSession(MOCK_DAY));
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      act(() => { result.current.toggleExercise('bench_press'); });
+
+      await waitFor(() => expect(result.current.syncStatus).toBe('failed'));
+    });
+
+    it('retrySync re-queues the session and reports synced', async () => {
+      mockedQueueSync.mockResolvedValueOnce('failed');
+      mockedQueueSync.mockResolvedValueOnce('synced');
+
+      const { result } = renderHook(() => useWorkoutSession(MOCK_DAY));
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      act(() => { result.current.finishWorkout(); });
+      await waitFor(() => expect(result.current.syncStatus).toBe('failed'));
+
+      act(() => { result.current.retrySync(); });
+      await waitFor(() => expect(result.current.syncStatus).toBe('synced'));
+      expect(mockedQueueSync).toHaveBeenCalledTimes(2);
     });
   });
 });
