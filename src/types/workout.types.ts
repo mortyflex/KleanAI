@@ -81,4 +81,11 @@ export interface GenerateProgramParams {
   sessionDurationMin: number;
   trainingLocation: 'gym' | 'home' | 'both';
   durationWeeks?: number;
+  /**
+   * Equipment confirmed by the user (typically via Gym Vision). When set,
+   * exercises whose equipment list does not intersect this array are
+   * filtered out. Bodyweight is implicitly available. Leave undefined to
+   * skip equipment-aware filtering.
+   */
+  availableEquipment?: Equipment[];
 }

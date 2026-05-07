@@ -469,6 +469,54 @@
       }
     }
   },
+  "vision": {
+    "gym": {
+      "title": "Scanne ta salle",
+      "subtitle": "Montre-nous ton matos et on adapte ton programme autour.",
+      "intro": "Ajoute quelques photos du matériel auquel tu as accès. On détecte ce qu'il y a — tu gardes la main.",
+      "addPhotosCta": "Ajouter des photos",
+      "addMorePhotosCta": "En ajouter",
+      "imagesSelected_one": "{{count}} photo prête",
+      "imagesSelected_other": "{{count}} photos prêtes",
+      "noImagesHint": "Choisis au moins une photo pour lancer le scan.",
+      "analyzeCta": "Détecter le matériel",
+      "analyzing": "On regarde ton matos…",
+      "retryCta": "Réessayer",
+      "removePhoto": "Retirer",
+      "mockNotice": "Mode démo — on utilise des images d'exemple pour l'instant.",
+      "errors": {
+        "providerTitle": "Impossible de joindre l'IA",
+        "providerBody": "Un souci de notre côté. Réessaie dans un instant.",
+        "schemaTitle": "Réponse inattendue",
+        "schemaBody": "On n'a pas compris la réponse de l'IA. On tentera un prompt différent la prochaine fois.",
+        "noDetectionsTitle": "Rien de reconnu",
+        "noDetectionsBody": "On n'a repéré aucun matériel familier. Essaie des photos plus nettes ou plus proches."
+      },
+      "results": {
+        "title": "Voici ce qu'on a vu",
+        "subtitle": "Décoche ce qui n'est pas vraiment dispo — on planifie autour de ta sélection.",
+        "confidence": "{{percent}}% sûr",
+        "rawLabel": "Détecté comme : {{label}}",
+        "selectAll": "Tout cocher",
+        "clearAll": "Tout décocher",
+        "addManualHint": "Il manque un truc ? Tu pourras l'ajouter à la main ensuite.",
+        "saveCta": "Enregistrer mon matériel",
+        "savedTitle": "Matériel enregistré",
+        "savedBody": "Ton entraînement s'adapte au matos confirmé.",
+        "noneSelectedHint": "Choisis au moins un élément ou passe — sinon ton plan reste en poids du corps.",
+        "skipCta": "Passer pour l'instant"
+      }
+    },
+    "equipment": {
+      "barbell": "Barre & rack",
+      "dumbbell": "Haltères",
+      "cable": "Machine à poulie",
+      "machine": "Machine guidée",
+      "pull_up_bar": "Barre de traction",
+      "resistance_band": "Élastiques",
+      "bodyweight": "Poids du corps"
+    }
+  },
   "auth": {
     "fields": {
       "email": "E-mail",

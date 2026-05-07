@@ -468,6 +468,54 @@
       }
     }
   },
+  "vision": {
+    "gym": {
+      "title": "Scan your gym",
+      "subtitle": "Show us your gear and we'll tailor your program around it.",
+      "intro": "Add a few photos of the equipment you have access to. We'll detect what's there — you stay in control.",
+      "addPhotosCta": "Add photos",
+      "addMorePhotosCta": "Add more",
+      "imagesSelected_one": "{{count}} photo ready",
+      "imagesSelected_other": "{{count}} photos ready",
+      "noImagesHint": "Pick at least one photo to start the scan.",
+      "analyzeCta": "Detect equipment",
+      "analyzing": "Looking at your gear…",
+      "retryCta": "Try again",
+      "removePhoto": "Remove",
+      "mockNotice": "Demo mode — using sample images for now.",
+      "errors": {
+        "providerTitle": "Couldn't reach the AI",
+        "providerBody": "Something went wrong on our side. Please try again in a moment.",
+        "schemaTitle": "Unexpected response",
+        "schemaBody": "We couldn't understand the AI's reply. We'll try a different prompt next time.",
+        "noDetectionsTitle": "Nothing recognised",
+        "noDetectionsBody": "We didn't spot any familiar equipment. Try clearer or closer photos."
+      },
+      "results": {
+        "title": "We spotted these",
+        "subtitle": "Uncheck anything that isn't really available — we'll plan around your selection.",
+        "confidence": "{{percent}}% sure",
+        "rawLabel": "Detected as: {{label}}",
+        "selectAll": "Select all",
+        "clearAll": "Clear all",
+        "addManualHint": "Missing something? You can add it manually next.",
+        "saveCta": "Save my equipment",
+        "savedTitle": "Equipment saved",
+        "savedBody": "Your workout will adapt to the gear you confirmed.",
+        "noneSelectedHint": "Pick at least one item or skip — your plan stays bodyweight-only otherwise.",
+        "skipCta": "Skip for now"
+      }
+    },
+    "equipment": {
+      "barbell": "Barbell & rack",
+      "dumbbell": "Dumbbells",
+      "cable": "Cable machine",
+      "machine": "Selectorized machine",
+      "pull_up_bar": "Pull-up bar",
+      "resistance_band": "Resistance bands",
+      "bodyweight": "Bodyweight"
+    }
+  },
   "auth": {
     "fields": {
       "email": "Email",

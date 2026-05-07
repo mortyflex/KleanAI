@@ -4,9 +4,23 @@ import type {
   WorkoutExercise,
   GenerateProgramParams,
   ProgramSplit,
+  Equipment,
 } from '../../../types/workout.types';
 import { EXERCISES } from '../data/exercises';
 import { PROGRAM_TEMPLATES } from '../data/program-templates';
+
+/**
+ * An exercise is "doable" when at least one of its required equipment
+ * categories is in the user's available set. Bodyweight is always available
+ * even if the user has never confirmed equipment, so home/calisthenics
+ * exercises stay reachable.
+ */
+export function isExerciseAvailable(
+  required: Equipment[],
+  available: ReadonlySet<Equipment>,
+): boolean {
+  return required.some((eq) => eq === 'bodyweight' || available.has(eq));
+}
 
 const EXTRA_SETS_BY_LEVEL: Record<string, number> = {
   beginner: 0,
@@ -61,6 +75,9 @@ export function generateProgram(params: GenerateProgramParams): WorkoutProgram {
   const template = PROGRAM_TEMPLATES[split];
   const maxEx = maxExercisesFromDuration(params.sessionDurationMin);
   const durationWeeks = params.durationWeeks ?? 12;
+  const availableSet = params.availableEquipment
+    ? new Set<Equipment>([...params.availableEquipment, 'bodyweight'])
+    : null;
 
   const days: WorkoutDay[] = template.weekSchedule.map((dayTemplate, weekDayIndex) => {
     if (!dayTemplate) {
@@ -76,7 +93,14 @@ export function generateProgram(params: GenerateProgramParams): WorkoutProgram {
       };
     }
 
-    const exercises = dayTemplate.exerciseIds
+    const eligibleIds = availableSet
+      ? dayTemplate.exerciseIds.filter((id) => {
+          const ex = EXERCISES[id];
+          return ex ? isExerciseAvailable(ex.equipment, availableSet) : false;
+        })
+      : dayTemplate.exerciseIds;
+
+    const exercises = eligibleIds
       .slice(0, maxEx)
       .map((id) => buildWorkoutExercise(id, params.fitnessLevel))
       .filter((ex): ex is WorkoutExercise => ex !== null);
