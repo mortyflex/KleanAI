@@ -1,5 +1,5 @@
-import React, { useCallback } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { ActivityIndicator, Image, Pressable, ScrollView, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
 
@@ -11,23 +11,18 @@ import type { IngredientId } from '../../../types/ai.types';
 import { useConfirmedFridge } from '../hooks/useConfirmedFridge';
 import { useFridgeVisionFlow } from '../hooks/useFridgeVisionFlow';
 import { INGREDIENT_CATALOG } from '../data/ingredient-catalog';
+import {
+  createMockFridgeImage,
+  isMockImageUri,
+  pickFridgeImage,
+  type PickerOutcome,
+} from '../utils/image-picker';
 
 const labelKeyById: Record<string, string> = Object.fromEntries(
   INGREDIENT_CATALOG.map((e) => [e.internalId, e.labelKey]),
 );
 
-/**
- * Mock image picker. Real implementation will call `expo-image-picker` once
- * the dependency is approved and added — until then we hand the flow a
- * synthetic image URI so the rest of the pipeline (provider, parser,
- * mapper, UI) can be exercised end-to-end.
- */
-function pickMockFridgeImage(index: number): { uri: string; mimeType: string } {
-  return {
-    uri: `mock://fridge-photo-${index}-${Date.now()}.jpg`,
-    mimeType: 'image/jpeg',
-  };
-}
+type PickerErrorKind = 'permission_denied' | 'unavailable';
 
 interface IngredientRowProps {
   internalId: IngredientId;
@@ -114,14 +109,122 @@ function IngredientRow({
   );
 }
 
+interface ImagePreviewProps {
+  uri: string;
+  onRemove: () => void;
+  onReplace: () => void;
+}
+
+function ImagePreview({ uri, onRemove, onReplace }: ImagePreviewProps) {
+  const { t } = useTranslation('common');
+  const isMock = isMockImageUri(uri);
+
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+        padding: 10,
+        backgroundColor: colors.bg,
+        borderRadius: radii.chip,
+        borderWidth: 1,
+        borderColor: colors.border,
+      }}
+    >
+      <View
+        style={{
+          width: 64,
+          height: 64,
+          borderRadius: radii.chip,
+          backgroundColor: colors.brandLight,
+          alignItems: 'center',
+          justifyContent: 'center',
+          overflow: 'hidden',
+        }}
+      >
+        {isMock ? (
+          <KleanText variant="caption" color={colors.brand} weight="700">
+            ★
+          </KleanText>
+        ) : (
+          <Image
+            source={{ uri }}
+            accessibilityLabel={t('vision.fridge.previewAlt')}
+            style={{ width: '100%', height: '100%' }}
+            resizeMode="cover"
+          />
+        )}
+      </View>
+      <View style={{ flex: 1, gap: 2 }}>
+        <KleanText variant="bodyMedium" color={colors.ink} numberOfLines={1}>
+          {isMock ? t('vision.fridge.demoImageBadge') : uri.split('/').pop()}
+        </KleanText>
+        <View style={{ flexDirection: 'row', gap: 12 }}>
+          <Pressable
+            onPress={onReplace}
+            accessibilityLabel={t('vision.fridge.replacePhoto')}
+            testID="fridge-replace-photo"
+          >
+            <KleanText variant="caption" color={colors.brand} weight="700">
+              {t('vision.fridge.replacePhoto')}
+            </KleanText>
+          </Pressable>
+          <Pressable
+            onPress={onRemove}
+            accessibilityLabel={t('vision.fridge.removePhoto')}
+            testID={`fridge-remove-photo-${uri}`}
+          >
+            <KleanText variant="caption" color={colors.energy} weight="700">
+              {t('vision.fridge.removePhoto')}
+            </KleanText>
+          </Pressable>
+        </View>
+      </View>
+    </View>
+  );
+}
+
 export function FridgeVisionScreen() {
   const { t } = useTranslation('common');
   const router = useRouter();
   const flow = useFridgeVisionFlow();
   const { save } = useConfirmedFridge();
+  const [pickerError, setPickerError] = useState<PickerErrorKind | null>(null);
 
-  const handlePickImage = useCallback(() => {
-    flow.addImage(pickMockFridgeImage(flow.state.images.length + 1));
+  const handleOutcome = useCallback(
+    (outcome: PickerOutcome, replaceUri?: string) => {
+      if (outcome.ok) {
+        setPickerError(null);
+        if (replaceUri) flow.removeImage(replaceUri);
+        flow.addImage(outcome.image);
+        return;
+      }
+      if (outcome.reason === 'cancelled') return;
+      setPickerError(outcome.reason);
+    },
+    [flow],
+  );
+
+  const handlePickFromLibrary = useCallback(
+    async (replaceUri?: string) => {
+      const outcome = await pickFridgeImage('library');
+      handleOutcome(outcome, replaceUri);
+    },
+    [handleOutcome],
+  );
+
+  const handleTakePhoto = useCallback(
+    async (replaceUri?: string) => {
+      const outcome = await pickFridgeImage('camera');
+      handleOutcome(outcome, replaceUri);
+    },
+    [handleOutcome],
+  );
+
+  const handleAddMockImage = useCallback(() => {
+    setPickerError(null);
+    flow.addImage(createMockFridgeImage(flow.state.images.length + 1));
   }, [flow]);
 
   const handleAnalyze = useCallback(() => {
@@ -138,6 +241,8 @@ export function FridgeVisionScreen() {
   }, [router]);
 
   const { state } = flow;
+  const showDevControls = __DEV__;
+  const hasImages = state.images.length > 0;
 
   return (
     <ScrollView
@@ -164,62 +269,104 @@ export function FridgeVisionScreen() {
           <KleanText variant="body" color={colors.ink}>
             {t('vision.fridge.intro')}
           </KleanText>
-          <KleanText variant="caption" color={colors.muted}>
-            {t('vision.fridge.mockNotice')}
-          </KleanText>
-          <PillButton
-            label={
-              state.images.length === 0
-                ? t('vision.fridge.addPhotosCta')
-                : t('vision.fridge.addMorePhotosCta')
-            }
-            variant="outline"
-            onPress={handlePickImage}
-            testID="fridge-add-photo"
-          />
-          {state.images.length === 0 && (
+
+          <View style={{ gap: 6 }}>
+            <KleanText variant="caption" color={colors.muted} weight="700">
+              {t('vision.fridge.howItWorksTitle')}
+            </KleanText>
+            <KleanText variant="caption" color={colors.muted}>
+              1. {t('vision.fridge.howItWorksStep1')}
+            </KleanText>
+            <KleanText variant="caption" color={colors.muted}>
+              2. {t('vision.fridge.howItWorksStep2')}
+            </KleanText>
+            <KleanText variant="caption" color={colors.muted}>
+              3. {t('vision.fridge.howItWorksStep3')}
+            </KleanText>
+          </View>
+
+          <View style={{ gap: 8 }}>
+            <PillButton
+              label={t('vision.fridge.takePhotoCta')}
+              onPress={() => handleTakePhoto()}
+              testID="fridge-take-photo"
+            />
+            <PillButton
+              label={t('vision.fridge.pickFromLibraryCta')}
+              variant="outline"
+              onPress={() => handlePickFromLibrary()}
+              testID="fridge-pick-library"
+            />
+            {showDevControls && (
+              <PillButton
+                label={t('vision.fridge.useMockImageCta')}
+                variant="ghost"
+                onPress={handleAddMockImage}
+                testID="fridge-add-photo"
+              />
+            )}
+          </View>
+
+          {pickerError && (
+            <View
+              style={{
+                gap: 4,
+                padding: 12,
+                backgroundColor: colors.energyLight,
+                borderRadius: radii.chip,
+                borderWidth: 1,
+                borderColor: colors.energy,
+              }}
+              accessibilityRole="alert"
+            >
+              <KleanText variant="bodyMedium" color={colors.ink}>
+                {t(
+                  pickerError === 'permission_denied'
+                    ? 'vision.fridge.permissionDeniedTitle'
+                    : 'vision.fridge.pickerUnavailableTitle',
+                )}
+              </KleanText>
+              <KleanText variant="caption" color={colors.muted}>
+                {t(
+                  pickerError === 'permission_denied'
+                    ? 'vision.fridge.permissionDeniedBody'
+                    : 'vision.fridge.pickerUnavailableBody',
+                )}
+              </KleanText>
+            </View>
+          )}
+
+          {showDevControls && (
+            <KleanText variant="caption" color={colors.muted}>
+              {t('vision.fridge.mockNotice')}
+            </KleanText>
+          )}
+
+          {!hasImages && (
             <KleanText variant="caption" color={colors.muted}>
               {t('vision.fridge.noImagesHint')}
             </KleanText>
           )}
-          {state.images.length > 0 && (
+
+          {hasImages && (
             <View style={{ gap: 8 }}>
               <KleanText variant="caption" color={colors.muted}>
                 {t('vision.fridge.imagesSelected', { count: state.images.length })}
               </KleanText>
               {state.images.map((img) => (
-                <View
+                <ImagePreview
                   key={img.uri}
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    gap: 10,
-                    paddingHorizontal: 12,
-                    paddingVertical: 10,
-                    backgroundColor: colors.bg,
-                    borderRadius: radii.chip,
-                    borderWidth: 1,
-                    borderColor: colors.border,
-                  }}
-                >
-                  <KleanText
-                    variant="caption"
-                    color={colors.ink}
-                    style={{ flex: 1 }}
-                    numberOfLines={1}
-                  >
-                    {img.uri}
-                  </KleanText>
-                  <Pressable
-                    onPress={() => flow.removeImage(img.uri)}
-                    accessibilityLabel={t('vision.fridge.removePhoto')}
-                  >
-                    <KleanText variant="caption" color={colors.energy} weight="700">
-                      {t('vision.fridge.removePhoto')}
-                    </KleanText>
-                  </Pressable>
-                </View>
+                  uri={img.uri}
+                  onRemove={() => flow.removeImage(img.uri)}
+                  onReplace={() => handlePickFromLibrary(img.uri)}
+                />
               ))}
+              <PillButton
+                label={t('vision.fridge.addMorePhotosCta')}
+                variant="outline"
+                onPress={() => handlePickFromLibrary()}
+                testID="fridge-add-more"
+              />
               <PillButton
                 label={t('vision.fridge.analyzeCta')}
                 onPress={handleAnalyze}
@@ -237,6 +384,11 @@ export function FridgeVisionScreen() {
           <KleanText variant="bodyMedium" color={colors.ink}>
             {t('vision.fridge.analyzing')}
           </KleanText>
+          {showDevControls && (
+            <KleanText variant="caption" color={colors.muted}>
+              {t('vision.fridge.mockNotice')}
+            </KleanText>
+          )}
         </Card>
       )}
 

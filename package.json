@@ -19,6 +19,7 @@
     ],
     "moduleNameMapper": {
       "^expo-localization$": "<rootDir>/__mocks__/expo-localization.ts",
+      "^expo-image-picker$": "<rootDir>/__mocks__/expo-image-picker.ts",
       "^@expo-google-fonts/plus-jakarta-sans$": "<rootDir>/__mocks__/@expo-google-fonts/plus-jakarta-sans.ts",
       "^@react-native-async-storage/async-storage$": "@react-native-async-storage/async-storage/jest/async-storage-mock",
       "^@/(.*)$": "<rootDir>/src/$1"
@@ -34,6 +35,7 @@
     "expo": "~54.0.33",
     "expo-constants": "~18.0.13",
     "expo-font": "~14.0.11",
+    "expo-image-picker": "~17.0.11",
     "expo-linking": "~8.0.12",
     "expo-localization": "~17.0.8",
     "expo-router": "~6.0.23",
