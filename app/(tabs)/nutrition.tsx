@@ -1,13 +1,12 @@
-import React, { useMemo, useState, useCallback } from "react";
-import { ScrollView, View, Text, Pressable } from "react-native";
+import React, { useMemo, useCallback } from "react";
+import { ScrollView, View, Text } from "react-native";
 import { useRouter, useFocusEffect } from "expo-router";
 import { useTranslation } from "react-i18next";
-import { nutrition, meals } from "../../src/data/mock";
+import { nutrition } from "../../src/data/mock";
 import { Card } from "../../src/components/ui/card";
 import { MacroBar } from "../../src/components/ui/macro-bar";
-import { SectionHeader } from "../../src/components/ui/section-header";
 import { PillButton } from "../../src/components/ui/pill-button";
-import { colors, radii, shadows } from "../../src/design/tokens";
+import { colors, radii } from "../../src/design/tokens";
 import { useOnboarding } from "../../src/features/onboarding/onboarding-context";
 import { useSmoothingContext } from "../../src/features/smoothing/hooks/useSmoothingContext";
 import {
@@ -19,62 +18,11 @@ import {
   getDailyMealPlanWithFridge,
   planInputFromProfile,
 } from "../../src/features/nutrition";
+import {
+  todayLogDate,
+  useDailyConsumption,
+} from "../../src/features/nutrition/hooks/useDailyConsumption";
 import { useConfirmedFridge } from "../../src/features/vision/hooks/useConfirmedFridge";
-
-const MEAL_KEYS: Record<string, string> = {
-  Breakfast: "meals.breakfast",
-  Lunch:     "meals.lunch",
-  Dinner:    "meals.dinner",
-  Snacks:    "meals.snacks",
-};
-
-function MealCard({ meal }: { meal: (typeof meals)[0] }) {
-  const { t } = useTranslation("common");
-  const [expanded, setExpanded] = useState(false);
-  const mealName = t(MEAL_KEYS[meal.name] ?? meal.name);
-
-  return (
-    <Pressable
-      onPress={() => setExpanded((v) => !v)}
-      style={{
-        backgroundColor: colors.card, borderRadius: radii.card, overflow: "hidden",
-        boxShadow: shadows.soft, borderCurve: "continuous",
-      } as any}
-    >
-      <View style={{ flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingVertical: 14, gap: 12 }}>
-        <View style={{ width: 42, height: 42, borderRadius: radii.icon + 2, backgroundColor: meal.logged ? colors.mintLight : colors.bg, alignItems: "center", justifyContent: "center" }}>
-          <Text style={{ fontSize: 20 }}>{meal.emoji}</Text>
-        </View>
-        <View style={{ flex: 1, gap: 3 }}>
-          <Text style={{ fontSize: 15, fontWeight: "700", color: colors.ink }}>{mealName}</Text>
-          <Text style={{ fontSize: 12, color: colors.muted }}>
-            {meal.logged ? meal.time : t("nutrition.meals.notLogged")}
-          </Text>
-        </View>
-        <View style={{ alignItems: "flex-end", gap: 2 }}>
-          {meal.logged ? (
-            <>
-              <Text style={{ fontSize: 16, fontWeight: "700", color: colors.ink }}>{meal.calories}</Text>
-              <Text style={{ fontSize: 11, color: colors.muted }}>{t("nutrition.meals.kcalUnit")}</Text>
-            </>
-          ) : (
-            <Text style={{ fontSize: 13, fontWeight: "600", color: colors.brand }}>{t("nutrition.meals.logFood")}</Text>
-          )}
-        </View>
-      </View>
-      {expanded && meal.logged && meal.items.length > 0 && (
-        <View style={{ paddingHorizontal: 16, paddingBottom: 14, paddingTop: 12, borderTopWidth: 1, borderTopColor: colors.border, gap: 7 }}>
-          {meal.items.map((item, i) => (
-            <View key={i} style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-              <View style={{ width: 5, height: 5, borderRadius: 3, backgroundColor: colors.muted }} />
-              <Text style={{ fontSize: 13, color: colors.muted }}>{item}</Text>
-            </View>
-          ))}
-        </View>
-      )}
-    </Pressable>
-  );
-}
 
 function WaterDrop({ filled }: { filled: boolean }) {
   return (
@@ -142,6 +90,8 @@ export default function NutritionScreen() {
   const { profile } = useOnboarding();
   const smoothingContext = useSmoothingContext();
   const { ingredientIds: fridgeIds, reload: reloadFridge } = useConfirmedFridge();
+  const today = useMemo(() => todayLogDate(), []);
+  const consumption = useDailyConsumption(today);
   const handleScanFridge = useCallback(() => {
     router.push("/vision/fridge");
   }, [router]);
@@ -169,12 +119,31 @@ export default function NutritionScreen() {
     return getDailyMealPlan(restrictions);
   }, [profile.dietaryRestrictions, fridgeIds]);
 
-  // Use the computed plan when available, else fall back to mock for visual
-  // continuity. The current/eaten counter still comes from mock data — we
-  // intentionally don't wire a tracker here (Klean AI is not a food tracker).
+  const consumedIds = useMemo(
+    () => new Set(Object.keys(consumption.consumed)),
+    [consumption.consumed],
+  );
+
+  const handleToggleConsume = useCallback(
+    (meal: Parameters<typeof consumption.consume>[0]) => {
+      if (consumedIds.has(meal.id)) {
+        consumption.unconsume(meal.id);
+      } else {
+        consumption.consume(meal);
+      }
+    },
+    [consumption, consumedIds],
+  );
+
+  // Goal values come from the computed plan when the profile is complete;
+  // they only fall back to the mock when the profile hasn't filled in yet
+  // (visual placeholder, no tracking value). Current values come from
+  // today's per-meal consumption — see useDailyConsumption.
   const calGoal = plan?.calories ?? nutrition.calories.goal;
-  const calCurrent = nutrition.calories.current;
-  const calPct = Math.min(100, Math.round((calCurrent / calGoal) * 100));
+  const calCurrent = consumption.totals.kcal;
+  const calPct = calGoal > 0
+    ? Math.min(100, Math.round((calCurrent / calGoal) * 100))
+    : 0;
   const remaining = Math.max(0, calGoal - calCurrent);
   const proteinGoal = plan?.proteinG ?? nutrition.protein.goal;
   const carbsGoal = plan?.carbsG ?? nutrition.carbs.goal;
@@ -214,9 +183,9 @@ export default function NutritionScreen() {
           </View>
         </View>
         <View style={{ gap: 14 }}>
-          <MacroBar label={t("nutrition.macros.protein")} current={nutrition.protein.current} goal={proteinGoal} unit="g" color={colors.brand}  trackColor={colors.brandLight}  />
-          <MacroBar label={t("nutrition.macros.carbs")}   current={nutrition.carbs.current}   goal={carbsGoal}   unit="g" color={colors.amber}  trackColor={colors.amberLight}  />
-          <MacroBar label={t("nutrition.macros.fat")}     current={nutrition.fat.current}     goal={fatGoal}     unit="g" color={colors.energy} trackColor={colors.energyLight} />
+          <MacroBar label={t("nutrition.macros.protein")} current={consumption.totals.proteinG} goal={proteinGoal} unit="g" color={colors.brand}  trackColor={colors.brandLight}  />
+          <MacroBar label={t("nutrition.macros.carbs")}   current={consumption.totals.carbsG}   goal={carbsGoal}   unit="g" color={colors.amber}  trackColor={colors.amberLight}  />
+          <MacroBar label={t("nutrition.macros.fat")}     current={consumption.totals.fatG}     goal={fatGoal}     unit="g" color={colors.energy} trackColor={colors.energyLight} />
         </View>
       </Card>
 
@@ -230,15 +199,11 @@ export default function NutritionScreen() {
       <NutritionEventReporter context={smoothingContext} />
 
       {/* ── Simple meal suggestions ── */}
-      <MealSuggestionsList suggestions={suggestions} />
-
-      {/* ── Meals (legacy mock log) ── */}
-      <View style={{ gap: 12 }}>
-        <SectionHeader title={t("nutrition.meals.title")} action={t("nutrition.meals.logFood")} />
-        {meals.map((meal) => (
-          <MealCard key={meal.id} meal={meal} />
-        ))}
-      </View>
+      <MealSuggestionsList
+        suggestions={suggestions}
+        consumedIds={consumedIds}
+        onToggleConsume={handleToggleConsume}
+      />
 
       {/* ── Hydration ── */}
       <Card style={{ gap: 16 }}>

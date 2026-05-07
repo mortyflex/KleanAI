@@ -20,8 +20,16 @@ Core product promise:
 
 > Klean AI adjusts your fitness and nutrition plan when real life gets messy, without guilt.
 
-Klean AI is not a generic fitness tracker.
-Klean AI is a friendly expert coach: motivating, practical, adaptive, and never judgmental.
+Klean AI is a **light-touch tracker** built around suggestions, not a
+calorie-counting micromanager. The user picks meals from a small curated
+catalog (or from fridge-aware suggestions) and taps **"I ate this"** —
+calories and macros decrement automatically. There is no manual gram entry,
+no barcode scanning (yet), no per-ingredient logging.
+
+Klean AI is, above all, a friendly expert coach: motivating, practical,
+adaptive, and never judgmental. Tracking exists to help adaptation — when
+the user skips meals, eats too much, or breaks the plan, the **Smoothing
+Engine** absorbs the deviation and rebalances the rest of the week.
 
 ---
 
@@ -50,6 +58,39 @@ AI vision is useful, but the core product is:
 - automatic adaptation
 - zero guilt
 - no mental load
+- one-tap meal validation (no manual macro entry)
+
+---
+
+## Nutrition Tracking
+
+The nutrition surface combines three things on a single screen:
+
+1. **Daily plan** — calorie target + protein/carbs/fat goals computed from
+   the onboarding profile (`computeDailyPlan` in `src/features/nutrition`).
+2. **Meal suggestions** — `MealSuggestionsList` shows one suggestion per
+   slot (breakfast / lunch / dinner / snack), filtered by dietary
+   restrictions and biased by confirmed fridge ingredients when available.
+3. **Light consumption tracking** — each suggestion has an "I ate this" /
+   "Undo" toggle. Tapping it stores a per-meal entry in
+   `consumed-meals-storage` (local) AND mirrors the aggregated totals into
+   `DailyNutritionRecord` so the existing sync pipeline ships them to
+   Supabase. The big calorie counter and the three macro bars decrement
+   from real consumption — never from mock data.
+
+Constraints:
+
+- **Never** ask the user to type calories or grams. Tracking is one tap or
+  zero.
+- **Never** auto-confirm a suggestion as eaten — the user owns every entry.
+- Per-day rollover happens naturally: storage is keyed by `YYYY-MM-DD`
+  (local timezone), so a fresh day starts at zero without explicit reset.
+- Deviations (skipped meals, excess food, eating out) are reported via
+  `NutritionEventReporter`, **not** via the meal toggle. The toggle is for
+  validating a planned suggestion; the reporter feeds the smoothing engine.
+- Open Food Facts integration is intentionally out of scope until the
+  curated catalog stops being enough. Adding sauces/condiments/brands is
+  a future phase.
 
 ---
 

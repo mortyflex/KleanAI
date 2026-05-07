@@ -91,10 +91,12 @@ describe('MEAL_CATALOG — invariants', () => {
     }
   });
 
-  it('every meal has a positive kcal and non-negative protein value', () => {
+  it('every meal has positive kcal and non-negative macros', () => {
     for (const m of MEAL_CATALOG) {
       expect(m.approxKcal).toBeGreaterThan(0);
       expect(m.approxProteinG).toBeGreaterThanOrEqual(0);
+      expect(m.approxCarbsG).toBeGreaterThanOrEqual(0);
+      expect(m.approxFatG).toBeGreaterThanOrEqual(0);
     }
   });
 });

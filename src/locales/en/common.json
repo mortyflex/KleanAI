@@ -269,9 +269,6 @@
       "proteinUnit": "{{grams}} g protein"
     },
     "meals": {
-      "title": "Meals",
-      "logFood": "Log food",
-      "notLogged": "Not logged yet",
       "kcalUnit": "kcal"
     },
     "fridgeScan": {
@@ -291,8 +288,12 @@
     },
     "suggestions": {
       "title": "Simple ideas",
-      "subtitle": "Pick what fits your day. Nothing strict.",
+      "subtitle": "Pick what fits your day. Tap once you've eaten — your daily total adapts.",
       "kcalLine": "{{kcal}} kcal · {{protein}} g protein",
+      "markCta": "I ate this",
+      "markLabel": "Mark this meal as eaten",
+      "unmarkCta": "Undo",
+      "unmarkLabel": "Remove this meal from today's total",
       "noResultsTitle": "Nothing to suggest right now",
       "noResultsBody": "Your dietary preferences filter out our default ideas. We'll add more soon.",
       "meals": {

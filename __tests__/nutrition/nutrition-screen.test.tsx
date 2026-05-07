@@ -1,5 +1,11 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react-native';
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import '../../src/lib/i18n';
@@ -108,6 +114,40 @@ describe('NutritionScreen', () => {
     renderScreen({});
     expect(screen.getByTestId('nutrition-fridge-scan-cta')).toBeTruthy();
     expect(screen.getByText('Scan my fridge')).toBeTruthy();
+  });
+
+  it('decrements the calorie counter when the user marks a suggestion as eaten', async () => {
+    renderScreen({
+      goal: 'lose_weight',
+      gender: 'female',
+      age: 30,
+      weightKg: 70,
+      heightCm: 168,
+      trainingDaysPerWeek: 3,
+      targetWeightKg: 65,
+      targetTimeframe: { durationWeeks: 12 },
+      dietaryRestrictions: [],
+    });
+
+    // Default lunch suggestion is the chicken rice bowl (580 kcal). Tap its
+    // "I ate this" button and verify the totals card updates.
+    const lunchToggle = await screen.findByTestId('suggestion-lunch-toggle');
+    await act(async () => {
+      fireEvent.press(lunchToggle);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('580')).toBeTruthy();
+    });
+
+    // Tap again — totals should drop back to 0.
+    await act(async () => {
+      fireEvent.press(screen.getByTestId('suggestion-lunch-toggle'));
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('0')).toBeTruthy();
+    });
   });
 
   it('biases meal suggestions toward confirmed fridge ingredients', async () => {

@@ -1,7 +1,23 @@
 export { useNutritionLogger } from './hooks/useNutritionLogger';
 export { useNutritionEventReporter } from './hooks/useNutritionEventReporter';
+export {
+  useDailyConsumption,
+  todayLogDate,
+} from './hooks/useDailyConsumption';
 export { queueNutritionSync } from './services/nutrition-sync';
 export { getDay, saveDay, clearDay } from './store/nutrition-storage';
+export {
+  getConsumedMeals,
+  saveConsumedMeals,
+  clearConsumedMeals,
+  totalsFromConsumed,
+  ZERO_TOTALS,
+} from './store/consumed-meals-storage';
+export type {
+  ConsumedMealEntry,
+  ConsumedMealMap,
+  ConsumedTotals,
+} from './store/consumed-meals-storage';
 export {
   nutritionQueryKeys,
   nutritionMutationKeys,

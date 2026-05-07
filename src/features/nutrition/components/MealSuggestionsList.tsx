@@ -1,5 +1,5 @@
 import React from 'react';
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Card } from '../../../components/ui/card';
 import { KleanText } from '../../../components/ui/klean-text';
@@ -8,6 +8,10 @@ import type { MealSuggestion, MealType } from '../utils/meal-suggestions';
 
 interface MealSuggestionsListProps {
   suggestions: Record<MealType, MealSuggestion | null>;
+  /** Set of meal ids the user has marked as eaten today. */
+  consumedIds?: ReadonlySet<string>;
+  /** Called when the user taps the "I ate this" / "Undo" button on a card. */
+  onToggleConsume?: (meal: MealSuggestion) => void;
   testID?: string;
 }
 
@@ -20,6 +24,8 @@ const MEAL_LABEL_KEYS: Record<MealType, string> = {
 
 export function MealSuggestionsList({
   suggestions,
+  consumedIds,
+  onToggleConsume,
   testID,
 }: MealSuggestionsListProps) {
   const { t } = useTranslation('common');
@@ -58,19 +64,20 @@ export function MealSuggestionsList({
       {types.map((typeKey) => {
         const meal = suggestions[typeKey];
         if (!meal) return null;
+        const eaten = consumedIds?.has(meal.id) ?? false;
         return (
           <View
             key={typeKey}
             testID={`suggestion-${typeKey}`}
             style={{
-              backgroundColor: colors.card,
+              backgroundColor: eaten ? colors.mintLight : colors.card,
               borderRadius: radii.card,
               padding: 16,
               flexDirection: 'row',
               alignItems: 'center',
               gap: 12,
               borderWidth: 1,
-              borderColor: colors.border,
+              borderColor: eaten ? colors.mint : colors.border,
             }}
           >
             <View
@@ -78,12 +85,12 @@ export function MealSuggestionsList({
                 width: 44,
                 height: 44,
                 borderRadius: radii.icon + 2,
-                backgroundColor: colors.bg,
+                backgroundColor: eaten ? colors.mint : colors.bg,
                 alignItems: 'center',
                 justifyContent: 'center',
               }}
             >
-              <KleanText variant="h3">{meal.emoji}</KleanText>
+              <KleanText variant="h3">{eaten ? '✓' : meal.emoji}</KleanText>
             </View>
             <View style={{ flex: 1, gap: 3 }}>
               <KleanText
@@ -103,6 +110,38 @@ export function MealSuggestionsList({
                 })}
               </KleanText>
             </View>
+            {onToggleConsume ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t(
+                  eaten
+                    ? 'nutrition.suggestions.unmarkLabel'
+                    : 'nutrition.suggestions.markLabel',
+                )}
+                onPress={() => onToggleConsume(meal)}
+                testID={`suggestion-${typeKey}-toggle`}
+                style={{
+                  paddingHorizontal: 12,
+                  paddingVertical: 8,
+                  borderRadius: radii.pill,
+                  borderWidth: 1,
+                  borderColor: eaten ? colors.mint : colors.brand,
+                  backgroundColor: eaten ? colors.card : colors.brand,
+                }}
+              >
+                <KleanText
+                  variant="caption"
+                  weight="700"
+                  color={eaten ? colors.mint : '#FFFFFF'}
+                >
+                  {t(
+                    eaten
+                      ? 'nutrition.suggestions.unmarkCta'
+                      : 'nutrition.suggestions.markCta',
+                  )}
+                </KleanText>
+              </Pressable>
+            ) : null}
           </View>
         );
       })}

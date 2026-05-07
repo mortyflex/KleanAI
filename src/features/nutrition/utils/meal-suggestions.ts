@@ -13,6 +13,12 @@ export interface MealSuggestion {
   bodyKey: string;
   approxKcal: number;
   approxProteinG: number;
+  /** Approximate carbs in grams — used to decrement the carbs macro bar
+   * when the user marks a meal as eaten. */
+  approxCarbsG: number;
+  /** Approximate fat in grams — used to decrement the fat macro bar when
+   * the user marks a meal as eaten. */
+  approxFatG: number;
   /** Restrictions this meal is COMPATIBLE with (i.e. user can eat it). */
   compatibleWith: DietaryRestriction[];
   /** Restrictions this meal CONFLICTS with (i.e. should be hidden). */
@@ -58,6 +64,8 @@ export const MEAL_CATALOG: MealSuggestion[] = [
     bodyKey: 'nutrition.suggestions.meals.oatmeal_berries.body',
     approxKcal: 380,
     approxProteinG: 18,
+    approxCarbsG: 55,
+    approxFatG: 9,
     compatibleWith: omit(ALL_RESTRICTIONS, ['gluten_free']),
     conflictsWith: ['gluten_free'],
     emoji: '🥣',
@@ -70,6 +78,8 @@ export const MEAL_CATALOG: MealSuggestion[] = [
     bodyKey: 'nutrition.suggestions.meals.greek_yogurt_bowl.body',
     approxKcal: 320,
     approxProteinG: 24,
+    approxCarbsG: 38,
+    approxFatG: 8,
     compatibleWith: omit(ALL_RESTRICTIONS, ['vegan', 'lactose_free']),
     conflictsWith: ['vegan', 'lactose_free'],
     emoji: '🥛',
@@ -82,6 +92,8 @@ export const MEAL_CATALOG: MealSuggestion[] = [
     bodyKey: 'nutrition.suggestions.meals.tofu_scramble.body',
     approxKcal: 360,
     approxProteinG: 22,
+    approxCarbsG: 24,
+    approxFatG: 18,
     compatibleWith: ALL_RESTRICTIONS,
     conflictsWith: [],
     emoji: '🍳',
@@ -94,6 +106,8 @@ export const MEAL_CATALOG: MealSuggestion[] = [
     bodyKey: 'nutrition.suggestions.meals.eggs_avocado_toast.body',
     approxKcal: 420,
     approxProteinG: 22,
+    approxCarbsG: 30,
+    approxFatG: 22,
     compatibleWith: omit(ALL_RESTRICTIONS, ['vegan', 'gluten_free']),
     conflictsWith: ['vegan', 'gluten_free'],
     emoji: '🥑',
@@ -108,6 +122,8 @@ export const MEAL_CATALOG: MealSuggestion[] = [
     bodyKey: 'nutrition.suggestions.meals.chicken_rice_bowl.body',
     approxKcal: 580,
     approxProteinG: 42,
+    approxCarbsG: 70,
+    approxFatG: 12,
     compatibleWith: omit(ALL_RESTRICTIONS, ['vegetarian', 'vegan']),
     conflictsWith: ['vegetarian', 'vegan'],
     emoji: '🍗',
@@ -120,6 +136,8 @@ export const MEAL_CATALOG: MealSuggestion[] = [
     bodyKey: 'nutrition.suggestions.meals.lentil_quinoa_salad.body',
     approxKcal: 480,
     approxProteinG: 24,
+    approxCarbsG: 60,
+    approxFatG: 14,
     compatibleWith: ALL_RESTRICTIONS,
     conflictsWith: [],
     emoji: '🥗',
@@ -132,6 +150,8 @@ export const MEAL_CATALOG: MealSuggestion[] = [
     bodyKey: 'nutrition.suggestions.meals.salmon_sweet_potato.body',
     approxKcal: 560,
     approxProteinG: 38,
+    approxCarbsG: 48,
+    approxFatG: 22,
     compatibleWith: omit(ALL_RESTRICTIONS, ['vegetarian', 'vegan']),
     conflictsWith: ['vegetarian', 'vegan'],
     emoji: '🐟',
@@ -144,6 +164,8 @@ export const MEAL_CATALOG: MealSuggestion[] = [
     bodyKey: 'nutrition.suggestions.meals.tofu_stir_fry.body',
     approxKcal: 510,
     approxProteinG: 28,
+    approxCarbsG: 60,
+    approxFatG: 16,
     compatibleWith: ALL_RESTRICTIONS,
     conflictsWith: [],
     emoji: '🥢',
@@ -158,6 +180,8 @@ export const MEAL_CATALOG: MealSuggestion[] = [
     bodyKey: 'nutrition.suggestions.meals.turkey_meatballs.body',
     approxKcal: 540,
     approxProteinG: 40,
+    approxCarbsG: 50,
+    approxFatG: 18,
     compatibleWith: omit(ALL_RESTRICTIONS, ['vegetarian', 'vegan']),
     conflictsWith: ['vegetarian', 'vegan'],
     emoji: '🍝',
@@ -170,6 +194,8 @@ export const MEAL_CATALOG: MealSuggestion[] = [
     bodyKey: 'nutrition.suggestions.meals.chickpea_curry.body',
     approxKcal: 520,
     approxProteinG: 22,
+    approxCarbsG: 70,
+    approxFatG: 14,
     compatibleWith: ALL_RESTRICTIONS,
     conflictsWith: [],
     emoji: '🍛',
@@ -182,6 +208,8 @@ export const MEAL_CATALOG: MealSuggestion[] = [
     bodyKey: 'nutrition.suggestions.meals.grilled_chicken_veg.body',
     approxKcal: 500,
     approxProteinG: 44,
+    approxCarbsG: 30,
+    approxFatG: 20,
     compatibleWith: omit(ALL_RESTRICTIONS, ['vegetarian', 'vegan']),
     conflictsWith: ['vegetarian', 'vegan'],
     emoji: '🍽️',
@@ -196,6 +224,8 @@ export const MEAL_CATALOG: MealSuggestion[] = [
     bodyKey: 'nutrition.suggestions.meals.fruit_almonds.body',
     approxKcal: 220,
     approxProteinG: 6,
+    approxCarbsG: 24,
+    approxFatG: 12,
     compatibleWith: ALL_RESTRICTIONS,
     conflictsWith: [],
     emoji: '🍎',
@@ -208,6 +238,8 @@ export const MEAL_CATALOG: MealSuggestion[] = [
     bodyKey: 'nutrition.suggestions.meals.cottage_cheese_fruit.body',
     approxKcal: 200,
     approxProteinG: 18,
+    approxCarbsG: 18,
+    approxFatG: 5,
     compatibleWith: omit(ALL_RESTRICTIONS, ['vegan', 'lactose_free']),
     conflictsWith: ['vegan', 'lactose_free'],
     emoji: '🥄',
@@ -220,6 +252,8 @@ export const MEAL_CATALOG: MealSuggestion[] = [
     bodyKey: 'nutrition.suggestions.meals.edamame.body',
     approxKcal: 180,
     approxProteinG: 16,
+    approxCarbsG: 14,
+    approxFatG: 7,
     compatibleWith: ALL_RESTRICTIONS,
     conflictsWith: [],
     emoji: '🫛',

@@ -270,9 +270,6 @@
       "proteinUnit": "{{grams}} g de protéines"
     },
     "meals": {
-      "title": "Repas",
-      "logFood": "Enregistrer",
-      "notLogged": "Non enregistré",
       "kcalUnit": "kcal"
     },
     "fridgeScan": {
@@ -292,8 +289,12 @@
     },
     "suggestions": {
       "title": "Idées simples",
-      "subtitle": "Choisis ce qui te va. Rien d'imposé.",
+      "subtitle": "Choisis ce qui te va. Tape dès que c'est mangé — ton total du jour s'adapte.",
       "kcalLine": "{{kcal}} kcal · {{protein}} g de protéines",
+      "markCta": "Je l'ai mangé",
+      "markLabel": "Marquer ce repas comme mangé",
+      "unmarkCta": "Annuler",
+      "unmarkLabel": "Retirer ce repas du total du jour",
       "noResultsTitle": "Aucune idée à proposer pour l'instant",
       "noResultsBody": "Tes préférences alimentaires excluent nos idées par défaut. On en ajoutera bientôt.",
       "meals": {
