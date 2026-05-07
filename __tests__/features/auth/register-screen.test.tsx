@@ -91,16 +91,14 @@ describe("RegisterScreen", () => {
     });
   });
 
-  it("routes back to summary with autoSave when intent=save-onboarding", async () => {
+  it("routes to the summary recap when intent=save-onboarding so the user can review their plan", async () => {
     mockIntent = "save-onboarding";
     renderRegister();
     fireEvent.changeText(screen.getByTestId("register-email-input"), "a@b.com");
     fireEvent.changeText(screen.getByTestId("register-password-input"), "secret123");
     fireEvent.press(screen.getByTestId("register-submit"));
     await waitFor(() => {
-      expect(mockReplace).toHaveBeenCalledWith(
-        "/(onboarding)/summary?autoSave=1",
-      );
+      expect(mockReplace).toHaveBeenCalledWith("/(onboarding)/summary");
     });
   });
 });

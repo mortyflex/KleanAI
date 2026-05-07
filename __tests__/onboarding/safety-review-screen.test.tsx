@@ -1,21 +1,43 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen } from '@testing-library/react-native';
 import '../../src/lib/i18n';
 import { OnboardingContext } from '../../src/features/onboarding/onboarding-context';
 import SafetyReviewScreen from '../../app/(onboarding)/safety-review';
+import {
+  AuthContext,
+  type AuthContextValue,
+} from '../../src/features/auth';
 import type { OnboardingProfile } from '../../src/types/profile.types';
 
+const mockPush = jest.fn();
+
 jest.mock('expo-router', () => ({
-  useRouter: () => ({ push: jest.fn(), back: jest.fn(), replace: jest.fn() }),
+  useRouter: () => ({ push: mockPush, back: jest.fn(), replace: jest.fn() }),
 }));
 
-function renderWithProfile(profile: Partial<OnboardingProfile>) {
+const noopAuth: AuthContextValue = {
+  status: 'unauthenticated',
+  session: null,
+  user: null,
+  signIn: jest.fn(),
+  signUp: jest.fn(),
+  signOut: jest.fn(async () => undefined),
+  refresh: jest.fn(async () => undefined),
+};
+
+function renderWithProfile(
+  profile: Partial<OnboardingProfile>,
+  authOverrides: Partial<AuthContextValue> = {},
+) {
   const updateProfile = jest.fn();
   const resetProfile = jest.fn();
+  const auth: AuthContextValue = { ...noopAuth, ...authOverrides };
   return render(
-    <OnboardingContext.Provider value={{ profile, updateProfile, resetProfile }}>
-      <SafetyReviewScreen />
-    </OnboardingContext.Provider>
+    <AuthContext.Provider value={auth}>
+      <OnboardingContext.Provider value={{ profile, updateProfile, resetProfile }}>
+        <SafetyReviewScreen />
+      </OnboardingContext.Provider>
+    </AuthContext.Provider>
   );
 }
 
@@ -30,8 +52,34 @@ const safeProfile: Partial<OnboardingProfile> = {
 };
 
 describe('SafetyReviewScreen', () => {
+  beforeEach(() => {
+    mockPush.mockClear();
+  });
+
   it('renders without crashing', () => {
     renderWithProfile(safeProfile);
+  });
+
+  it('routes unauthenticated users to /(auth)/register on continue (account before summary)', () => {
+    renderWithProfile(safeProfile);
+    fireEvent.press(screen.getByTestId('safety-cta-primary'));
+    expect(mockPush).toHaveBeenCalledWith(
+      '/(auth)/register?intent=save-onboarding',
+    );
+  });
+
+  it('routes already-authenticated users straight to the summary recap', () => {
+    renderWithProfile(safeProfile, {
+      status: 'authenticated',
+      user: { id: 'u-1', email: 'a@b.com' } as never,
+      session: {
+        access_token: 'tok',
+        refresh_token: 'rtok',
+        user: { id: 'u-1' },
+      } as never,
+    });
+    fireEvent.press(screen.getByTestId('safety-cta-primary'));
+    expect(mockPush).toHaveBeenCalledWith('/(onboarding)/summary');
   });
 
   it('shows step 9 of 10 indicator', () => {

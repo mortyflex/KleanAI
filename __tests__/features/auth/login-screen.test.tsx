@@ -93,7 +93,7 @@ describe("LoginScreen", () => {
     });
   });
 
-  it("navigates back to summary with autoSave when intent=save-onboarding", async () => {
+  it("navigates to summary recap when intent=save-onboarding (no auto-save)", async () => {
     mockIntent = "save-onboarding";
     const { auth } = renderLogin();
     fireEvent.changeText(screen.getByTestId("login-email-input"), "a@b.com");
@@ -102,9 +102,7 @@ describe("LoginScreen", () => {
 
     await waitFor(() => {
       expect(auth.signIn).toHaveBeenCalled();
-      expect(mockReplace).toHaveBeenCalledWith(
-        "/(onboarding)/summary?autoSave=1",
-      );
+      expect(mockReplace).toHaveBeenCalledWith("/(onboarding)/summary");
     });
   });
 

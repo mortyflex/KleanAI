@@ -42,7 +42,7 @@ export default function LoginScreen() {
     try {
       await signIn(email.trim(), password);
       if (intent === "save-onboarding") {
-        router.replace("/(onboarding)/summary?autoSave=1");
+        router.replace("/(onboarding)/summary");
       } else {
         router.replace("/(tabs)");
       }

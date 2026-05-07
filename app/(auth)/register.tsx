@@ -65,7 +65,9 @@ export default function RegisterScreen() {
         return;
       }
       if (isPostOnboarding) {
-        router.replace("/(onboarding)/summary?autoSave=1");
+        // Show the "step 10/10 — your plan is ready" recap. The user reviews
+        // it and presses "Follow this program" to persist + enter the app.
+        router.replace("/(onboarding)/summary");
       } else {
         router.replace("/(tabs)");
       }

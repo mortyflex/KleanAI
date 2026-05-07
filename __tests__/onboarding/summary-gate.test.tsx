@@ -12,11 +12,9 @@ import type { OnboardingProfile } from "../../src/types/profile.types";
 
 const mockReplace = jest.fn();
 const mockPush = jest.fn();
-let mockAutoSave: string | undefined;
 
 jest.mock("expo-router", () => ({
   useRouter: () => ({ replace: mockReplace, push: mockPush, back: jest.fn() }),
-  useLocalSearchParams: () => ({ autoSave: mockAutoSave }),
 }));
 
 const mockSave: jest.Mock = jest.fn();
@@ -51,13 +49,10 @@ const FILLED_PROFILE: Partial<OnboardingProfile> = {
 function renderSummary({
   authStatus,
   user,
-  autoSave,
 }: {
   authStatus: AuthContextValue["status"];
   user: AuthContextValue["user"];
-  autoSave?: string;
 }) {
-  mockAutoSave = autoSave;
   const auth: AuthContextValue = {
     status: authStatus,
     session: user
@@ -88,60 +83,45 @@ function renderSummary({
   );
 }
 
-describe("SummaryScreen — onboarding gate", () => {
+describe("SummaryScreen — gated by safety-review, never auto-saves", () => {
   beforeEach(() => {
     mockReplace.mockClear();
     mockPush.mockClear();
     mockSave.mockReset();
     mockSave.mockResolvedValue(undefined);
-    mockAutoSave = undefined;
   });
 
-  it("redirects to /(auth)/register when unauthenticated and CTA is pressed", async () => {
+  it("calls saveOnboardingProfile with the auth user id and routes to (tabs) when CTA pressed", async () => {
+    renderSummary({
+      authStatus: "authenticated",
+      user: { id: "auth-user-1", email: "a@b.com" } as never,
+    });
+    fireEvent.press(screen.getByTestId("generate-plan-cta"));
+    await waitFor(() => {
+      expect(mockSave).toHaveBeenCalledTimes(1);
+      expect(mockSave.mock.calls[0][0]).toBe("auth-user-1");
+      expect(mockReplace).toHaveBeenCalledWith("/(tabs)");
+    });
+  });
+
+  it("does not auto-save on mount even when authenticated", async () => {
+    renderSummary({
+      authStatus: "authenticated",
+      user: { id: "auth-user-1", email: "a@b.com" } as never,
+    });
+    // Give effects a tick — the user must press the CTA themselves.
+    await new Promise((r) => setTimeout(r, 0));
+    expect(mockSave).not.toHaveBeenCalled();
+  });
+
+  it("safety-net: bounces unauthenticated user to /(auth)/register if they reach summary", async () => {
     renderSummary({ authStatus: "unauthenticated", user: null });
     fireEvent.press(screen.getByTestId("generate-plan-cta"));
     await waitFor(() => {
-      expect(mockPush).toHaveBeenCalledWith(
+      expect(mockReplace).toHaveBeenCalledWith(
         "/(auth)/register?intent=save-onboarding",
       );
       expect(mockSave).not.toHaveBeenCalled();
     });
-  });
-
-  it("calls saveOnboardingProfile with the auth user id when authenticated", async () => {
-    renderSummary({
-      authStatus: "authenticated",
-      user: { id: "auth-user-1", email: "a@b.com" } as never,
-    });
-    fireEvent.press(screen.getByTestId("generate-plan-cta"));
-    await waitFor(() => {
-      expect(mockSave).toHaveBeenCalledTimes(1);
-      expect(mockSave.mock.calls[0][0]).toBe("auth-user-1");
-      expect(mockReplace).toHaveBeenCalledWith("/(tabs)");
-    });
-  });
-
-  it("auto-saves once on mount when autoSave=1 and user is authenticated", async () => {
-    renderSummary({
-      authStatus: "authenticated",
-      user: { id: "auth-user-1", email: "a@b.com" } as never,
-      autoSave: "1",
-    });
-    await waitFor(() => {
-      expect(mockSave).toHaveBeenCalledTimes(1);
-      expect(mockSave.mock.calls[0][0]).toBe("auth-user-1");
-      expect(mockReplace).toHaveBeenCalledWith("/(tabs)");
-    });
-  });
-
-  it("does not auto-save when autoSave=1 but user is still unauthenticated", async () => {
-    renderSummary({
-      authStatus: "unauthenticated",
-      user: null,
-      autoSave: "1",
-    });
-    // Give effects a tick; the persistence call must not fire.
-    await new Promise((r) => setTimeout(r, 0));
-    expect(mockSave).not.toHaveBeenCalled();
   });
 });
