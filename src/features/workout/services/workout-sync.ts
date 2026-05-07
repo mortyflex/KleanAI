@@ -6,11 +6,17 @@ import { runSync } from '../../sync/sync-runner';
 interface QueueWorkoutSessionInput {
   userId: string;
   session: WorkoutSessionRecord;
-  /** Stable id used as the Supabase row id and dedupe key. */
+  /** UUID v4 used as the Supabase row id and dedupe key. */
   sessionId: string;
 }
 
 export type WorkoutSessionSyncOutcome = 'synced' | 'failed' | 'pending';
+
+export interface WorkoutSessionSyncResult {
+  outcome: WorkoutSessionSyncOutcome;
+  /** First non-empty error reported by any item that ended in `failed`. */
+  error?: string;
+}
 
 function logKey(sessionId: string, exerciseId: string): string {
   return `workout_log:${sessionId}:${exerciseId}`;
@@ -18,17 +24,12 @@ function logKey(sessionId: string, exerciseId: string): string {
 
 /**
  * Persist a workout session change to the sync queue and drain it. Returns
- * the resulting outcome the UI should show:
- *   - `synced` — every queued row landed in Supabase.
- *   - `failed` — at least one row threw and is left in `failed` state.
- *   - `pending` — the runner skipped some items (e.g. attempts cap reached).
- *
- * Each completed exercise is enqueued as its own `workout_log` row so partial
- * progress is preserved even if the session row fails to upsert.
+ * the outcome plus the first failure message we found, so the UI can surface
+ * the real Supabase error instead of a generic "sync failed".
  */
 export async function queueWorkoutSessionSync(
   input: QueueWorkoutSessionInput,
-): Promise<WorkoutSessionSyncOutcome> {
+): Promise<WorkoutSessionSyncResult> {
   const { userId, session, sessionId } = input;
   const sessionDedupe = `workout_session:${sessionId}`;
   const logDedupes: string[] = [];
@@ -72,8 +73,14 @@ export async function queueWorkoutSessionSync(
   const ours = all.filter(
     (i) => i.dedupeKey === sessionDedupe || logDedupes.includes(i.dedupeKey),
   );
-  if (ours.length === 0) return 'pending';
-  if (ours.every((i) => i.status === 'synced')) return 'synced';
-  if (ours.some((i) => i.status === 'failed')) return 'failed';
-  return 'pending';
+  if (ours.length === 0) return { outcome: 'pending' };
+  if (ours.every((i) => i.status === 'synced')) return { outcome: 'synced' };
+  const firstFailed = ours.find((i) => i.status === 'failed');
+  if (firstFailed) {
+    return {
+      outcome: 'failed',
+      error: firstFailed.lastError,
+    };
+  }
+  return { outcome: 'pending' };
 }

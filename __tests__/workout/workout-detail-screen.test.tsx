@@ -13,7 +13,9 @@ jest.mock('../../src/features/auth', () => ({
 jest.mock(
   '../../src/features/workout/services/workout-sync',
   () => ({
-    queueWorkoutSessionSync: jest.fn().mockReturnValue(new Promise(() => {})),
+    queueWorkoutSessionSync: jest
+      .fn()
+      .mockReturnValue(new Promise<never>(() => {})),
   }),
 );
 

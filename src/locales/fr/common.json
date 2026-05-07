@@ -209,6 +209,8 @@
       "synced": "Synchronisé",
       "syncFailed": "Échec de la synchro — appuie pour réessayer",
       "retrySync": "Réessayer la synchro",
+      "reset": "Réinitialiser la séance",
+      "resetHint": "Efface l'entrée locale. La prochaine séance terminée ou manquée écrasera l'historique.",
       "completedChip": "Terminée",
       "missedChip": "Manquée"
     },

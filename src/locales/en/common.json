@@ -208,6 +208,8 @@
       "synced": "Synced",
       "syncFailed": "Sync failed — tap to retry",
       "retrySync": "Retry sync",
+      "reset": "Reset session",
+      "resetHint": "Wipes the local entry. The next finish or miss will overwrite it.",
       "completedChip": "Done",
       "missedChip": "Missed"
     },

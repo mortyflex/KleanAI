@@ -152,10 +152,12 @@ export default function WorkoutDetailScreen() {
     exercises,
     status,
     syncStatus,
+    lastSyncError,
     toggleExercise,
     finishWorkout,
     markMissed,
     retrySync,
+    resetSession,
   } = useWorkoutSession(day ?? program.days[0]);
 
   if (!day || day.isRestDay) return null;
@@ -235,25 +237,38 @@ export default function WorkoutDetailScreen() {
         </View>
       )}
       {syncStatus === 'failed' && (
-        <Pressable
-          accessibilityRole="button"
-          onPress={retrySync}
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 6,
-            alignSelf: 'flex-start',
-            backgroundColor: colors.energyLight,
-            borderRadius: radii.pill,
-            paddingHorizontal: 10,
-            paddingVertical: 4,
-          }}
-        >
-          <Text style={{ fontSize: 11 }}>⚠️</Text>
-          <Text style={{ fontSize: 11, fontWeight: '600', color: colors.energy }}>
-            {t('workout.session.syncFailed')}
-          </Text>
-        </Pressable>
+        <View style={{ gap: 6, alignSelf: 'flex-start', maxWidth: '100%' }}>
+          <Pressable
+            accessibilityRole="button"
+            onPress={retrySync}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 6,
+              backgroundColor: colors.energyLight,
+              borderRadius: radii.pill,
+              paddingHorizontal: 10,
+              paddingVertical: 4,
+            }}
+          >
+            <Text style={{ fontSize: 11 }}>⚠️</Text>
+            <Text style={{ fontSize: 11, fontWeight: '600', color: colors.energy }}>
+              {t('workout.session.syncFailed')}
+            </Text>
+          </Pressable>
+          {lastSyncError ? (
+            <Text
+              style={{
+                fontSize: 10,
+                color: colors.muted,
+                paddingHorizontal: 4,
+              }}
+              numberOfLines={4}
+            >
+              {lastSyncError}
+            </Text>
+          ) : null}
+        </View>
       )}
 
       {/* ── Header Card ── */}
@@ -440,6 +455,36 @@ export default function WorkoutDetailScreen() {
             style={{ fontSize: 17, fontWeight: '700', color: colors.amber, textAlign: 'center' }}
           >
             {t('workout.session.missedBanner')}
+          </Text>
+        </View>
+      )}
+
+      {(status === 'completed' || status === 'missed') && (
+        <View style={{ gap: 6, alignItems: 'center', marginTop: 4 }}>
+          <Pressable
+            accessibilityRole="button"
+            onPress={resetSession}
+            style={{
+              borderWidth: 1,
+              borderColor: colors.border,
+              borderRadius: radii.pill,
+              paddingHorizontal: 16,
+              paddingVertical: 10,
+            }}
+          >
+            <Text style={{ fontSize: 14, fontWeight: '600', color: colors.muted }}>
+              {t('workout.session.reset')}
+            </Text>
+          </Pressable>
+          <Text
+            style={{
+              fontSize: 11,
+              color: colors.muted,
+              textAlign: 'center',
+              paddingHorizontal: 24,
+            }}
+          >
+            {t('workout.session.resetHint')}
           </Text>
         </View>
       )}

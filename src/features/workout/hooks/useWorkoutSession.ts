@@ -5,28 +5,26 @@ import type {
   WorkoutSessionStatus,
   WorkoutSyncStatus,
 } from '../../../types/workout-session.types';
+import { uuidv4 } from '../../../utils/uuid';
 import { useAuth } from '../../auth';
 import { queueWorkoutSessionSync } from '../services/workout-sync';
-import { getSession, saveSession } from '../store/workout-session-storage';
+import {
+  clearSession,
+  getSession,
+  saveSession,
+} from '../store/workout-session-storage';
 
 export interface UseWorkoutSessionResult {
   exercises: WorkoutExercise[];
   status: WorkoutSessionStatus;
   syncStatus: WorkoutSyncStatus;
+  lastSyncError: string | null;
   isLoading: boolean;
   toggleExercise: (exerciseId: string) => void;
   finishWorkout: () => void;
   markMissed: () => void;
   retrySync: () => void;
-}
-
-/**
- * Stable Supabase row id for a session. Derived from the local day id so the
- * server upsert is idempotent across retries; once Supabase returns its own
- * ids we can swap this for the server value without changing the queue shape.
- */
-function sessionIdFor(userId: string, dayId: string): string {
-  return `${userId}:${dayId}`;
+  resetSession: () => void;
 }
 
 export function useWorkoutSession(day: WorkoutDay): UseWorkoutSessionResult {
@@ -34,12 +32,15 @@ export function useWorkoutSession(day: WorkoutDay): UseWorkoutSessionResult {
   const [exercises, setExercises] = useState<WorkoutExercise[]>(day.exercises);
   const [status, setStatus] = useState<WorkoutSessionStatus>('in_progress');
   const [syncStatus, setSyncStatus] = useState<WorkoutSyncStatus>('local');
+  const [lastSyncError, setLastSyncError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Timestamps stored in refs so they don't cause re-renders or stale-closure issues
+  // Timestamps + server id stored in refs so they don't cause re-renders or
+  // stale-closure issues across the persistence effect.
   const startedAtRef = useRef(new Date().toISOString());
   const finishedAtRef = useRef<string | undefined>(undefined);
   const missedAtRef = useRef<string | undefined>(undefined);
+  const serverIdRef = useRef<string | undefined>(undefined);
   // Guards the persistence effect: only persist after the user takes an action,
   // never on the initial load from storage (which would overwrite saved timestamps).
   const hasUserInteracted = useRef(false);
@@ -49,11 +50,13 @@ export function useWorkoutSession(day: WorkoutDay): UseWorkoutSessionResult {
     setExercises(day.exercises);
     setStatus('in_progress');
     setSyncStatus('local');
+    setLastSyncError(null);
     setIsLoading(true);
     hasUserInteracted.current = false;
     startedAtRef.current = new Date().toISOString();
     finishedAtRef.current = undefined;
     missedAtRef.current = undefined;
+    serverIdRef.current = undefined;
 
     let cancelled = false;
 
@@ -64,9 +67,11 @@ export function useWorkoutSession(day: WorkoutDay): UseWorkoutSessionResult {
           setExercises(saved.exercises);
           setStatus(saved.status);
           setSyncStatus(saved.syncStatus);
+          setLastSyncError(saved.lastSyncError ?? null);
           startedAtRef.current = saved.startedAt;
           finishedAtRef.current = saved.finishedAt;
           missedAtRef.current = saved.missedAt;
+          serverIdRef.current = saved.serverId;
         }
         setIsLoading(false);
       })
@@ -82,12 +87,12 @@ export function useWorkoutSession(day: WorkoutDay): UseWorkoutSessionResult {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [day.id]);
 
-  // Build the current record snapshot. Used both for persistence and queue payload.
   const buildRecord = useCallback(
     (
       nextExercises: WorkoutExercise[],
       nextStatus: WorkoutSessionStatus,
       nextSyncStatus: WorkoutSyncStatus,
+      nextError?: string | null,
     ): WorkoutSessionRecord => ({
       dayId: day.id,
       weekDayIndex: day.weekDayIndex,
@@ -98,18 +103,25 @@ export function useWorkoutSession(day: WorkoutDay): UseWorkoutSessionResult {
       finishedAt: finishedAtRef.current,
       missedAt: missedAtRef.current,
       updatedAt: new Date().toISOString(),
+      serverId: serverIdRef.current,
+      lastSyncError: nextError ?? undefined,
     }),
     [day.id, day.weekDayIndex],
   );
 
-  // Persist to AsyncStorage and enqueue a sync push after every user action.
-  // The queue + runner await Supabase, then we update syncStatus to reflect
-  // the final outcome (synced / failed). The UI never blocks: the user keeps
-  // interacting with the hook while the promise resolves in the background.
+  // Persist + enqueue sync after every user action. The runner awaits Supabase
+  // and we then update syncStatus + lastSyncError to reflect the outcome. The
+  // UI never blocks: the user keeps interacting while the promise resolves.
   useEffect(() => {
     if (isLoading || !hasUserInteracted.current) return;
 
-    const record = buildRecord(exercises, status, syncStatus);
+    // Lazy-allocate the server-side UUID on the first user action. Reused on
+    // every retry so Supabase upsert is idempotent.
+    if (!serverIdRef.current) {
+      serverIdRef.current = uuidv4();
+    }
+
+    const record = buildRecord(exercises, status, syncStatus, lastSyncError);
     saveSession(record).catch(() => {});
 
     if (syncStatus !== 'pending' || !user?.id) return;
@@ -118,15 +130,22 @@ export function useWorkoutSession(day: WorkoutDay): UseWorkoutSessionResult {
     queueWorkoutSessionSync({
       userId: user.id,
       session: record,
-      sessionId: sessionIdFor(user.id, day.id),
+      sessionId: serverIdRef.current,
     })
-      .then((outcome) => {
+      .then((result) => {
         if (cancelled) return;
-        if (outcome === 'synced') setSyncStatus('synced');
-        else if (outcome === 'failed') setSyncStatus('failed');
+        if (result.outcome === 'synced') {
+          setLastSyncError(null);
+          setSyncStatus('synced');
+        } else if (result.outcome === 'failed') {
+          setLastSyncError(result.error ?? 'Unknown sync error');
+          setSyncStatus('failed');
+        }
       })
-      .catch(() => {
-        if (!cancelled) setSyncStatus('failed');
+      .catch((err: unknown) => {
+        if (cancelled) return;
+        setLastSyncError(err instanceof Error ? err.message : String(err));
+        setSyncStatus('failed');
       });
 
     return () => {
@@ -163,14 +182,34 @@ export function useWorkoutSession(day: WorkoutDay): UseWorkoutSessionResult {
     setSyncStatus('pending');
   }, [user?.id]);
 
+  /**
+   * Wipe the locally-saved session for this day and roll all state back to
+   * a fresh start. The matching Supabase row, if any, is left in place — the
+   * next finish/miss will upsert over it via the same `serverId`.
+   */
+  const resetSession = useCallback(() => {
+    hasUserInteracted.current = false;
+    startedAtRef.current = new Date().toISOString();
+    finishedAtRef.current = undefined;
+    missedAtRef.current = undefined;
+    serverIdRef.current = undefined;
+    setExercises(day.exercises.map((e) => ({ ...e, done: false })));
+    setStatus('in_progress');
+    setSyncStatus('local');
+    setLastSyncError(null);
+    clearSession(day.id).catch(() => {});
+  }, [day.exercises, day.id]);
+
   return {
     exercises,
     status,
     syncStatus,
+    lastSyncError,
     isLoading,
     toggleExercise,
     finishWorkout,
     markMissed,
     retrySync,
+    resetSession,
   };
 }

@@ -13,7 +13,7 @@ jest.mock('../../src/features/auth', () => ({
 jest.mock(
   '../../src/features/workout/services/workout-sync',
   () => ({
-    queueWorkoutSessionSync: jest.fn().mockResolvedValue('synced'),
+    queueWorkoutSessionSync: jest.fn().mockResolvedValue({ outcome: 'synced' }),
   }),
 );
 
@@ -72,7 +72,7 @@ describe('useWorkoutSession', () => {
     // (synced / failed) override this in their own `it` block. This keeps
     // the "syncStatus becomes pending" assertions deterministic — without it,
     // the microtask from .then() could flip the state before the assertion.
-    mockedQueueSync.mockReturnValue(new Promise(() => {}));
+    mockedQueueSync.mockReturnValue(new Promise<never>(() => {}));
   });
 
   describe('initial state', () => {
@@ -320,7 +320,7 @@ describe('useWorkoutSession', () => {
 
   describe('sync outcome transitions', () => {
     it('transitions to synced when the queue reports success', async () => {
-      mockedQueueSync.mockResolvedValueOnce('synced');
+      mockedQueueSync.mockResolvedValueOnce({ outcome: 'synced' });
 
       const { result } = renderHook(() => useWorkoutSession(MOCK_DAY));
       await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -331,8 +331,11 @@ describe('useWorkoutSession', () => {
       expect(mockedQueueSync).toHaveBeenCalledTimes(1);
     });
 
-    it('transitions to failed when the queue reports failure', async () => {
-      mockedQueueSync.mockResolvedValueOnce('failed');
+    it('transitions to failed and surfaces the error message from the queue', async () => {
+      mockedQueueSync.mockResolvedValueOnce({
+        outcome: 'failed',
+        error: 'invalid input syntax for type uuid',
+      });
 
       const { result } = renderHook(() => useWorkoutSession(MOCK_DAY));
       await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -340,6 +343,7 @@ describe('useWorkoutSession', () => {
       act(() => { result.current.finishWorkout(); });
 
       await waitFor(() => expect(result.current.syncStatus).toBe('failed'));
+      expect(result.current.lastSyncError).toBe('invalid input syntax for type uuid');
     });
 
     it('transitions to failed when the queue throws', async () => {
@@ -351,11 +355,34 @@ describe('useWorkoutSession', () => {
       act(() => { result.current.toggleExercise('bench_press'); });
 
       await waitFor(() => expect(result.current.syncStatus).toBe('failed'));
+      expect(result.current.lastSyncError).toBe('network down');
+    });
+
+    it('resetSession wipes local storage and rolls state back to in_progress', async () => {
+      mockedQueueSync.mockResolvedValueOnce({ outcome: 'synced' });
+
+      const { result } = renderHook(() => useWorkoutSession(MOCK_DAY));
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      act(() => { result.current.toggleExercise('bench_press'); });
+      act(() => { result.current.finishWorkout(); });
+      await waitFor(() => expect(result.current.status).toBe('completed'));
+
+      act(() => { result.current.resetSession(); });
+
+      expect(result.current.status).toBe('in_progress');
+      expect(result.current.syncStatus).toBe('local');
+      expect(result.current.exercises.every((e) => !e.done)).toBe(true);
+
+      await waitFor(async () => {
+        const saved = await storage.getSession('day-0');
+        expect(saved).toBeNull();
+      });
     });
 
     it('retrySync re-queues the session and reports synced', async () => {
-      mockedQueueSync.mockResolvedValueOnce('failed');
-      mockedQueueSync.mockResolvedValueOnce('synced');
+      mockedQueueSync.mockResolvedValueOnce({ outcome: 'failed', error: 'first try' });
+      mockedQueueSync.mockResolvedValueOnce({ outcome: 'synced' });
 
       const { result } = renderHook(() => useWorkoutSession(MOCK_DAY));
       await waitFor(() => expect(result.current.isLoading).toBe(false));
