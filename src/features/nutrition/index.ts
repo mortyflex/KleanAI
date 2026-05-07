@@ -21,11 +21,15 @@ export {
   MEAL_CATALOG,
   getMealSuggestions,
   getDailyMealPlan,
+  getDailyMealPlanWithFridge,
+  getFridgeAwareSuggestions,
+  scoreMealAgainstFridge,
 } from './utils/meal-suggestions';
 export type {
   MealSuggestion,
   MealType,
   SuggestionsQuery,
+  FridgeAwareSuggestionsQuery,
 } from './utils/meal-suggestions';
 export {
   buildSmoothingEvent,

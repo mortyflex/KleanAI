@@ -1,3 +1,4 @@
+import type { IngredientId } from '../../../types/ai.types';
 import type { DietaryRestriction } from '../../../types/profile.types';
 
 export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
@@ -17,6 +18,12 @@ export interface MealSuggestion {
   /** Restrictions this meal CONFLICTS with (i.e. should be hidden). */
   conflictsWith: DietaryRestriction[];
   emoji: string;
+  /**
+   * Internal ingredient ids the meal primarily relies on. Used by the fridge
+   * vision flow to score meals against confirmed ingredients — not a strict
+   * recipe, just enough to bias suggestions toward what is on hand.
+   */
+  ingredientIds?: IngredientId[];
 }
 
 const ALL_RESTRICTIONS: DietaryRestriction[] = [
@@ -54,6 +61,7 @@ export const MEAL_CATALOG: MealSuggestion[] = [
     compatibleWith: omit(ALL_RESTRICTIONS, ['gluten_free']),
     conflictsWith: ['gluten_free'],
     emoji: '🥣',
+    ingredientIds: ['oats', 'berries'],
   },
   {
     id: 'greek_yogurt_bowl',
@@ -65,6 +73,7 @@ export const MEAL_CATALOG: MealSuggestion[] = [
     compatibleWith: omit(ALL_RESTRICTIONS, ['vegan', 'lactose_free']),
     conflictsWith: ['vegan', 'lactose_free'],
     emoji: '🥛',
+    ingredientIds: ['greek_yogurt', 'berries'],
   },
   {
     id: 'tofu_scramble',
@@ -76,6 +85,7 @@ export const MEAL_CATALOG: MealSuggestion[] = [
     compatibleWith: ALL_RESTRICTIONS,
     conflictsWith: [],
     emoji: '🍳',
+    ingredientIds: ['tofu', 'spinach'],
   },
   {
     id: 'eggs_avocado_toast',
@@ -87,6 +97,7 @@ export const MEAL_CATALOG: MealSuggestion[] = [
     compatibleWith: omit(ALL_RESTRICTIONS, ['vegan', 'gluten_free']),
     conflictsWith: ['vegan', 'gluten_free'],
     emoji: '🥑',
+    ingredientIds: ['eggs', 'avocado'],
   },
 
   // ── Lunch ────────────────────────────────────────────────────────────────
@@ -100,6 +111,7 @@ export const MEAL_CATALOG: MealSuggestion[] = [
     compatibleWith: omit(ALL_RESTRICTIONS, ['vegetarian', 'vegan']),
     conflictsWith: ['vegetarian', 'vegan'],
     emoji: '🍗',
+    ingredientIds: ['chicken_breast', 'brown_rice', 'broccoli'],
   },
   {
     id: 'lentil_quinoa_salad',
@@ -111,6 +123,7 @@ export const MEAL_CATALOG: MealSuggestion[] = [
     compatibleWith: ALL_RESTRICTIONS,
     conflictsWith: [],
     emoji: '🥗',
+    ingredientIds: ['lentils', 'quinoa', 'tomato'],
   },
   {
     id: 'salmon_sweet_potato',
@@ -122,6 +135,7 @@ export const MEAL_CATALOG: MealSuggestion[] = [
     compatibleWith: omit(ALL_RESTRICTIONS, ['vegetarian', 'vegan']),
     conflictsWith: ['vegetarian', 'vegan'],
     emoji: '🐟',
+    ingredientIds: ['salmon', 'sweet_potato', 'spinach'],
   },
   {
     id: 'tofu_stir_fry',
@@ -133,6 +147,7 @@ export const MEAL_CATALOG: MealSuggestion[] = [
     compatibleWith: ALL_RESTRICTIONS,
     conflictsWith: [],
     emoji: '🥢',
+    ingredientIds: ['tofu', 'brown_rice', 'bell_pepper'],
   },
 
   // ── Dinner ───────────────────────────────────────────────────────────────
@@ -146,6 +161,7 @@ export const MEAL_CATALOG: MealSuggestion[] = [
     compatibleWith: omit(ALL_RESTRICTIONS, ['vegetarian', 'vegan']),
     conflictsWith: ['vegetarian', 'vegan'],
     emoji: '🍝',
+    ingredientIds: ['turkey', 'tomato'],
   },
   {
     id: 'chickpea_curry',
@@ -157,6 +173,7 @@ export const MEAL_CATALOG: MealSuggestion[] = [
     compatibleWith: ALL_RESTRICTIONS,
     conflictsWith: [],
     emoji: '🍛',
+    ingredientIds: ['chickpeas', 'spinach', 'brown_rice'],
   },
   {
     id: 'grilled_chicken_veg',
@@ -168,6 +185,7 @@ export const MEAL_CATALOG: MealSuggestion[] = [
     compatibleWith: omit(ALL_RESTRICTIONS, ['vegetarian', 'vegan']),
     conflictsWith: ['vegetarian', 'vegan'],
     emoji: '🍽️',
+    ingredientIds: ['chicken_breast', 'broccoli', 'olive_oil'],
   },
 
   // ── Snack ────────────────────────────────────────────────────────────────
@@ -181,6 +199,7 @@ export const MEAL_CATALOG: MealSuggestion[] = [
     compatibleWith: ALL_RESTRICTIONS,
     conflictsWith: [],
     emoji: '🍎',
+    ingredientIds: ['apple', 'almonds'],
   },
   {
     id: 'cottage_cheese_fruit',
@@ -192,6 +211,7 @@ export const MEAL_CATALOG: MealSuggestion[] = [
     compatibleWith: omit(ALL_RESTRICTIONS, ['vegan', 'lactose_free']),
     conflictsWith: ['vegan', 'lactose_free'],
     emoji: '🥄',
+    ingredientIds: ['cottage_cheese', 'banana'],
   },
   {
     id: 'edamame',
@@ -240,6 +260,82 @@ export function getDailyMealPlan(
   const result = {} as Record<MealType, MealSuggestion | null>;
   for (const t of types) {
     const candidates = getMealSuggestions({ restrictions, type: t, limit: 1 });
+    result[t] = candidates[0] ?? null;
+  }
+  return result;
+}
+
+/**
+ * Score a single meal against the set of ingredient ids the user actually
+ * has on hand. Higher score = more matches with the fridge. Meals that do
+ * not declare any ingredient ids score 0 — they are still eligible, just
+ * not preferred when fridge data is available.
+ */
+export function scoreMealAgainstFridge(
+  meal: MealSuggestion,
+  available: ReadonlySet<IngredientId>,
+): number {
+  if (!meal.ingredientIds || meal.ingredientIds.length === 0) return 0;
+  let matches = 0;
+  for (const id of meal.ingredientIds) {
+    if (available.has(id)) matches += 1;
+  }
+  return matches;
+}
+
+export interface FridgeAwareSuggestionsQuery extends SuggestionsQuery {
+  /** Internal ingredient ids the user has confirmed are in their fridge. */
+  ingredientIds: IngredientId[];
+}
+
+/**
+ * Like {@link getMealSuggestions} but biases the result toward meals that
+ * use ingredients the user has confirmed. Filtering by restrictions still
+ * applies — fridge data can never override a dietary conflict. Meals are
+ * sorted by descending fridge match count, then by their original catalog
+ * order so results are stable.
+ */
+export function getFridgeAwareSuggestions(
+  query: FridgeAwareSuggestionsQuery,
+): MealSuggestion[] {
+  const available = new Set<IngredientId>(query.ingredientIds);
+  const filtered = MEAL_CATALOG.filter((m) => {
+    if (query.type && m.type !== query.type) return false;
+    return !m.conflictsWith.some((c) => (query.restrictions ?? []).includes(c));
+  });
+
+  const scored = filtered
+    .map((meal, index) => ({
+      meal,
+      index,
+      score: scoreMealAgainstFridge(meal, available),
+    }))
+    // Stable sort: by score desc, then by original catalog order.
+    .sort((a, b) => (b.score - a.score) || (a.index - b.index));
+
+  if (!query.type) return scored.map((s) => s.meal);
+  return scored.slice(0, query.limit ?? 3).map((s) => s.meal);
+}
+
+/**
+ * Daily plan version of {@link getFridgeAwareSuggestions}. Each meal type
+ * returns the single best-scoring suggestion that does not conflict with
+ * the user's restrictions. When no ingredient ids are provided, this
+ * behaves identically to {@link getDailyMealPlan} (catalog order wins).
+ */
+export function getDailyMealPlanWithFridge(
+  ingredientIds: IngredientId[],
+  restrictions: DietaryRestriction[] = [],
+): Record<MealType, MealSuggestion | null> {
+  const types: MealType[] = ['breakfast', 'lunch', 'dinner', 'snack'];
+  const result = {} as Record<MealType, MealSuggestion | null>;
+  for (const t of types) {
+    const candidates = getFridgeAwareSuggestions({
+      restrictions,
+      type: t,
+      limit: 1,
+      ingredientIds,
+    });
     result[t] = candidates[0] ?? null;
   }
   return result;

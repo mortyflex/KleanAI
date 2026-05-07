@@ -1,45 +1,48 @@
 import {
-  analyzeGymImages,
-  GYM_VISION_PROMPT_VERSION,
-} from '../../../src/features/vision/services/gym-vision.service';
+  analyzeFridgeImages,
+  FRIDGE_VISION_PROMPT_VERSION,
+} from '../../../src/features/vision/services/fridge-vision.service';
 import { clearAILogs, getAILogs } from '../../../src/lib/ai/logs';
-import type { AIProvider, GymVisionResponseRaw } from '../../../src/types/ai.types';
+import type {
+  AIProvider,
+  FridgeVisionResponseRaw,
+  GymVisionResponseRaw,
+} from '../../../src/types/ai.types';
 
 function makeProvider(
-  payload: GymVisionResponseRaw | (() => Promise<GymVisionResponseRaw>),
+  payload: FridgeVisionResponseRaw | (() => Promise<FridgeVisionResponseRaw>),
   overrides?: Partial<AIProvider>,
 ): AIProvider {
   return {
     id: 'mock',
     modelId: 'fake-model',
-    analyzeGymImages: typeof payload === 'function'
-      ? payload
-      : async () => payload,
+    analyzeGymImages: async () => ({
+      schemaVersion: '1' as const,
+      detected: [],
+    } as GymVisionResponseRaw),
+    analyzeFridgeImages:
+      typeof payload === 'function' ? payload : async () => payload,
     ...overrides,
   } as AIProvider;
 }
 
-describe('analyzeGymImages — provider behavior', () => {
+describe('analyzeFridgeImages — provider behavior', () => {
   beforeEach(() => clearAILogs());
 
   it('passes the prompt version through to the provider', async () => {
     const spy = jest.fn(async () => ({
       schemaVersion: '1' as const,
-      detected: [{ label: 'Barbell', confidence: 0.9 }],
+      detected: [{ label: 'Eggs', confidence: 0.9 }],
     }));
-    const provider = {
-      id: 'mock' as const,
-      modelId: 'fake-model',
-      analyzeGymImages: spy,
-    } as unknown as AIProvider;
+    const provider = makeProvider(spy);
 
-    await analyzeGymImages({
+    await analyzeFridgeImages({
       images: [{ uri: 'mock://a.jpg' }],
       provider,
     });
 
     expect(spy).toHaveBeenCalledWith(
-      expect.objectContaining({ promptVersion: GYM_VISION_PROMPT_VERSION }),
+      expect.objectContaining({ promptVersion: FRIDGE_VISION_PROMPT_VERSION }),
     );
   });
 
@@ -47,12 +50,12 @@ describe('analyzeGymImages — provider behavior', () => {
     const provider = makeProvider({
       schemaVersion: '1',
       detected: [
-        { label: 'Barbell rack', confidence: 0.9 },
-        { label: 'Dumbbells', confidence: 0.85 },
+        { label: 'Chicken breast', confidence: 0.9 },
+        { label: 'Eggs', confidence: 0.85 },
       ],
     });
 
-    const result = await analyzeGymImages({
+    const result = await analyzeFridgeImages({
       images: [{ uri: 'mock://a.jpg' }],
       provider,
     });
@@ -60,8 +63,8 @@ describe('analyzeGymImages — provider behavior', () => {
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.detected.map((d) => d.internalId).sort()).toEqual([
-        'barbell',
-        'dumbbell',
+        'chicken_breast',
+        'eggs',
       ]);
     }
   });
@@ -71,7 +74,7 @@ describe('analyzeGymImages — provider behavior', () => {
       throw new Error('network down');
     });
 
-    const result = await analyzeGymImages({
+    const result = await analyzeFridgeImages({
       images: [{ uri: 'mock://a.jpg' }],
       provider,
     });
@@ -87,10 +90,10 @@ describe('analyzeGymImages — provider behavior', () => {
     const provider = makeProvider({
       // confidence out of range — fails Zod validation.
       schemaVersion: '1',
-      detected: [{ label: 'Barbell', confidence: 99 }],
-    } as unknown as GymVisionResponseRaw);
+      detected: [{ label: 'Eggs', confidence: 99 }],
+    } as unknown as FridgeVisionResponseRaw);
 
-    const result = await analyzeGymImages({
+    const result = await analyzeFridgeImages({
       images: [{ uri: 'mock://a.jpg' }],
       provider,
     });
@@ -102,15 +105,15 @@ describe('analyzeGymImages — provider behavior', () => {
   it('respects a custom confidence threshold', async () => {
     const provider = makeProvider({
       schemaVersion: '1',
-      detected: [{ label: 'Barbell', confidence: 0.4 }],
+      detected: [{ label: 'Eggs', confidence: 0.4 }],
     });
 
-    const lowThreshold = await analyzeGymImages({
+    const lowThreshold = await analyzeFridgeImages({
       images: [{ uri: 'mock://a.jpg' }],
       provider,
       confidenceThreshold: 0.3,
     });
-    const highThreshold = await analyzeGymImages({
+    const highThreshold = await analyzeFridgeImages({
       images: [{ uri: 'mock://a.jpg' }],
       provider,
       confidenceThreshold: 0.9,
@@ -121,16 +124,16 @@ describe('analyzeGymImages — provider behavior', () => {
   });
 });
 
-describe('analyzeGymImages — AI logs', () => {
+describe('analyzeFridgeImages — AI logs', () => {
   beforeEach(() => clearAILogs());
 
   it('records a success log entry', async () => {
     const provider = makeProvider({
       schemaVersion: '1',
-      detected: [{ label: 'Barbell rack', confidence: 0.9 }],
+      detected: [{ label: 'Chicken breast', confidence: 0.9 }],
     });
 
-    await analyzeGymImages({
+    await analyzeFridgeImages({
       images: [{ uri: 'mock://a.jpg' }, { uri: 'mock://b.jpg' }],
       provider,
     });
@@ -138,10 +141,10 @@ describe('analyzeGymImages — AI logs', () => {
     const logs = getAILogs();
     expect(logs).toHaveLength(1);
     expect(logs[0]).toMatchObject({
-      feature: 'gym_vision',
+      feature: 'fridge_vision',
       providerId: 'mock',
       modelId: 'fake-model',
-      promptVersion: GYM_VISION_PROMPT_VERSION,
+      promptVersion: FRIDGE_VISION_PROMPT_VERSION,
       imageCount: 2,
       succeeded: true,
     });
@@ -153,13 +156,14 @@ describe('analyzeGymImages — AI logs', () => {
       throw new Error('boom');
     });
 
-    await analyzeGymImages({
+    await analyzeFridgeImages({
       images: [{ uri: 'mock://a.jpg' }],
       provider,
     });
 
     const logs = getAILogs();
     expect(logs).toHaveLength(1);
+    expect(logs[0].feature).toBe('fridge_vision');
     expect(logs[0].succeeded).toBe(false);
     expect(logs[0].errorMessage).toContain('boom');
   });
@@ -168,9 +172,9 @@ describe('analyzeGymImages — AI logs', () => {
     const provider = makeProvider({
       schemaVersion: '1',
       detected: [{ label: 'X', confidence: 5 }],
-    } as unknown as GymVisionResponseRaw);
+    } as unknown as FridgeVisionResponseRaw);
 
-    await analyzeGymImages({
+    await analyzeFridgeImages({
       images: [{ uri: 'mock://a.jpg' }],
       provider,
     });

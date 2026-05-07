@@ -23,3 +23,4 @@ export function __resetAIProviderForTests(): void {
 
 export { MockAIProvider } from './mock-provider';
 export { MOCK_GYM_VISION_RESPONSE } from './mock-gym-vision';
+export { MOCK_FRIDGE_VISION_RESPONSE } from './mock-fridge-vision';

@@ -15,8 +15,10 @@ import {
   NutritionEventReporter,
   computeDailyPlan,
   getDailyMealPlan,
+  getDailyMealPlanWithFridge,
   planInputFromProfile,
 } from "../../src/features/nutrition";
+import { useConfirmedFridge } from "../../src/features/vision/hooks/useConfirmedFridge";
 
 const MEAL_KEYS: Record<string, string> = {
   Breakfast: "meals.breakfast",
@@ -88,16 +90,20 @@ export default function NutritionScreen() {
   const { t } = useTranslation("common");
   const { profile } = useOnboarding();
   const smoothingContext = useSmoothingContext();
+  const { ingredientIds: fridgeIds } = useConfirmedFridge();
 
   const plan = useMemo(() => {
     const input = planInputFromProfile(profile);
     return input ? computeDailyPlan(input) : null;
   }, [profile]);
 
-  const suggestions = useMemo(
-    () => getDailyMealPlan(profile.dietaryRestrictions ?? []),
-    [profile.dietaryRestrictions],
-  );
+  const suggestions = useMemo(() => {
+    const restrictions = profile.dietaryRestrictions ?? [];
+    if (fridgeIds && fridgeIds.length > 0) {
+      return getDailyMealPlanWithFridge(fridgeIds, restrictions);
+    }
+    return getDailyMealPlan(restrictions);
+  }, [profile.dietaryRestrictions, fridgeIds]);
 
   // Use the computed plan when available, else fall back to mock for visual
   // continuity. The current/eaten counter still comes from mock data — we

@@ -1,9 +1,12 @@
 import type {
   AIProvider,
+  FridgeVisionRequest,
+  FridgeVisionResponseRaw,
   GymVisionRequest,
   GymVisionResponseRaw,
 } from '../../types/ai.types';
 import { MOCK_GYM_VISION_RESPONSE } from './mock-gym-vision';
+import { MOCK_FRIDGE_VISION_RESPONSE } from './mock-fridge-vision';
 
 /**
  * Mock AI provider — returns a fixed structured response so the rest of the
@@ -19,5 +22,12 @@ export class MockAIProvider implements AIProvider {
     // Tiny artificial delay so the UI shows its loading state in dev/preview.
     await new Promise((resolve) => setTimeout(resolve, 250));
     return MOCK_GYM_VISION_RESPONSE;
+  }
+
+  async analyzeFridgeImages(
+    _req: FridgeVisionRequest,
+  ): Promise<FridgeVisionResponseRaw> {
+    await new Promise((resolve) => setTimeout(resolve, 250));
+    return MOCK_FRIDGE_VISION_RESPONSE;
   }
 }
