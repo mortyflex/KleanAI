@@ -543,6 +543,8 @@
       "replacePhoto": "Remplacer",
       "previewAlt": "Aperçu de ta photo de frigo",
       "mockNotice": "Mode test : tes photos sont réelles, mais l'analyse IA utilise encore une réponse d'exemple.",
+      "providerBadgeMock": "Mode IA : mock (réponse d'exemple)",
+      "providerBadgeGemini": "Mode IA : Gemini (analyse réelle)",
       "demoImageBadge": "Image de démo",
       "permissionDeniedTitle": "Autorisation requise",
       "permissionDeniedBody": "Autorise Klean AI à accéder à tes photos ou à ton appareil photo dans les Réglages pour scanner ton frigo.",

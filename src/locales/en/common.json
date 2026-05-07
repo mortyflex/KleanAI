@@ -542,6 +542,8 @@
       "replacePhoto": "Replace",
       "previewAlt": "Preview of your fridge photo",
       "mockNotice": "Test mode — your photos are real, but the AI analysis still uses a sample response.",
+      "providerBadgeMock": "AI mode: mock (sample response)",
+      "providerBadgeGemini": "AI mode: Gemini (real analysis)",
       "demoImageBadge": "Demo image",
       "permissionDeniedTitle": "Permission needed",
       "permissionDeniedBody": "Allow Klean AI to access your photos or camera in Settings to scan your fridge.",

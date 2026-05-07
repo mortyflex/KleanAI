@@ -7,6 +7,7 @@ import { Card } from '../../../components/ui/card';
 import { KleanText } from '../../../components/ui/klean-text';
 import { PillButton } from '../../../components/ui/pill-button';
 import { colors, radii } from '../../../design/tokens';
+import { getActiveAIProviderId } from '../../../lib/ai';
 import type { IngredientId } from '../../../types/ai.types';
 import { useConfirmedFridge } from '../hooks/useConfirmedFridge';
 import { useFridgeVisionFlow } from '../hooks/useFridgeVisionFlow';
@@ -243,6 +244,11 @@ export function FridgeVisionScreen() {
   const { state } = flow;
   const showDevControls = __DEV__;
   const hasImages = state.images.length > 0;
+  const providerId = getActiveAIProviderId();
+  const providerBadgeKey =
+    providerId === 'gemini'
+      ? 'vision.fridge.providerBadgeGemini'
+      : 'vision.fridge.providerBadgeMock';
 
   return (
     <ScrollView
@@ -262,6 +268,25 @@ export function FridgeVisionScreen() {
         <KleanText variant="body" color={colors.muted}>
           {t('vision.fridge.subtitle')}
         </KleanText>
+        {showDevControls && (
+          <View
+            testID="fridge-provider-badge"
+            style={{
+              alignSelf: 'flex-start',
+              marginTop: 4,
+              paddingHorizontal: 10,
+              paddingVertical: 4,
+              borderRadius: radii.pill,
+              borderWidth: 1,
+              borderColor: colors.border,
+              backgroundColor: colors.card,
+            }}
+          >
+            <KleanText variant="caption" color={colors.muted} weight="700">
+              {t(providerBadgeKey)}
+            </KleanText>
+          </View>
+        )}
       </View>
 
       {state.stage === 'idle' && (
@@ -412,6 +437,25 @@ export function FridgeVisionScreen() {
                   : 'vision.fridge.errors.providerBody',
             )}
           </KleanText>
+          {showDevControls && state.failureDetails ? (
+            <View
+              testID="fridge-error-details"
+              style={{
+                padding: 10,
+                borderRadius: radii.chip,
+                borderWidth: 1,
+                borderColor: colors.border,
+                backgroundColor: colors.bg,
+              }}
+            >
+              <KleanText variant="caption" color={colors.muted} weight="700">
+                Dev details
+              </KleanText>
+              <KleanText variant="caption" color={colors.muted}>
+                {state.failureDetails}
+              </KleanText>
+            </View>
+          ) : null}
           <PillButton
             label={t('vision.fridge.retryCta')}
             variant="outline"

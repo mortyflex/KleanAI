@@ -23,6 +23,8 @@ export interface FridgeVisionFlowState {
   /** Map of internalId -> selected? — defaults to true for everything detected. */
   selection: Record<string, boolean>;
   failureReason: FridgeVisionFailureReason | 'no_detections' | null;
+  /** Raw error text from the provider — surfaced in `__DEV__` for debugging. */
+  failureDetails: string | null;
 }
 
 type Action =
@@ -31,7 +33,11 @@ type Action =
   | { type: 'analyze_started' }
   | { type: 'analyze_succeeded'; detected: DetectedIngredient[] }
   | { type: 'analyze_no_detections' }
-  | { type: 'analyze_failed'; reason: FridgeVisionFailureReason }
+  | {
+      type: 'analyze_failed';
+      reason: FridgeVisionFailureReason;
+      details?: string;
+    }
   | { type: 'toggle_selection'; internalId: IngredientId }
   | { type: 'select_all' }
   | { type: 'clear_all' }
@@ -44,6 +50,7 @@ const initialState: FridgeVisionFlowState = {
   detected: [],
   selection: {},
   failureReason: null,
+  failureDetails: null,
 };
 
 function buildSelection(detected: DetectedIngredient[]): Record<string, boolean> {
@@ -65,7 +72,12 @@ export function fridgeVisionReducer(
         images: state.images.filter((img) => img.uri !== action.uri),
       };
     case 'analyze_started':
-      return { ...state, stage: 'analyzing', failureReason: null };
+      return {
+        ...state,
+        stage: 'analyzing',
+        failureReason: null,
+        failureDetails: null,
+      };
     case 'analyze_succeeded':
       return {
         ...state,
@@ -73,6 +85,7 @@ export function fridgeVisionReducer(
         detected: action.detected,
         selection: buildSelection(action.detected),
         failureReason: null,
+        failureDetails: null,
       };
     case 'analyze_no_detections':
       return {
@@ -81,6 +94,7 @@ export function fridgeVisionReducer(
         detected: [],
         selection: {},
         failureReason: 'no_detections',
+        failureDetails: null,
       };
     case 'analyze_failed':
       return {
@@ -89,6 +103,7 @@ export function fridgeVisionReducer(
         detected: [],
         selection: {},
         failureReason: action.reason,
+        failureDetails: action.details ?? null,
       };
     case 'toggle_selection':
       return {
@@ -142,7 +157,11 @@ export function useFridgeVisionFlow(): UseFridgeVisionFlowApi {
     dispatch({ type: 'analyze_started' });
     const result = await analyzeFridgeImages({ images: state.images });
     if (!result.ok) {
-      dispatch({ type: 'analyze_failed', reason: result.reason });
+      dispatch({
+        type: 'analyze_failed',
+        reason: result.reason,
+        details: result.details,
+      });
       return;
     }
     if (result.detected.length === 0) {

@@ -3,7 +3,13 @@ const expoConfig = require("eslint-config-expo/flat");
 module.exports = [
   ...expoConfig,
   {
-    ignores: ["node_modules/", ".expo/", "dist/", "index.ts"],
+    ignores: [
+      "node_modules/",
+      ".expo/",
+      "dist/",
+      "index.ts",
+      "supabase/functions/",
+    ],
   },
   {
     // i18next's chained .use() API is a documented pattern on the default export

@@ -11,6 +11,7 @@ const makeInitialState = (): FridgeVisionFlowState => ({
   detected: [],
   selection: {},
   failureReason: null,
+  failureDetails: null,
 });
 
 const sampleDetected: DetectedIngredient[] = [
@@ -90,13 +91,15 @@ describe('fridgeVisionReducer', () => {
     expect(state.failureReason).toBe('no_detections');
   });
 
-  it('analyze_failed moves to error and forwards the failure reason', () => {
+  it('analyze_failed moves to error and forwards the failure reason + details', () => {
     const state = fridgeVisionReducer(makeInitialState(), {
       type: 'analyze_failed',
       reason: 'invalid_schema',
+      details: 'detected.0.confidence: out of range',
     });
     expect(state.stage).toBe('error');
     expect(state.failureReason).toBe('invalid_schema');
+    expect(state.failureDetails).toBe('detected.0.confidence: out of range');
   });
 
   it('toggle_selection flips a single id', () => {
