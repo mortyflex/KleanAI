@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "../../src/features/auth";
 import { KleanText } from "../../src/components/ui/klean-text";
 import { PillButton } from "../../src/components/ui/pill-button";
+import { PasswordField } from "../../src/components/ui/password-field";
 import { colors, radii } from "../../src/design/tokens";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -74,22 +75,20 @@ export default function LoginScreen() {
         </View>
 
         <View style={{ gap: 16 }}>
-          <Field
+          <EmailField
             testID="login-email-input"
             label={t("auth.fields.email")}
             value={email}
             onChangeText={setEmail}
-            autoCapitalize="none"
-            keyboardType="email-address"
             placeholder={t("auth.fields.emailPlaceholder")}
             error={errors.email}
           />
-          <Field
+          <PasswordField
             testID="login-password-input"
+            toggleTestID="login-password-toggle"
             label={t("auth.fields.password")}
             value={password}
             onChangeText={setPassword}
-            secureTextEntry
             placeholder={t("auth.fields.passwordPlaceholder")}
             error={errors.password}
           />
@@ -120,19 +119,16 @@ export default function LoginScreen() {
   );
 }
 
-interface FieldProps {
+interface EmailFieldProps {
   label: string;
   value: string;
   onChangeText: (v: string) => void;
   placeholder?: string;
-  secureTextEntry?: boolean;
-  autoCapitalize?: "none" | "sentences" | "words" | "characters";
-  keyboardType?: "default" | "email-address";
   error?: string;
   testID?: string;
 }
 
-function Field({ label, error, testID, ...rest }: FieldProps) {
+function EmailField({ label, error, testID, ...rest }: EmailFieldProps) {
   return (
     <View style={{ gap: 6 }}>
       <KleanText variant="label" color={colors.ink}>
@@ -141,6 +137,9 @@ function Field({ label, error, testID, ...rest }: FieldProps) {
       <TextInput
         testID={testID}
         {...rest}
+        autoCapitalize="none"
+        autoCorrect={false}
+        keyboardType="email-address"
         placeholderTextColor={colors.muted}
         style={{
           backgroundColor: colors.card,

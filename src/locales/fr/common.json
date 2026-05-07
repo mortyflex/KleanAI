@@ -371,13 +371,19 @@
       "email": "E-mail",
       "emailPlaceholder": "toi@exemple.com",
       "password": "Mot de passe",
-      "passwordPlaceholder": "8 caractères minimum"
+      "passwordPlaceholder": "8 caractères minimum",
+      "passwordConfirm": "Confirme ton mot de passe",
+      "passwordConfirmPlaceholder": "Retape ton mot de passe",
+      "passwordShow": "Afficher",
+      "passwordHide": "Masquer"
     },
     "errors": {
       "emailRequired": "Merci d'entrer ton e-mail.",
       "emailInvalid": "Cet e-mail n'a pas l'air valide.",
       "passwordRequired": "Merci d'entrer un mot de passe.",
-      "passwordTooShort": "Le mot de passe doit faire au moins 8 caractères."
+      "passwordTooShort": "Le mot de passe doit faire au moins 8 caractères.",
+      "passwordConfirmRequired": "Merci de confirmer ton mot de passe.",
+      "passwordMismatch": "Les mots de passe ne correspondent pas. Réessaie."
     },
     "login": {
       "title": "Bon retour",

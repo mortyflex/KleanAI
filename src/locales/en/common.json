@@ -370,13 +370,19 @@
       "email": "Email",
       "emailPlaceholder": "you@example.com",
       "password": "Password",
-      "passwordPlaceholder": "At least 8 characters"
+      "passwordPlaceholder": "At least 8 characters",
+      "passwordConfirm": "Confirm password",
+      "passwordConfirmPlaceholder": "Type your password again",
+      "passwordShow": "Show",
+      "passwordHide": "Hide"
     },
     "errors": {
       "emailRequired": "Please enter your email.",
       "emailInvalid": "That doesn't look like a valid email.",
       "passwordRequired": "Please enter a password.",
-      "passwordTooShort": "Password must be at least 8 characters."
+      "passwordTooShort": "Password must be at least 8 characters.",
+      "passwordConfirmRequired": "Please confirm your password.",
+      "passwordMismatch": "Passwords don't match. Try again."
     },
     "login": {
       "title": "Welcome back",

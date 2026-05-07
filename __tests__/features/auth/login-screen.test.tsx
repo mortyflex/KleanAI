@@ -62,6 +62,14 @@ describe("LoginScreen", () => {
     expect(screen.getByText("Start the onboarding")).toBeTruthy();
   });
 
+  it("hides the password by default and reveals it when the eye toggle is pressed", () => {
+    renderLogin();
+    const pw = screen.getByTestId("login-password-input");
+    expect(pw.props.secureTextEntry).toBe(true);
+    fireEvent.press(screen.getByTestId("login-password-toggle"));
+    expect(screen.getByTestId("login-password-input").props.secureTextEntry).toBe(false);
+  });
+
   it("shows validation errors when fields are empty", async () => {
     renderLogin();
     fireEvent.press(screen.getByTestId("login-submit"));
