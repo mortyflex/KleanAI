@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { ScrollView, View, Text, Pressable } from "react-native";
 import { useTranslation } from "react-i18next";
 import { nutrition, meals } from "../../src/data/mock";
@@ -7,6 +7,16 @@ import { MacroBar } from "../../src/components/ui/macro-bar";
 import { SectionHeader } from "../../src/components/ui/section-header";
 import { PillButton } from "../../src/components/ui/pill-button";
 import { colors, radii, shadows } from "../../src/design/tokens";
+import { useOnboarding } from "../../src/features/onboarding/onboarding-context";
+import { useSmoothingContext } from "../../src/features/smoothing/hooks/useSmoothingContext";
+import {
+  DailyPlanCard,
+  MealSuggestionsList,
+  NutritionEventReporter,
+  computeDailyPlan,
+  getDailyMealPlan,
+  planInputFromProfile,
+} from "../../src/features/nutrition";
 
 const MEAL_KEYS: Record<string, string> = {
   Breakfast: "meals.breakfast",
@@ -76,9 +86,29 @@ function WaterDrop({ filled }: { filled: boolean }) {
 
 export default function NutritionScreen() {
   const { t } = useTranslation("common");
-  const cal = nutrition.calories;
-  const calPct = Math.round((cal.current / cal.goal) * 100);
-  const remaining = cal.goal - cal.current;
+  const { profile } = useOnboarding();
+  const smoothingContext = useSmoothingContext();
+
+  const plan = useMemo(() => {
+    const input = planInputFromProfile(profile);
+    return input ? computeDailyPlan(input) : null;
+  }, [profile]);
+
+  const suggestions = useMemo(
+    () => getDailyMealPlan(profile.dietaryRestrictions ?? []),
+    [profile.dietaryRestrictions],
+  );
+
+  // Use the computed plan when available, else fall back to mock for visual
+  // continuity. The current/eaten counter still comes from mock data — we
+  // intentionally don't wire a tracker here (Klean AI is not a food tracker).
+  const calGoal = plan?.calories ?? nutrition.calories.goal;
+  const calCurrent = nutrition.calories.current;
+  const calPct = Math.min(100, Math.round((calCurrent / calGoal) * 100));
+  const remaining = Math.max(0, calGoal - calCurrent);
+  const proteinGoal = plan?.proteinG ?? nutrition.protein.goal;
+  const carbsGoal = plan?.carbsG ?? nutrition.carbs.goal;
+  const fatGoal = plan?.fatG ?? nutrition.fat.goal;
 
   return (
     <ScrollView
@@ -88,16 +118,18 @@ export default function NutritionScreen() {
     >
       {/* ── Header ── */}
       <View style={{ gap: 4 }}>
-        <Text style={{ fontSize: 15, color: colors.muted }}>Sunday, May 4</Text>
         <Text style={{ fontSize: 30, fontWeight: "800", color: colors.ink }}>{t("nutrition.title")}</Text>
       </View>
 
-      {/* ── Calorie Overview ── */}
+      {/* ── Daily plan from goal ── */}
+      <DailyPlanCard plan={plan} />
+
+      {/* ── Today's totals (mock / coming from logger later) ── */}
       <Card style={{ gap: 18 }}>
         <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 6 }}>
-          <Text style={{ fontSize: 42, fontWeight: "800", color: colors.ink }}>{cal.current.toLocaleString()}</Text>
+          <Text style={{ fontSize: 42, fontWeight: "800", color: colors.ink }}>{calCurrent.toLocaleString()}</Text>
           <Text style={{ fontSize: 15, color: colors.muted, paddingBottom: 7 }}>
-            {t("nutrition.goalSuffix", { goal: cal.goal.toLocaleString() })}
+            {t("nutrition.goalSuffix", { goal: calGoal.toLocaleString() })}
           </Text>
         </View>
         <View style={{ gap: 6 }}>
@@ -112,13 +144,19 @@ export default function NutritionScreen() {
           </View>
         </View>
         <View style={{ gap: 14 }}>
-          <MacroBar label={t("nutrition.macros.protein")} current={nutrition.protein.current} goal={nutrition.protein.goal} unit="g" color={colors.brand}  trackColor={colors.brandLight}  />
-          <MacroBar label={t("nutrition.macros.carbs")}   current={nutrition.carbs.current}   goal={nutrition.carbs.goal}   unit="g" color={colors.amber}  trackColor={colors.amberLight}  />
-          <MacroBar label={t("nutrition.macros.fat")}     current={nutrition.fat.current}     goal={nutrition.fat.goal}     unit="g" color={colors.energy} trackColor={colors.energyLight} />
+          <MacroBar label={t("nutrition.macros.protein")} current={nutrition.protein.current} goal={proteinGoal} unit="g" color={colors.brand}  trackColor={colors.brandLight}  />
+          <MacroBar label={t("nutrition.macros.carbs")}   current={nutrition.carbs.current}   goal={carbsGoal}   unit="g" color={colors.amber}  trackColor={colors.amberLight}  />
+          <MacroBar label={t("nutrition.macros.fat")}     current={nutrition.fat.current}     goal={fatGoal}     unit="g" color={colors.energy} trackColor={colors.energyLight} />
         </View>
       </Card>
 
-      {/* ── Meals ── */}
+      {/* ── Event reporter (zero-guilt, connects to smoothing) ── */}
+      <NutritionEventReporter context={smoothingContext} />
+
+      {/* ── Simple meal suggestions ── */}
+      <MealSuggestionsList suggestions={suggestions} />
+
+      {/* ── Meals (legacy mock log) ── */}
       <View style={{ gap: 12 }}>
         <SectionHeader title={t("nutrition.meals.title")} action={t("nutrition.meals.logFood")} />
         {meals.map((meal) => (
@@ -134,34 +172,21 @@ export default function NutritionScreen() {
               {t("nutrition.hydration.title")}
             </Text>
             <Text style={{ fontSize: 16, fontWeight: "700", color: colors.ink }}>
-              {t("nutrition.hydration.glassCount", { current: nutrition.hydration.current, goal: nutrition.hydration.goal })}
+              {t("nutrition.hydration.glassCount", { current: nutrition.hydration.current, goal: plan?.hydrationGlasses ?? nutrition.hydration.goal })}
             </Text>
           </View>
           <Text style={{ fontSize: 28 }}>💧</Text>
         </View>
         <View style={{ flexDirection: "row", gap: 8, flexWrap: "wrap" }}>
-          {Array.from({ length: nutrition.hydration.goal }).map((_, i) => (
+          {Array.from({ length: plan?.hydrationGlasses ?? nutrition.hydration.goal }).map((_, i) => (
             <WaterDrop key={i} filled={i < nutrition.hydration.current} />
           ))}
         </View>
         <View style={{ height: 7, borderRadius: 100, backgroundColor: colors.skyLight, overflow: "hidden" }}>
-          <View style={{ width: `${(nutrition.hydration.current / nutrition.hydration.goal) * 100}%` as any, height: "100%", borderRadius: 100, backgroundColor: colors.sky }} />
+          <View style={{ width: `${(nutrition.hydration.current / (plan?.hydrationGlasses ?? nutrition.hydration.goal)) * 100}%` as any, height: "100%", borderRadius: 100, backgroundColor: colors.sky }} />
         </View>
         <PillButton label={t("nutrition.hydration.addGlass")} size="sm" variant="outline" />
       </Card>
-
-      {/* ── Insight ── */}
-      <View style={{ backgroundColor: colors.mintLight, borderRadius: radii.card, padding: 20, gap: 10, borderCurve: "continuous" } as any}>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-          <Text style={{ fontSize: 16 }}>🌿</Text>
-          <Text style={{ fontSize: 10, fontWeight: "700", color: colors.mint, letterSpacing: 1.2, textTransform: "uppercase" }}>
-            {t("nutrition.insight.label")}
-          </Text>
-        </View>
-        <Text style={{ fontSize: 14, fontWeight: "600", color: colors.ink, lineHeight: 22 }}>
-          {t("nutrition.insight.body")}
-        </Text>
-      </View>
     </ScrollView>
   );
 }

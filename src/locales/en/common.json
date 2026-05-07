@@ -265,13 +265,110 @@
     "macros": {
       "protein": "Protein",
       "carbs": "Carbs",
-      "fat": "Fat"
+      "fat": "Fat",
+      "proteinUnit": "{{grams}} g protein"
     },
     "meals": {
       "title": "Meals",
       "logFood": "Log food",
       "notLogged": "Not logged yet",
       "kcalUnit": "kcal"
+    },
+    "plan": {
+      "title": "Today's plan",
+      "subtitle": "A simple target. Not a strict diet.",
+      "estimateLabel": "Estimate from your profile",
+      "incompleteTitle": "Finish your profile",
+      "incompleteBody": "We'll show your daily plan once your goal and metrics are set."
+    },
+    "suggestions": {
+      "title": "Simple ideas",
+      "subtitle": "Pick what fits your day. Nothing strict.",
+      "kcalLine": "{{kcal}} kcal · {{protein}} g protein",
+      "noResultsTitle": "Nothing to suggest right now",
+      "noResultsBody": "Your dietary preferences filter out our default ideas. We'll add more soon.",
+      "meals": {
+        "oatmeal_berries": {
+          "title": "Oatmeal with berries",
+          "body": "Rolled oats, mixed berries, a spoon of nut butter."
+        },
+        "greek_yogurt_bowl": {
+          "title": "Greek yogurt bowl",
+          "body": "Greek yogurt, granola, fruit, a drizzle of honey."
+        },
+        "tofu_scramble": {
+          "title": "Tofu scramble",
+          "body": "Crumbled tofu, turmeric, spinach, cherry tomatoes."
+        },
+        "eggs_avocado_toast": {
+          "title": "Eggs & avocado toast",
+          "body": "Two eggs, mashed avocado on whole-grain toast."
+        },
+        "chicken_rice_bowl": {
+          "title": "Chicken & rice bowl",
+          "body": "Grilled chicken, rice, roasted veg, lemon."
+        },
+        "lentil_quinoa_salad": {
+          "title": "Lentil & quinoa salad",
+          "body": "Lentils, quinoa, cucumber, tomato, olive oil."
+        },
+        "salmon_sweet_potato": {
+          "title": "Salmon & sweet potato",
+          "body": "Baked salmon, sweet potato, steamed greens."
+        },
+        "tofu_stir_fry": {
+          "title": "Tofu stir-fry",
+          "body": "Tofu, mixed vegetables, soy sauce, brown rice."
+        },
+        "turkey_meatballs": {
+          "title": "Turkey meatballs & pasta",
+          "body": "Lean turkey meatballs, whole-grain pasta, tomato sauce."
+        },
+        "chickpea_curry": {
+          "title": "Chickpea curry",
+          "body": "Chickpeas, tomato, coconut milk, basmati rice."
+        },
+        "grilled_chicken_veg": {
+          "title": "Grilled chicken & veg",
+          "body": "Grilled chicken breast, mixed vegetables, olive oil."
+        },
+        "fruit_almonds": {
+          "title": "Fruit & almonds",
+          "body": "An apple or banana with a small handful of almonds."
+        },
+        "cottage_cheese_fruit": {
+          "title": "Cottage cheese & fruit",
+          "body": "Cottage cheese with fresh fruit and a sprinkle of seeds."
+        },
+        "edamame": {
+          "title": "Edamame",
+          "body": "A bowl of edamame with a pinch of salt."
+        }
+      }
+    },
+    "events": {
+      "title": "How did today go?",
+      "subtitle": "One tap. No judgment, no guilt.",
+      "followed_plan": {
+        "label": "Followed plan",
+        "message": "Nice — staying on plan is the win we keep building on."
+      },
+      "excess_food": {
+        "label": "Ate a bit extra",
+        "message": "All good. We'll spread it gently over the next 2–3 days."
+      },
+      "skipped_meal": {
+        "label": "Skipped a meal",
+        "message": "We won't compensate by cutting more. Eat normally next meal."
+      },
+      "ordered_food": {
+        "label": "Ordered out",
+        "message": "Enjoyed it. We'll absorb it gently across the next few days."
+      },
+      "alcohol": {
+        "label": "Drank alcohol",
+        "message": "No drama. We'll smooth it across the next 2–3 days."
+      }
     },
     "hydration": {
       "title": "Hydration",

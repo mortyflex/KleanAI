@@ -266,13 +266,110 @@
     "macros": {
       "protein": "Protéines",
       "carbs": "Glucides",
-      "fat": "Lipides"
+      "fat": "Lipides",
+      "proteinUnit": "{{grams}} g de protéines"
     },
     "meals": {
       "title": "Repas",
       "logFood": "Enregistrer",
       "notLogged": "Non enregistré",
       "kcalUnit": "kcal"
+    },
+    "plan": {
+      "title": "Ton plan du jour",
+      "subtitle": "Un objectif simple. Pas un régime strict.",
+      "estimateLabel": "Estimation depuis ton profil",
+      "incompleteTitle": "Termine ton profil",
+      "incompleteBody": "On affichera ton plan dès que ton objectif et tes mesures sont saisis."
+    },
+    "suggestions": {
+      "title": "Idées simples",
+      "subtitle": "Choisis ce qui te va. Rien d'imposé.",
+      "kcalLine": "{{kcal}} kcal · {{protein}} g de protéines",
+      "noResultsTitle": "Aucune idée à proposer pour l'instant",
+      "noResultsBody": "Tes préférences alimentaires excluent nos idées par défaut. On en ajoutera bientôt.",
+      "meals": {
+        "oatmeal_berries": {
+          "title": "Porridge aux fruits rouges",
+          "body": "Flocons d'avoine, fruits rouges, une cuillère de purée de noix."
+        },
+        "greek_yogurt_bowl": {
+          "title": "Bol de yaourt grec",
+          "body": "Yaourt grec, granola, fruits, un filet de miel."
+        },
+        "tofu_scramble": {
+          "title": "Tofu brouillé",
+          "body": "Tofu émietté, curcuma, épinards, tomates cerises."
+        },
+        "eggs_avocado_toast": {
+          "title": "Œufs & toast à l'avocat",
+          "body": "Deux œufs, avocat écrasé sur pain complet."
+        },
+        "chicken_rice_bowl": {
+          "title": "Bol poulet & riz",
+          "body": "Poulet grillé, riz, légumes rôtis, citron."
+        },
+        "lentil_quinoa_salad": {
+          "title": "Salade lentilles & quinoa",
+          "body": "Lentilles, quinoa, concombre, tomate, huile d'olive."
+        },
+        "salmon_sweet_potato": {
+          "title": "Saumon & patate douce",
+          "body": "Saumon au four, patate douce, légumes verts vapeur."
+        },
+        "tofu_stir_fry": {
+          "title": "Tofu sauté",
+          "body": "Tofu, légumes mélangés, sauce soja, riz complet."
+        },
+        "turkey_meatballs": {
+          "title": "Boulettes de dinde & pâtes",
+          "body": "Boulettes de dinde, pâtes complètes, sauce tomate."
+        },
+        "chickpea_curry": {
+          "title": "Curry de pois chiches",
+          "body": "Pois chiches, tomate, lait de coco, riz basmati."
+        },
+        "grilled_chicken_veg": {
+          "title": "Poulet grillé & légumes",
+          "body": "Blanc de poulet grillé, légumes, huile d'olive."
+        },
+        "fruit_almonds": {
+          "title": "Fruit & amandes",
+          "body": "Une pomme ou banane avec une poignée d'amandes."
+        },
+        "cottage_cheese_fruit": {
+          "title": "Fromage blanc & fruits",
+          "body": "Fromage blanc avec fruits frais et graines."
+        },
+        "edamame": {
+          "title": "Edamame",
+          "body": "Un bol d'edamame avec une pincée de sel."
+        }
+      }
+    },
+    "events": {
+      "title": "Comment s'est passée ta journée ?",
+      "subtitle": "Un tap. Sans jugement, sans culpabilité.",
+      "followed_plan": {
+        "label": "Plan respecté",
+        "message": "Bravo — rester sur le plan, c'est la victoire qu'on construit jour après jour."
+      },
+      "excess_food": {
+        "label": "Mangé un peu plus",
+        "message": "Pas de souci. On répartit ça en douceur sur 2–3 jours."
+      },
+      "skipped_meal": {
+        "label": "Repas sauté",
+        "message": "On ne compensera pas en coupant plus. Mange normalement au prochain repas."
+      },
+      "ordered_food": {
+        "label": "Commandé à emporter",
+        "message": "Profite. On lisse les calories en plus sur les prochains jours."
+      },
+      "alcohol": {
+        "label": "Bu de l'alcool",
+        "message": "Pas de drame. On absorbe ça gentiment sur 2–3 jours."
+      }
     },
     "hydration": {
       "title": "Hydratation",
