@@ -13,12 +13,17 @@ import { authService, type AuthService } from "./auth.service";
 
 export type AuthStatus = "loading" | "authenticated" | "unauthenticated";
 
+export interface SignUpResult {
+  user: User | null;
+  session: Session | null;
+}
+
 export interface AuthContextValue {
   status: AuthStatus;
   session: Session | null;
   user: User | null;
   signIn: (email: string, password: string) => Promise<User>;
-  signUp: (email: string, password: string) => Promise<User | null>;
+  signUp: (email: string, password: string) => Promise<SignUpResult>;
   signOut: () => Promise<void>;
   refresh: () => Promise<void>;
 }
@@ -88,12 +93,15 @@ export function AuthProvider({
   );
 
   const signUp = useCallback(
-    async (email: string, password: string) => {
+    async (email: string, password: string): Promise<SignUpResult> => {
       const result = await service.signUpWithPassword({ email, password });
-      // Supabase may return a user but no session if email confirmation is on.
+      // Supabase may return a user but no session if email confirmation is on
+      // (or if the email is already registered — Supabase masks that case for
+      // security). The caller MUST check `session` before assuming sign-up
+      // succeeded; only a non-null session means the user is actually in.
       setSession(result.session);
       setStatus(result.session ? "authenticated" : "unauthenticated");
-      return result.user;
+      return { user: result.user, session: result.session };
     },
     [service],
   );

@@ -1,4 +1,5 @@
 import React from "react";
+import { Alert } from "react-native";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react-native";
 import "../../../src/lib/i18n";
 
@@ -18,13 +19,22 @@ jest.mock("expo-router", () => ({
   Link: ({ children }: { children: React.ReactNode }) => children,
 }));
 
+const FAKE_SESSION = {
+  access_token: "tok",
+  refresh_token: "rtok",
+  user: { id: "u1", email: "a@b.com" },
+};
+
 function buildAuth(overrides: Partial<AuthContextValue> = {}): AuthContextValue {
   return {
     status: "unauthenticated",
     session: null,
     user: null,
     signIn: jest.fn(),
-    signUp: jest.fn(async () => ({ id: "u1", email: "a@b.com" }) as never),
+    signUp: jest.fn(async () => ({
+      user: { id: "u1", email: "a@b.com" },
+      session: FAKE_SESSION,
+    }) as never),
     signOut: jest.fn(async () => undefined),
     refresh: jest.fn(async () => undefined),
     ...overrides,
@@ -100,5 +110,27 @@ describe("RegisterScreen", () => {
     await waitFor(() => {
       expect(mockReplace).toHaveBeenCalledWith("/(onboarding)/summary");
     });
+  });
+
+  it("does NOT navigate forward when signUp returns no session (email-confirmation or already-registered)", async () => {
+    mockIntent = "save-onboarding";
+    const alertSpy = jest.spyOn(Alert, "alert").mockImplementation(() => undefined);
+    const noSessionSignUp = jest.fn(async () => ({
+      user: { id: "u1", email: "a@b.com" },
+      session: null,
+    }) as never);
+    renderRegister({ signUp: noSessionSignUp });
+
+    fireEvent.changeText(screen.getByTestId("register-email-input"), "a@b.com");
+    fireEvent.changeText(screen.getByTestId("register-password-input"), "secret123");
+    fireEvent.press(screen.getByTestId("register-submit"));
+
+    await waitFor(() => {
+      expect(noSessionSignUp).toHaveBeenCalled();
+      expect(alertSpy).toHaveBeenCalled();
+    });
+    expect(mockReplace).not.toHaveBeenCalled();
+    expect(mockPush).not.toHaveBeenCalled();
+    alertSpy.mockRestore();
   });
 });

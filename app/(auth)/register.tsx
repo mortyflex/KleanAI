@@ -53,11 +53,13 @@ export default function RegisterScreen() {
     if (!validate()) return;
     setSubmitting(true);
     try {
-      const user = await signUp(email.trim(), password);
-      // If Supabase email confirmation is on, no session is returned. We can
-      // still flow forward — the next time the user opens the app with the
-      // confirmation link they'll already be signed in.
-      if (!user) {
+      const { session } = await signUp(email.trim(), password);
+      // No session = either email confirmation is required, or the email is
+      // already registered (Supabase intentionally hides that case). Either
+      // way we MUST stop here — navigating forward without a session would
+      // bounce the user straight back through the auth gate, creating a
+      // confusing register/summary loop.
+      if (!session) {
         Alert.alert(
           t("auth.register.checkEmailTitle"),
           t("auth.register.checkEmailBody"),
