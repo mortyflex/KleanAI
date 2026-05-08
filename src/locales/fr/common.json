@@ -278,7 +278,8 @@
       "confirmedBody_one": "{{count}} ingrédient confirmé — les repas s'adaptent à ce que tu as.",
       "confirmedBody_other": "{{count}} ingrédients confirmés — les repas s'adaptent à ce que tu as.",
       "scanCta": "Scanner mon frigo",
-      "updateCta": "Mettre à jour mon frigo"
+      "updateCta": "Mettre à jour mon frigo",
+      "cardAccessibility": "Ouvrir mon frigo confirmé"
     },
     "today": {
       "kicker": "Aujourd'hui",
@@ -286,7 +287,7 @@
       "mealsTitle": "Tes repas du jour",
       "mealsSubtitleNoFridge": "Choisis un type de repas pour voir nos idées. Scanne ton frigo pour les adapter.",
       "mealsSubtitleWithFridge": "Chaque idée est biaisée par ce que tu as confirmé dans ton frigo.",
-      "changeCta": "Changer",
+      "viewRecipeCta": "Voir la recette",
       "adaptCta": "Adapter avec mon frigo",
       "slotEmptyTitle": "Rien de prévu",
       "slotEmptyBody": "Choisis une recette pour caler ce repas."
@@ -593,6 +594,21 @@
         "unmappedSectionBody": "Confirme-les et on les transmettra à l'IA quand on génère des recettes."
       }
     },
+    "confirmedFridge": {
+      "title": "Mon frigo confirmé",
+      "subtitle_one": "{{count}} ingrédient disponible pour tes recettes.",
+      "subtitle_other": "{{count}} ingrédients disponibles pour tes recettes.",
+      "emptyTitle": "Ton frigo est vide",
+      "emptyBody": "Scanne ton frigo pour confirmer ce que tu as.",
+      "loading": "Chargement de tes ingrédients…",
+      "mappedSection": "Depuis notre catalogue",
+      "unmappedSection": "Détectés, nutrition estimée",
+      "removeCta": "Retirer",
+      "removeAccessibility": "Retirer {{label}}",
+      "rescanCta": "Scanner à nouveau",
+      "clearAllCta": "Tout effacer",
+      "backCta": "Retour"
+    },
     "ingredients": {
       "chicken_breast": "Blanc de poulet",
       "turkey": "Dinde",
@@ -640,7 +656,9 @@
       "emptyTitle": "Aucune correspondance",
       "emptyBody": "Confirme quelques ingrédients dans ton frigo et on adapte les recettes.",
       "scanFridgeCta": "Scanner mon frigo",
-      "backCta": "Retour"
+      "backCta": "Retour",
+      "aiUnavailableTitle": "Suggestions IA indisponibles",
+      "aiUnavailableBody": "Impossible de joindre l'IA pour l'instant — on n'affiche que les recettes du catalogue. Tes ingrédients hors catalogue sont toujours sauvegardés."
     },
     "fullDay": {
       "title": "Ta journée, prête",
@@ -655,7 +673,9 @@
       "viewCta": "Voir la recette",
       "chooseCta": "Choisir",
       "haveAlready": "Tu as déjà : {{items}}",
-      "stillMissing": "Manquent : {{items}}"
+      "stillMissing": "Manquent : {{items}}",
+      "aiUsesYourFridge": "Utilise des ingrédients de ton frigo hors de notre catalogue.",
+      "calorieNotice": "~{{kcal}} kcal — un peu plus que d'habitude. Pense à doser tes quantités."
     },
     "detail": {
       "timeLabel": "Temps",
@@ -694,6 +714,22 @@
     "difficulty": {
       "easy": "Facile",
       "medium": "Intermédiaire"
+    },
+    "units": {
+      "g": "{{amount}} g",
+      "ml": "{{amount}} ml",
+      "piece_one": "{{count}} pièce",
+      "piece_other": "{{count}} pièces",
+      "tbsp_one": "{{count}} c. à soupe",
+      "tbsp_other": "{{count}} c. à soupe",
+      "tsp_one": "{{count}} c. à café",
+      "tsp_other": "{{count}} c. à café",
+      "slice_one": "{{count}} tranche",
+      "slice_other": "{{count}} tranches",
+      "cup_one": "{{count}} tasse",
+      "cup_other": "{{count}} tasses",
+      "pinch_one": "{{count}} pincée",
+      "pinch_other": "{{count}} pincées"
     },
     "matchReasons": {
       "allInFridge": "Tout est dans ton frigo",

@@ -161,7 +161,10 @@ describe('NutritionScreen', () => {
     expect(screen.getByText('Update my fridge')).toBeTruthy();
   });
 
-  it('surfaces the chosen recipe title and macros in the slot card', async () => {
+  it('surfaces the chosen recipe title and macros in the slot card, re-resolved live from the catalog', async () => {
+    // Persist a snapshot whose stored title is intentionally stale (mimics a
+    // snapshot saved in another locale or before an i18n migration). The
+    // Nutrition screen must re-resolve the title against the live catalog.
     await AsyncStorage.setItem(
       `@klean_chosen_recipes_${todayKey()}`,
       JSON.stringify({
@@ -169,8 +172,8 @@ describe('NutritionScreen', () => {
           recipeId: 'internal:chicken_rice_lunch',
           source: 'internal',
           mealType: 'lunch',
-          title: 'My chosen lunch',
-          description: 'A custom pick',
+          title: 'stale title from another locale',
+          description: 'stale description',
           estimatedCalories: 540,
           estimatedProteinG: 40,
           estimatedCarbsG: 50,
@@ -185,8 +188,9 @@ describe('NutritionScreen', () => {
     renderScreen({});
 
     await waitFor(() => {
-      expect(screen.getByText('My chosen lunch')).toBeTruthy();
+      expect(screen.getByText('Chicken & brown rice bowl')).toBeTruthy();
     });
+    expect(screen.queryByText('stale title from another locale')).toBeNull();
   });
 });
 

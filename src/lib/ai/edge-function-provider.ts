@@ -1,5 +1,7 @@
 import type {
   AIProvider,
+  AIRecipeRequest,
+  AIRecipesResponseRaw,
   FridgeVisionRequest,
   FridgeVisionResponseRaw,
   GymVisionRequest,
@@ -7,6 +9,7 @@ import type {
 } from "../../types/ai.types";
 import { getPublicEnv } from "../env";
 import { encodeImageToBase64 } from "./encode-image";
+import { buildMockRecipeResponse } from "./mock-recipe-suggestions";
 
 const FRIDGE_FUNCTION_PATH = "/functions/v1/analyze-fridge-images";
 
@@ -53,6 +56,34 @@ export class EdgeFunctionAIProvider implements AIProvider {
     // Phase 12.2 only wires the fridge function — gym vision still uses the
     // mock provider until its own Edge Function lands.
     throw new Error("EdgeFunctionAIProvider.analyzeGymImages not implemented");
+  }
+
+  /**
+   * Phase 12.3+: recipe generation uses the same client-side template as the
+   * mock provider until a dedicated `generate-recipe-suggestions` Edge
+   * Function is deployed. The template incorporates both mapped and unmapped
+   * ingredient labels, and respects the requested language — that is enough
+   * to give the user fridge-aware recipe ideas in production while we work
+   * on the real Gemini wiring.
+   *
+   * The hybrid service still applies the deterministic restriction filter
+   * on top, so this transitional implementation is safe.
+   */
+  async generateRecipeSuggestions(
+    req: AIRecipeRequest,
+  ): Promise<AIRecipesResponseRaw> {
+    if (__DEV__) {
+      console.log(
+        "[EdgeFunctionAIProvider] generateRecipeSuggestions placeholder",
+        {
+          mealType: req.mealType,
+          mappedCount: req.mappedIngredientIds.length,
+          unmappedCount: req.unmappedIngredientLabels.length,
+          desiredCount: req.desiredCount,
+        },
+      );
+    }
+    return buildMockRecipeResponse(req);
   }
 
   async analyzeFridgeImages(

@@ -163,7 +163,7 @@ export function scoreRecipeAgainstFridge(
 /**
  * Translation keys describing why a recipe matches the user's context.
  * Kept deterministic so the UI can render them as chips without further
- * computation. Keys live under `nutrition.recipes.matchReasons.*`.
+ * computation. Keys live under `recipes.matchReasons.*`.
  */
 export function getRecipeMatchReasons(
   recipe: InternalRecipe,
@@ -174,30 +174,30 @@ export function getRecipeMatchReasons(
   const reasons: string[] = [];
 
   if (matchedRequiredCount > 0 && missingCount === 0) {
-    reasons.push('nutrition.recipes.matchReasons.allInFridge');
+    reasons.push('recipes.matchReasons.allInFridge');
   } else if (
     matchedRequiredCount > 0 &&
     matchedRequiredCount >= Math.ceil((recipe.ingredientIds.length || 1) / 2)
   ) {
-    reasons.push('nutrition.recipes.matchReasons.mostInFridge');
+    reasons.push('recipes.matchReasons.mostInFridge');
   }
 
   if (recipe.tags.includes('quick') || recipe.prepTimeMinutes <= 10) {
-    reasons.push('nutrition.recipes.matchReasons.quick');
+    reasons.push('recipes.matchReasons.quick');
   }
   if (recipe.tags.includes('high_protein')) {
-    reasons.push('nutrition.recipes.matchReasons.highProtein');
+    reasons.push('recipes.matchReasons.highProtein');
   }
 
   if (ctx.goal && recipe.compatibleGoals.includes(ctx.goal)) {
     if (ctx.goal === 'lose_weight') {
-      reasons.push('nutrition.recipes.matchReasons.fitsWeightLoss');
+      reasons.push('recipes.matchReasons.fitsWeightLoss');
     } else if (ctx.goal === 'gain_muscle') {
-      reasons.push('nutrition.recipes.matchReasons.fitsMassGain');
+      reasons.push('recipes.matchReasons.fitsMassGain');
     } else if (ctx.goal === 'recomposition') {
-      reasons.push('nutrition.recipes.matchReasons.fitsRecomposition');
+      reasons.push('recipes.matchReasons.fitsRecomposition');
     } else if (ctx.goal === 'maintain') {
-      reasons.push('nutrition.recipes.matchReasons.fitsMaintain');
+      reasons.push('recipes.matchReasons.fitsMaintain');
     }
   }
 

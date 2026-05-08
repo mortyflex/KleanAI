@@ -274,26 +274,40 @@ export interface GetHybridRecipesOptions {
  *
  * Algorithm:
  *   1. Rank internal recipes deterministically.
- *   2. If we already have `limit` strong matches, return them as-is.
- *   3. Otherwise ask the AI for the missing slots, validate, restriction-
- *      filter, and append. AI failures fall through gracefully — internal
- *      recipes are always shown first.
+ *   2. If the user has confirmed *unmapped* fridge ingredients (e.g.
+ *      ketchup, harissa), reserve at least one slot for an AI recipe so
+ *      they get suggestions that actually use those items — even when the
+ *      internal catalog could fill all 3 slots on its own.
+ *   3. Otherwise ask the AI only for the missing slots, validate,
+ *      restriction-filter, and append.
+ *   4. AI failures fall through gracefully — internal recipes are always
+ *      shown first and the UI surfaces the failure for telemetry.
  */
 export async function getHybridRecipesForMealType(
   opts: GetHybridRecipesOptions,
 ): Promise<HybridRecipeResult> {
   const limit = opts.limit ?? MAX_RECIPES_PER_MEAL_TYPE;
   const restrictions = opts.restrictions ?? [];
+  const unmappedLabels = opts.unmappedLabels ?? [];
+  const hasUnmapped = unmappedLabels.length > 0;
+
+  // When the user has confirmed unmapped ingredients, we cap the internal
+  // contribution one short of the limit so the AI has room to surface a
+  // recipe that *uses* those ingredients. Without this carve-out, three
+  // strong internal matches would lock the AI out and the user would never
+  // see suggestions involving e.g. their ketchup or harissa.
+  const internalLimit = hasUnmapped && !opts.skipAI ? limit - 1 : limit;
 
   const internal = getRecipesForMealType(opts.mealType, {
     ingredientIds: opts.ingredientIds,
     unmappedCategories: opts.unmappedCategories,
     restrictions,
     goal: opts.goal,
-    limit,
+    limit: internalLimit,
   });
 
-  if (internal.length >= limit || opts.skipAI) {
+  const aiSlotsWanted = limit - internal.length;
+  if (aiSlotsWanted <= 0 || opts.skipAI) {
     return {
       matches: internal,
       internalCount: internal.length,
@@ -301,15 +315,14 @@ export async function getHybridRecipesForMealType(
     };
   }
 
-  const missing = limit - internal.length;
   const aiResult = await generateAIRecipeSuggestions({
     provider: opts.provider,
     mealType: opts.mealType,
     ingredientIds: opts.ingredientIds,
-    unmappedLabels: opts.unmappedLabels ?? [],
+    unmappedLabels,
     goal: opts.goal,
     restrictions,
-    desiredCount: missing,
+    desiredCount: aiSlotsWanted,
     language: opts.language,
   });
 
@@ -322,14 +335,14 @@ export async function getHybridRecipesForMealType(
     };
   }
 
-  const aiMatches: RecipeMatch[] = aiResult.recipes.slice(0, missing).map(
+  const aiMatches: RecipeMatch[] = aiResult.recipes.slice(0, aiSlotsWanted).map(
     (recipe): RecipeMatch => ({
       recipe,
       score: 0,
       matchedIngredientIds: [],
       missingIngredientIds: [],
       optionalIngredientIds: [],
-      matchReasonKeys: ['nutrition.recipes.matchReasons.aiSuggested'],
+      matchReasonKeys: ['recipes.matchReasons.aiSuggested'],
       goodFridgeMatch: false,
     }),
   );

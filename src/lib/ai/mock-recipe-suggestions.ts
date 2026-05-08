@@ -53,7 +53,12 @@ export function buildMockRecipeResponse(
       ];
 
   const baseKcal = mealType === 'snack' ? 220 : mealType === 'breakfast' ? 380 : 500;
-  const kcal = goal === 'gain_muscle' ? baseKcal + 80 : baseKcal;
+  // Confirmed unmapped ingredients are usually condiments / sauces / spreads.
+  // The mock acknowledges they push the calorie count up so the calorie-warning
+  // chip in the UI lights up — exactly what the user asked us to surface.
+  const unmappedBoost = req.unmappedIngredientLabels.length > 0 ? 180 : 0;
+  const kcal =
+    (goal === 'gain_muscle' ? baseKcal + 80 : baseKcal) + unmappedBoost;
   const proteinG =
     goal === 'gain_muscle'
       ? Math.round(kcal * 0.27 / 4)

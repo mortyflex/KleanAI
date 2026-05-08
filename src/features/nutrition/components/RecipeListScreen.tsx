@@ -173,6 +173,16 @@ export function RecipeListScreen() {
 
       {!loading && result && result.matches.length > 0 && (
         <View style={{ gap: 14 }}>
+          {(unmappedLabels?.length ?? 0) > 0 && result.aiCount === 0 && (
+            <Card style={{ gap: 4 }} testID="recipes-ai-unavailable">
+              <KleanText variant="caption" color={colors.muted} weight="700">
+                {t('recipes.list.aiUnavailableTitle')}
+              </KleanText>
+              <KleanText variant="caption" color={colors.muted}>
+                {t('recipes.list.aiUnavailableBody')}
+              </KleanText>
+            </Card>
+          )}
           {result.matches.map((match) => {
             const recipeId = buildSelectionId(match.recipe);
             return (

@@ -10,12 +10,18 @@ import { colors, radii } from '../../../design/tokens';
 import { useChosenRecipes } from '../hooks/useChosenRecipes';
 import { todayLogDate } from '../hooks/useDailyConsumption';
 import { RECIPE_BY_ID } from '../data/recipe-catalog';
+import { getRecipeIngredientQuantity } from '../data/recipe-quantities';
+import { formatQuantity } from '../utils/format-quantity';
 import {
   isAIGeneratedRecipe,
   isInternalRecipe,
 } from '../utils/recipe-engine';
 import { getRememberedRecipe } from '../utils/recent-recipes-cache';
-import type { Recipe } from '../../../types/recipe.types';
+import type {
+  AIGeneratedRecipe,
+  ChosenRecipeSnapshot,
+  Recipe,
+} from '../../../types/recipe.types';
 import type { MealType } from '../utils/meal-suggestions';
 
 const VALID_MEAL_TYPES: MealType[] = ['breakfast', 'lunch', 'dinner', 'snack'];
@@ -30,16 +36,44 @@ function isMealType(value: unknown): value is MealType {
   return typeof value === 'string' && VALID_MEAL_TYPES.includes(value as MealType);
 }
 
+function snapshotToAIRecipe(snapshot: ChosenRecipeSnapshot): AIGeneratedRecipe {
+  return {
+    id: snapshot.recipeId,
+    source: 'ai',
+    mealType: snapshot.mealType,
+    title: snapshot.title,
+    description: snapshot.description,
+    ingredientLabels: [],
+    prepTimeMinutes: snapshot.prepTimeMinutes,
+    difficulty: 'easy',
+    estimatedCalories: snapshot.estimatedCalories,
+    estimatedProteinG: snapshot.estimatedProteinG,
+    estimatedCarbsG: snapshot.estimatedCarbsG,
+    estimatedFatG: snapshot.estimatedFatG,
+    steps: [],
+    tags: snapshot.tags,
+  };
+}
+
 function lookupRecipe(
   recipeId: string | undefined,
   mealType: MealType,
+  chosenSnapshot: ChosenRecipeSnapshot | undefined,
 ): Recipe | null {
   if (!recipeId) return null;
   if (recipeId.startsWith('internal:')) {
     const internalId = recipeId.slice('internal:'.length);
-    return RECIPE_BY_ID.get(internalId) ?? null;
+    const fromCatalog = RECIPE_BY_ID.get(internalId);
+    if (fromCatalog) return fromCatalog;
   }
-  return getRememberedRecipe(mealType, recipeId);
+  const remembered = getRememberedRecipe(mealType, recipeId);
+  if (remembered) return remembered;
+  // Fallback for AI recipes after a restart: rebuild a minimal recipe shape
+  // from the persisted snapshot so the user still gets a usable detail view.
+  if (chosenSnapshot && chosenSnapshot.recipeId === recipeId) {
+    return snapshotToAIRecipe(chosenSnapshot);
+  }
+  return null;
 }
 
 export function RecipeDetailScreen() {
@@ -53,14 +87,15 @@ export function RecipeDetailScreen() {
   const mealType: MealType = isMealType(params.mealType)
     ? params.mealType
     : 'lunch';
-  const recipe = useMemo(
-    () => lookupRecipe(params.recipeId, mealType),
-    [params.recipeId, mealType],
-  );
 
   const today = useMemo(() => todayLogDate(), []);
   const resolveLabel = useCallback((key: string) => t(key), [t]);
-  const { choose } = useChosenRecipes(today, resolveLabel);
+  const { chosen, choose } = useChosenRecipes(today, resolveLabel);
+
+  const recipe = useMemo(
+    () => lookupRecipe(params.recipeId, mealType, chosen[mealType]),
+    [params.recipeId, mealType, chosen],
+  );
 
   const handleChoose = useCallback(async () => {
     if (!recipe) return;
@@ -103,15 +138,19 @@ export function RecipeDetailScreen() {
     ? t(recipe.descriptionKey)
     : recipe.description;
   const ingredientLabels = isInternal
-    ? recipe.ingredientIds.map((id) =>
-        t(`vision.ingredients.${id}`, { defaultValue: id }),
-      )
+    ? recipe.ingredientIds.map((id) => {
+        const name = t(`vision.ingredients.${id}`, { defaultValue: id });
+        const quantity = getRecipeIngredientQuantity(recipe.id, id);
+        return quantity ? `${formatQuantity(quantity, t)} · ${name}` : name;
+      })
     : recipe.ingredientLabels;
   const optionalLabels =
     isInternal && recipe.optionalIngredientIds
-      ? recipe.optionalIngredientIds.map((id) =>
-          t(`vision.ingredients.${id}`, { defaultValue: id }),
-        )
+      ? recipe.optionalIngredientIds.map((id) => {
+          const name = t(`vision.ingredients.${id}`, { defaultValue: id });
+          const quantity = getRecipeIngredientQuantity(recipe.id, id);
+          return quantity ? `${formatQuantity(quantity, t)} · ${name}` : name;
+        })
       : [];
   const steps = isInternal ? recipe.stepKeys.map((k) => t(k)) : recipe.steps;
   const tags = recipe.tags ?? [];

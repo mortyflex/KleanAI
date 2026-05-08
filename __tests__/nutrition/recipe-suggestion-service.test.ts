@@ -263,6 +263,36 @@ describe('getHybridRecipesForMealType — fallback wiring', () => {
     expect(callSpy).not.toHaveBeenCalled();
   });
 
+  it('reserves a slot for AI even when internal matches could fill the limit, if the user has unmapped fridge items', async () => {
+    const callSpy = jest.fn(async () => validAIPayload());
+    const provider: AIProvider = {
+      id: 'mock',
+      modelId: 'spy',
+      analyzeGymImages: async () =>
+        ({ schemaVersion: '1' as const, detected: [] } as never),
+      analyzeFridgeImages: async () =>
+        ({ schemaVersion: '1' as const, detected: [] } as never),
+      generateRecipeSuggestions: async () => callSpy() as never,
+    };
+    const result = await getHybridRecipesForMealType({
+      provider,
+      mealType: 'lunch',
+      // Plenty of mapped ingredients — internal would normally fill 3 slots.
+      ingredientIds: ['chicken_breast', 'brown_rice', 'broccoli', 'salmon'],
+      // …but the user also confirmed an unmapped item like ketchup. The
+      // service must still call AI to surface a recipe that uses it.
+      unmappedLabels: ['Ketchup'],
+      goal: 'maintain',
+      limit: 3,
+    });
+    expect(callSpy).toHaveBeenCalled();
+    expect(result.aiCount).toBe(1);
+    expect(result.matches).toHaveLength(3);
+    expect(
+      result.matches.find((m) => m.recipe.source === 'ai'),
+    ).toBeDefined();
+  });
+
   it('drops AI recipes that violate user restrictions even if the model returned them', async () => {
     const provider = makeProvider(async () =>
       validAIPayload({

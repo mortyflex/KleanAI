@@ -277,7 +277,8 @@
       "confirmedBody_one": "{{count}} ingredient confirmed — meals adapt to what you have.",
       "confirmedBody_other": "{{count}} ingredients confirmed — meals adapt to what you have.",
       "scanCta": "Scan my fridge",
-      "updateCta": "Update my fridge"
+      "updateCta": "Update my fridge",
+      "cardAccessibility": "Open my confirmed fridge"
     },
     "today": {
       "kicker": "Today",
@@ -285,7 +286,7 @@
       "mealsTitle": "Today's meals",
       "mealsSubtitleNoFridge": "Tap one to see ideas. Scan your fridge to make them frigde-aware.",
       "mealsSubtitleWithFridge": "Each idea is biased by what you confirmed in your fridge.",
-      "changeCta": "Change",
+      "viewRecipeCta": "View recipe",
       "adaptCta": "Adapt with my fridge",
       "slotEmptyTitle": "Nothing planned yet",
       "slotEmptyBody": "Pick a recipe to lock in this slot."
@@ -592,6 +593,21 @@
         "unmappedSectionBody": "Confirm them and we'll send them to the AI when generating recipes."
       }
     },
+    "confirmedFridge": {
+      "title": "My confirmed fridge",
+      "subtitle_one": "{{count}} item available for your recipes.",
+      "subtitle_other": "{{count}} items available for your recipes.",
+      "emptyTitle": "Your fridge is empty",
+      "emptyBody": "Scan your fridge to confirm what you have on hand.",
+      "loading": "Loading your ingredients…",
+      "mappedSection": "From our catalog",
+      "unmappedSection": "Detected, nutrition estimated",
+      "removeCta": "Remove",
+      "removeAccessibility": "Remove {{label}}",
+      "rescanCta": "Scan again",
+      "clearAllCta": "Clear all",
+      "backCta": "Back"
+    },
     "ingredients": {
       "chicken_breast": "Chicken breast",
       "turkey": "Turkey",
@@ -639,7 +655,9 @@
       "emptyTitle": "Nothing matches yet",
       "emptyBody": "Confirm a few ingredients in your fridge and we'll tailor recipes around them.",
       "scanFridgeCta": "Scan my fridge",
-      "backCta": "Back"
+      "backCta": "Back",
+      "aiUnavailableTitle": "AI suggestions unavailable",
+      "aiUnavailableBody": "We couldn't reach the AI for now — showing only catalog recipes. Your unmapped ingredients are still saved."
     },
     "fullDay": {
       "title": "Your day, ready",
@@ -654,7 +672,9 @@
       "viewCta": "View recipe",
       "chooseCta": "Choose",
       "haveAlready": "You already have: {{items}}",
-      "stillMissing": "Missing: {{items}}"
+      "stillMissing": "Missing: {{items}}",
+      "aiUsesYourFridge": "Uses ingredients from your fridge that are outside our catalog.",
+      "calorieNotice": "~{{kcal}} kcal — a bit higher than usual. Watch your portions."
     },
     "detail": {
       "timeLabel": "Time",
@@ -693,6 +713,22 @@
     "difficulty": {
       "easy": "Easy",
       "medium": "Medium"
+    },
+    "units": {
+      "g": "{{amount}} g",
+      "ml": "{{amount}} ml",
+      "piece_one": "{{count}} piece",
+      "piece_other": "{{count}} pieces",
+      "tbsp_one": "{{count}} tbsp",
+      "tbsp_other": "{{count}} tbsp",
+      "tsp_one": "{{count}} tsp",
+      "tsp_other": "{{count}} tsp",
+      "slice_one": "{{count}} slice",
+      "slice_other": "{{count}} slices",
+      "cup_one": "{{count}} cup",
+      "cup_other": "{{count}} cups",
+      "pinch_one": "{{count}} pinch",
+      "pinch_other": "{{count}} pinches"
     },
     "matchReasons": {
       "allInFridge": "All in your fridge",

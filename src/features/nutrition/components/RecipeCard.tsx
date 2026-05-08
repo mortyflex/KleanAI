@@ -7,6 +7,20 @@ import { PillButton } from '../../../components/ui/pill-button';
 import { colors, radii } from '../../../design/tokens';
 import type { RecipeMatch } from '../../../types/recipe.types';
 import { isAIGeneratedRecipe } from '../utils/recipe-engine';
+import type { MealType } from '../utils/meal-suggestions';
+
+/**
+ * Above these per-meal-type baselines, an AI-generated recipe gets a
+ * discreet "calories higher than usual" notice. The thresholds are loose
+ * — they're meant to nudge the user to double-check portions, not to
+ * scold or block the recipe.
+ */
+const AI_HIGH_CALORIE_THRESHOLD: Record<MealType, number> = {
+  breakfast: 520,
+  lunch: 700,
+  dinner: 720,
+  snack: 320,
+};
 
 interface RecipeCardProps {
   match: RecipeMatch;
@@ -80,6 +94,11 @@ export function RecipeCard({ match, onView, onChoose, testID }: RecipeCardProps)
         t(`vision.ingredients.${id}`, { defaultValue: id }),
       );
 
+  const showCalorieNotice =
+    isAI &&
+    recipe.estimatedCalories >
+      AI_HIGH_CALORIE_THRESHOLD[recipe.mealType];
+
   return (
     <View
       testID={testID}
@@ -89,9 +108,28 @@ export function RecipeCard({ match, onView, onChoose, testID }: RecipeCardProps)
         padding: 18,
         gap: 12,
         borderWidth: 1,
-        borderColor: colors.border,
+        borderColor: isAI ? colors.brand : colors.border,
       }}
     >
+      {isAI ? (
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 8,
+            paddingHorizontal: 10,
+            paddingVertical: 6,
+            borderRadius: radii.pill,
+            backgroundColor: colors.brand,
+            alignSelf: 'flex-start',
+          }}
+          testID={`${testID ?? 'recipe-card'}-ai-banner`}
+        >
+          <KleanText variant="caption" color="#FFFFFF" weight="800">
+            ✨ {t('recipes.badges.aiSuggested')}
+          </KleanText>
+        </View>
+      ) : null}
       <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 10 }}>
         <View style={{ flex: 1, gap: 4 }}>
           <KleanText variant="bodyMedium" color={colors.ink} weight="800">
@@ -101,15 +139,38 @@ export function RecipeCard({ match, onView, onChoose, testID }: RecipeCardProps)
             {description}
           </KleanText>
         </View>
-        {isAI ? (
-          <Chip
-            label={t('recipes.badges.aiSuggested')}
-            bg={colors.brandLight}
-            fg={colors.brand}
-            testID={`${testID ?? 'recipe-card'}-ai-badge`}
-          />
-        ) : null}
       </View>
+
+      {isAI && (
+        <KleanText variant="caption" color={colors.brand}>
+          {t('recipes.card.aiUsesYourFridge')}
+        </KleanText>
+      )}
+
+      {showCalorieNotice && (
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 6,
+            padding: 10,
+            borderRadius: radii.chip,
+            backgroundColor: colors.amberLight,
+            borderWidth: 1,
+            borderColor: colors.amber,
+          }}
+          testID={`${testID ?? 'recipe-card'}-calorie-notice`}
+        >
+          <KleanText variant="caption" color={colors.amber} weight="800">
+            ⚠️
+          </KleanText>
+          <KleanText variant="caption" color={colors.ink} style={{ flex: 1 }}>
+            {t('recipes.card.calorieNotice', {
+              kcal: recipe.estimatedCalories,
+            })}
+          </KleanText>
+        </View>
+      )}
 
       <View style={{ flexDirection: 'row', gap: 16, flexWrap: 'wrap' }}>
         <View style={{ gap: 1 }}>

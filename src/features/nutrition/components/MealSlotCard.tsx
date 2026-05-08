@@ -29,7 +29,9 @@ interface MealSlotCardProps {
   /** Suggestion fallback when no chosen recipe — keeps the screen useful. */
   suggestion: MealSuggestion | null;
   eaten: boolean;
-  onChange: () => void;
+  /** "Voir la recette" — opens the detail view of the currently displayed recipe. */
+  onViewRecipe: () => void;
+  /** "Adapter avec mon frigo" — opens the recipe list biased by the user's fridge. */
   onAdaptWithFridge: () => void;
   onMarkEaten: () => void;
   onUnmarkEaten: () => void;
@@ -46,7 +48,7 @@ export function MealSlotCard({
   chosen,
   suggestion,
   eaten,
-  onChange,
+  onViewRecipe,
   onAdaptWithFridge,
   onMarkEaten,
   onUnmarkEaten,
@@ -166,9 +168,9 @@ export function MealSlotCard({
 
       <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
         <Pressable
-          onPress={onChange}
+          onPress={onViewRecipe}
           accessibilityRole="button"
-          testID={`${testID ?? 'meal-slot'}-change`}
+          testID={`${testID ?? 'meal-slot'}-view`}
           style={{
             flex: 1,
             minWidth: 130,
@@ -182,7 +184,7 @@ export function MealSlotCard({
           }}
         >
           <KleanText variant="label" color={colors.ink}>
-            {t('nutrition.today.changeCta')}
+            {t('nutrition.today.viewRecipeCta')}
           </KleanText>
         </Pressable>
         <Pressable

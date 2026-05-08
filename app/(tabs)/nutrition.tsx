@@ -1,5 +1,5 @@
 import React, { useMemo, useCallback } from "react";
-import { ScrollView, View, Text } from "react-native";
+import { Pressable, ScrollView, View, Text } from "react-native";
 import { useRouter, useFocusEffect } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { nutrition } from "../../src/data/mock";
@@ -23,6 +23,7 @@ import {
 } from "../../src/features/nutrition/hooks/useDailyConsumption";
 import { useChosenRecipes } from "../../src/features/nutrition/hooks/useChosenRecipes";
 import { MealSlotCard } from "../../src/features/nutrition/components/MealSlotCard";
+import { resolveSnapshotForDisplay } from "../../src/features/nutrition/utils/resolve-snapshot";
 import { useConfirmedFridge } from "../../src/features/vision/hooks/useConfirmedFridge";
 import type { MealType } from "../../src/features/nutrition/utils/meal-suggestions";
 
@@ -42,17 +43,32 @@ function WaterDrop({ filled }: { filled: boolean }) {
 function FridgeSection({
   ingredientCount,
   unmappedCount,
-  onPress,
+  onPressCard,
+  onScan,
 }: {
   ingredientCount: number;
   unmappedCount: number;
-  onPress: () => void;
+  onPressCard: () => void;
+  onScan: () => void;
 }) {
   const { t } = useTranslation("common");
   const total = ingredientCount + unmappedCount;
   const hasFridge = total > 0;
   return (
-    <Card style={{ gap: 12 }}>
+    <Pressable
+      onPress={onPressCard}
+      accessibilityRole="button"
+      accessibilityLabel={t("nutrition.fridgeScan.cardAccessibility")}
+      testID="nutrition-fridge-card"
+      style={{
+        backgroundColor: colors.card,
+        borderRadius: radii.card,
+        padding: 20,
+        gap: 12,
+        borderWidth: 1,
+        borderColor: colors.border,
+      }}
+    >
       <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
         <View
           style={{
@@ -76,6 +92,11 @@ function FridgeSection({
               : t("nutrition.fridgeScan.emptyBody")}
           </KleanText>
         </View>
+        {hasFridge ? (
+          <KleanText variant="h3" color={colors.muted}>
+            ›
+          </KleanText>
+        ) : null}
       </View>
       <PillButton
         label={t(
@@ -84,10 +105,10 @@ function FridgeSection({
             : "nutrition.fridgeScan.scanCta",
         )}
         variant={hasFridge ? "outline" : "filled"}
-        onPress={onPress}
+        onPress={onScan}
         testID="nutrition-fridge-scan-cta"
       />
-    </Card>
+    </Pressable>
   );
 }
 
@@ -144,9 +165,33 @@ export default function NutritionScreen() {
     [router],
   );
 
+  const goToRecipeView = useCallback(
+    (mealType: MealType) => {
+      const chosenRecipe = chosen[mealType];
+      if (chosenRecipe) {
+        router.push({
+          pathname: "/recipes/detail",
+          params: { mealType, recipeId: chosenRecipe.recipeId },
+        });
+        return;
+      }
+      // No chosen recipe yet — open the list so the user can pick one to view.
+      goToMealList(mealType);
+    },
+    [chosen, goToMealList, router],
+  );
+
   const handleScanFridge = useCallback(() => {
     router.push("/vision/fridge");
   }, [router]);
+
+  const handleOpenConfirmedFridge = useCallback(() => {
+    if ((fridgeIds?.length ?? 0) + (fridgeUnmappedLabels?.length ?? 0) > 0) {
+      router.push("/vision/confirmed");
+    } else {
+      router.push("/vision/fridge");
+    }
+  }, [fridgeIds, fridgeUnmappedLabels, router]);
 
   const handleMarkEaten = useCallback(
     (mealType: MealType) => {
@@ -271,7 +316,13 @@ export default function NutritionScreen() {
 
       <View style={{ gap: 12 }}>
         {MEAL_ORDER.map((mealType) => {
-          const chosenRecipe = chosen[mealType] ?? null;
+          const rawChosen = chosen[mealType] ?? null;
+          // Re-resolve the snapshot's title/description against the current
+          // i18n language so internal recipes always render in the active
+          // language even if persisted in another locale.
+          const chosenRecipe = rawChosen
+            ? resolveSnapshotForDisplay(rawChosen, resolveLabel)
+            : null;
           const suggestion = suggestions[mealType] ?? null;
           const eatenId = chosenRecipe?.recipeId ?? suggestion?.id;
           const eaten = eatenId ? consumedIds.has(eatenId) : false;
@@ -282,7 +333,7 @@ export default function NutritionScreen() {
               chosen={chosenRecipe}
               suggestion={suggestion}
               eaten={eaten}
-              onChange={() => goToMealList(mealType)}
+              onViewRecipe={() => goToRecipeView(mealType)}
               onAdaptWithFridge={() =>
                 fridgeReady ? goToMealList(mealType) : handleScanFridge()
               }
@@ -298,7 +349,8 @@ export default function NutritionScreen() {
       <FridgeSection
         ingredientCount={fridgeIds?.length ?? 0}
         unmappedCount={fridgeUnmappedLabels?.length ?? 0}
-        onPress={handleScanFridge}
+        onPressCard={handleOpenConfirmedFridge}
+        onScan={handleScanFridge}
       />
 
       {/* ── Event reporter (zero-guilt, connects to smoothing) ───── */}

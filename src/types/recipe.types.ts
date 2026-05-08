@@ -5,6 +5,22 @@ import type { MealType } from '../features/nutrition/utils/meal-suggestions';
 export type RecipeMealType = MealType;
 export type RecipeDifficulty = 'easy' | 'medium';
 
+/** Display units for recipe ingredient quantities. */
+export type IngredientQuantityUnit =
+  | 'g'
+  | 'ml'
+  | 'piece'
+  | 'tbsp'
+  | 'tsp'
+  | 'slice'
+  | 'cup'
+  | 'pinch';
+
+export interface RecipeIngredientQuantity {
+  amount: number;
+  unit: IngredientQuantityUnit;
+}
+
 /** Coarse tags used for badges on recipe cards. */
 export type RecipeTag =
   | 'high_protein'
@@ -36,6 +52,15 @@ export interface InternalRecipe {
   ingredientIds: IngredientId[];
   /** Optional ingredients — counted as bonus matches but never penalising. */
   optionalIngredientIds?: IngredientId[];
+  /**
+   * Approximate quantities per ingredient (required + optional). The UI
+   * renders them through i18n unit keys, so they translate to "50 g" /
+   * "1 piece" / "1 c. à soupe" depending on the active language. The
+   * amounts are rough averages — not medically validated.
+   */
+  ingredientQuantities?: Partial<
+    Record<IngredientId, RecipeIngredientQuantity>
+  >;
   /**
    * Categories of *unmapped* fridge items the recipe can also use (e.g.
    * generic spices, condiments). Only used to slightly bias the score when
