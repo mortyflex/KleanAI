@@ -2,6 +2,7 @@ import type {
   DetectedIngredientRaw,
   DetectedIngredient,
   IngredientId,
+  UnmappedIngredient,
 } from '../../../types/ai.types';
 import {
   INGREDIENT_CATALOG,
@@ -95,4 +96,69 @@ export function mapIngredientDetections(
 /** Convenience: list every internal id known to the catalog. */
 export function listAllIngredientIds(): IngredientId[] {
   return INGREDIENT_CATALOG.map((e) => e.internalId);
+}
+
+export interface FridgeMappingResult {
+  /** Detections that resolved to a known internal ingredient id. */
+  mapped: DetectedIngredient[];
+  /** Detections above the confidence threshold but unknown to the catalog. */
+  unmapped: UnmappedIngredient[];
+}
+
+/**
+ * Builds a stable `unmappedId` for a free-form AI label so we can use it as a
+ * React key, dedupe entries, and round-trip the user's selection through the
+ * confirmation reducer without depending on object identity.
+ */
+export function buildUnmappedId(label: string): string {
+  const normalized = normalizeIngredientLabel(label);
+  const slug = normalized.replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+  return `unmapped:${slug || 'item'}`;
+}
+
+/**
+ * Same input as {@link mapIngredientDetections}, but returns BOTH the mapped
+ * detections (existing behavior) and the unmapped ones — detections that
+ * passed the confidence threshold but did not resolve to any catalog entry.
+ *
+ * Unmapped items are useful inputs for the AI recipe generator: even without
+ * precise nutrition data, knowing the user has e.g. "ketchup" or "harissa"
+ * lets the generator suggest more realistic recipes. Filtering rules
+ * (restrictions, etc.) still happen downstream, deterministically.
+ */
+export function partitionIngredientDetections(
+  detections: DetectedIngredientRaw[],
+  threshold: number = DEFAULT_FRIDGE_CONFIDENCE_THRESHOLD,
+): FridgeMappingResult {
+  const mapped = mapIngredientDetections(detections, threshold);
+  const mappedRawLabels = new Set(mapped.map((m) => m.rawLabel));
+
+  const unmappedById = new Map<string, UnmappedIngredient>();
+
+  for (const raw of detections) {
+    if (raw.confidence < threshold) continue;
+    if (mappedRawLabels.has(raw.label)) continue;
+    if (mapToInternalIngredient(raw)) continue;
+
+    const unmappedId = buildUnmappedId(raw.label);
+    const candidate: UnmappedIngredient = {
+      unmappedId,
+      rawLabel: raw.label,
+      category: raw.category,
+      confidence: raw.confidence,
+      quantity: raw.quantity,
+      uncertaintyNote: raw.uncertaintyNote,
+    };
+
+    const existing = unmappedById.get(unmappedId);
+    if (!existing || candidate.confidence > existing.confidence) {
+      unmappedById.set(unmappedId, candidate);
+    }
+  }
+
+  const unmapped = [...unmappedById.values()].sort(
+    (a, b) => b.confidence - a.confidence,
+  );
+
+  return { mapped, unmapped };
 }

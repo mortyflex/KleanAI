@@ -67,12 +67,12 @@ describe('NutritionScreen', () => {
     await AsyncStorage.clear();
   });
 
-  it('renders without crashing on an empty profile (incomplete state)', () => {
+  it('renders without crashing on an empty profile and shows the meal section', () => {
     renderScreen({});
-    expect(screen.getByText('Finish your profile')).toBeTruthy();
+    expect(screen.getByText("Today's meals")).toBeTruthy();
   });
 
-  it('shows the daily plan card title even when incomplete', () => {
+  it('shows the today plan kicker even when the profile is incomplete', () => {
     renderScreen({});
     expect(screen.getAllByText("Today's plan").length).toBeGreaterThan(0);
   });
@@ -86,28 +86,21 @@ describe('NutritionScreen', () => {
     expect(screen.getByTestId('event-alcohol')).toBeTruthy();
   });
 
-  it('renders meal suggestions with at least one card per slot', () => {
+  it('renders one meal slot card per meal type', () => {
     renderScreen({});
-    expect(screen.getByTestId('suggestion-breakfast')).toBeTruthy();
-    expect(screen.getByTestId('suggestion-lunch')).toBeTruthy();
-    expect(screen.getByTestId('suggestion-dinner')).toBeTruthy();
-    expect(screen.getByTestId('suggestion-snack')).toBeTruthy();
+    expect(screen.getByTestId('nutrition-meal-breakfast')).toBeTruthy();
+    expect(screen.getByTestId('nutrition-meal-lunch')).toBeTruthy();
+    expect(screen.getByTestId('nutrition-meal-dinner')).toBeTruthy();
+    expect(screen.getByTestId('nutrition-meal-snack')).toBeTruthy();
   });
 
-  it('shows a real plan when the profile is complete', () => {
-    renderScreen({
-      goal: 'lose_weight',
-      gender: 'female',
-      age: 30,
-      weightKg: 70,
-      heightCm: 168,
-      trainingDaysPerWeek: 3,
-      targetWeightKg: 65,
-      targetTimeframe: { durationWeeks: 12 },
-      dietaryRestrictions: [],
-    });
-    // Header subtitle (visible only when plan exists)
-    expect(screen.getByText('A simple target. Not a strict diet.')).toBeTruthy();
+  it('shows the zero-guilt hero copy regardless of profile state', () => {
+    renderScreen({});
+    expect(
+      screen.getByText(
+        'Real food, zero guilt. Klean adapts whenever life gets messy.',
+      ),
+    ).toBeTruthy();
   });
 
   it('exposes a CTA to scan the fridge when none is confirmed yet', async () => {
@@ -116,7 +109,7 @@ describe('NutritionScreen', () => {
     expect(screen.getByText('Scan my fridge')).toBeTruthy();
   });
 
-  it('decrements the calorie counter when the user marks a suggestion as eaten', async () => {
+  it('decrements the calorie counter when the user marks a meal as eaten', async () => {
     renderScreen({
       goal: 'lose_weight',
       gender: 'female',
@@ -129,20 +122,19 @@ describe('NutritionScreen', () => {
       dietaryRestrictions: [],
     });
 
-    // Default lunch suggestion is the chicken rice bowl (580 kcal). Tap its
+    // Default lunch fallback is the chicken rice bowl (580 kcal). Tap its
     // "I ate this" button and verify the totals card updates.
-    const lunchToggle = await screen.findByTestId('suggestion-lunch-toggle');
+    const lunchEat = await screen.findByTestId('nutrition-meal-lunch-eat');
     await act(async () => {
-      fireEvent.press(lunchToggle);
+      fireEvent.press(lunchEat);
     });
 
     await waitFor(() => {
       expect(screen.getByText('580')).toBeTruthy();
     });
 
-    // Tap again — totals should drop back to 0.
     await act(async () => {
-      fireEvent.press(screen.getByTestId('suggestion-lunch-toggle'));
+      fireEvent.press(screen.getByTestId('nutrition-meal-lunch-eat'));
     });
 
     await waitFor(() => {
@@ -151,10 +143,6 @@ describe('NutritionScreen', () => {
   });
 
   it('biases meal suggestions toward confirmed fridge ingredients', async () => {
-    // Default catalog order (no fridge) picks oatmeal_berries / chicken_rice_bowl
-    // / turkey_meatballs / fruit_almonds. With these ingredients, the scoring
-    // shifts breakfast to greek_yogurt_bowl, dinner to chickpea_curry, snack to
-    // cottage_cheese_fruit — giving us a clear signal the fridge is wired in.
     await saveConfirmedFridge([
       'greek_yogurt',
       'spinach',
@@ -170,7 +158,41 @@ describe('NutritionScreen', () => {
       expect(screen.getByText('Cottage cheese & fruit')).toBeTruthy();
     });
 
-    // CTA copy switches once a fridge is on file.
     expect(screen.getByText('Update my fridge')).toBeTruthy();
   });
+
+  it('surfaces the chosen recipe title and macros in the slot card', async () => {
+    await AsyncStorage.setItem(
+      `@klean_chosen_recipes_${todayKey()}`,
+      JSON.stringify({
+        lunch: {
+          recipeId: 'internal:chicken_rice_lunch',
+          source: 'internal',
+          mealType: 'lunch',
+          title: 'My chosen lunch',
+          description: 'A custom pick',
+          estimatedCalories: 540,
+          estimatedProteinG: 40,
+          estimatedCarbsG: 50,
+          estimatedFatG: 14,
+          prepTimeMinutes: 22,
+          tags: ['high_protein'],
+          chosenAt: '2026-05-08T10:00:00Z',
+        },
+      }),
+    );
+
+    renderScreen({});
+
+    await waitFor(() => {
+      expect(screen.getByText('My chosen lunch')).toBeTruthy();
+    });
+  });
 });
+
+function todayKey(now: Date = new Date()): string {
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const d = String(now.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}

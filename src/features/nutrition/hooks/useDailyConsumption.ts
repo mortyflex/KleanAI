@@ -13,6 +13,7 @@ import {
   type ConsumedTotals,
 } from '../store/consumed-meals-storage';
 import type { MealSuggestion } from '../utils/meal-suggestions';
+import type { ChosenRecipeSnapshot } from '../../../types/recipe.types';
 
 /**
  * Lightweight per-meal consumption tracker. Owns:
@@ -31,6 +32,11 @@ export interface UseDailyConsumptionResult {
   isLoading: boolean;
   /** Mark a suggestion as eaten — idempotent (re-tapping doesn't double-count). */
   consume: (meal: MealSuggestion) => void;
+  /**
+   * Mark a chosen recipe (internal or AI-generated) as eaten. Same one-tap
+   * semantics as {@link consume} but works from a `ChosenRecipeSnapshot`.
+   */
+  consumeRecipe: (snapshot: ChosenRecipeSnapshot) => void;
   /** Remove a previously marked meal. */
   unconsume: (mealId: string) => void;
   /** Convenience flag for the UI. */
@@ -45,6 +51,18 @@ function buildEntry(meal: MealSuggestion): ConsumedMealEntry {
     proteinG: meal.approxProteinG,
     carbsG: meal.approxCarbsG,
     fatG: meal.approxFatG,
+    consumedAt: new Date().toISOString(),
+  };
+}
+
+function buildRecipeEntry(snapshot: ChosenRecipeSnapshot): ConsumedMealEntry {
+  return {
+    mealId: snapshot.recipeId,
+    type: snapshot.mealType,
+    kcal: snapshot.estimatedCalories,
+    proteinG: snapshot.estimatedProteinG,
+    carbsG: snapshot.estimatedCarbsG,
+    fatG: snapshot.estimatedFatG,
     consumedAt: new Date().toISOString(),
   };
 }
@@ -128,6 +146,21 @@ export function useDailyConsumption(
     [persist],
   );
 
+  const consumeRecipe = useCallback(
+    (snapshot: ChosenRecipeSnapshot) => {
+      setConsumed((prev) => {
+        if (prev[snapshot.recipeId]) return prev;
+        const next = {
+          ...prev,
+          [snapshot.recipeId]: buildRecipeEntry(snapshot),
+        };
+        persist(next);
+        return next;
+      });
+    },
+    [persist],
+  );
+
   const unconsume = useCallback(
     (mealId: string) => {
       setConsumed((prev) => {
@@ -145,7 +178,15 @@ export function useDailyConsumption(
     [consumed],
   );
 
-  return { consumed, totals, isLoading, consume, unconsume, isConsumed };
+  return {
+    consumed,
+    totals,
+    isLoading,
+    consume,
+    consumeRecipe,
+    unconsume,
+    isConsumed,
+  };
 }
 
 /** Returns today's date in `YYYY-MM-DD` (local timezone). */

@@ -37,4 +37,23 @@ describe('fridge-storage', () => {
     await clearConfirmedFridge();
     expect(await getConfirmedFridge()).toBeNull();
   });
+
+  it('persists unmapped labels and dedupes them', async () => {
+    await saveConfirmedFridge({
+      ingredientIds: ['eggs'],
+      unmappedLabels: ['Ketchup', 'Ketchup', 'Harissa'],
+    });
+    const record = await getConfirmedFridge();
+    expect(record?.ingredientIds).toEqual(['eggs']);
+    expect(record?.unmappedLabels).toEqual(['Ketchup', 'Harissa']);
+  });
+
+  it('falls back to an empty unmapped list when the persisted record is from an older version', async () => {
+    await AsyncStorage.setItem(
+      '@klean_confirmed_fridge',
+      JSON.stringify({ ingredientIds: ['eggs'], updatedAt: '2024-01-01' }),
+    );
+    const record = await getConfirmedFridge();
+    expect(record?.unmappedLabels).toEqual([]);
+  });
 });

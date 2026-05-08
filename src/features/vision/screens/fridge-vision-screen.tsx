@@ -8,7 +8,6 @@ import { KleanText } from '../../../components/ui/klean-text';
 import { PillButton } from '../../../components/ui/pill-button';
 import { colors, radii } from '../../../design/tokens';
 import { getActiveAIProviderId } from '../../../lib/ai';
-import type { IngredientId } from '../../../types/ai.types';
 import { useConfirmedFridge } from '../hooks/useConfirmedFridge';
 import { useFridgeVisionFlow } from '../hooks/useFridgeVisionFlow';
 import { INGREDIENT_CATALOG } from '../data/ingredient-catalog';
@@ -26,13 +25,15 @@ const labelKeyById: Record<string, string> = Object.fromEntries(
 type PickerErrorKind = 'permission_denied' | 'unavailable';
 
 interface IngredientRowProps {
-  internalId: IngredientId;
   label: string;
   rawLabel: string;
   confidence: number;
   selected: boolean;
   uncertaintyNote?: string;
+  /** When true, render the discreet "estimated nutrition" badge for unmapped items. */
+  estimatedNutrition?: boolean;
   onToggle: () => void;
+  testID?: string;
 }
 
 function IngredientRow({
@@ -41,7 +42,9 @@ function IngredientRow({
   confidence,
   selected,
   uncertaintyNote,
+  estimatedNutrition,
   onToggle,
+  testID,
 }: IngredientRowProps) {
   const { t } = useTranslation('common');
   return (
@@ -49,6 +52,7 @@ function IngredientRow({
       onPress={onToggle}
       accessibilityRole="checkbox"
       accessibilityState={{ checked: selected }}
+      testID={testID}
       style={{
         flexDirection: 'row',
         alignItems: 'center',
@@ -86,6 +90,22 @@ function IngredientRow({
         <KleanText variant="caption" color={colors.muted}>
           {t('vision.fridge.results.rawLabel', { label: rawLabel })}
         </KleanText>
+        {estimatedNutrition ? (
+          <View
+            style={{
+              alignSelf: 'flex-start',
+              marginTop: 4,
+              paddingHorizontal: 8,
+              paddingVertical: 2,
+              borderRadius: radii.pill,
+              backgroundColor: colors.amberLight,
+            }}
+          >
+            <KleanText variant="caption" color={colors.amber} weight="700">
+              {t('vision.fridge.results.estimatedNutritionBadge')}
+            </KleanText>
+          </View>
+        ) : null}
         {uncertaintyNote ? (
           <KleanText variant="caption" color={colors.muted}>
             {uncertaintyNote}
@@ -233,12 +253,19 @@ export function FridgeVisionScreen() {
   }, [flow]);
 
   const handleSave = useCallback(async () => {
-    await save(flow.selectedIds);
+    await save({
+      ingredientIds: flow.selectedIds,
+      unmappedLabels: flow.selectedUnmappedLabels,
+    });
     flow.markSaved();
   }, [flow, save]);
 
   const handleSkip = useCallback(() => {
     router.back();
+  }, [router]);
+
+  const handleChooseRecipe = useCallback(() => {
+    router.replace('/recipes/meal-choice');
   }, [router]);
 
   const { state } = flow;
@@ -498,19 +525,43 @@ export function FridgeVisionScreen() {
               return (
                 <IngredientRow
                   key={item.internalId}
-                  internalId={item.internalId}
                   label={labelKey ? t(labelKey) : item.rawLabel}
                   rawLabel={item.rawLabel}
                   confidence={item.confidence}
                   uncertaintyNote={item.uncertaintyNote}
                   selected={!!state.selection[item.internalId]}
                   onToggle={() => flow.toggleSelection(item.internalId)}
+                  testID={`fridge-row-${item.internalId}`}
                 />
               );
             })}
           </View>
 
-          {flow.selectedIds.length === 0 && (
+          {state.unmapped.length > 0 && (
+            <View style={{ gap: 8 }}>
+              <KleanText variant="caption" color={colors.muted} weight="700">
+                {t('vision.fridge.results.unmappedSectionTitle')}
+              </KleanText>
+              <KleanText variant="caption" color={colors.muted}>
+                {t('vision.fridge.results.unmappedSectionBody')}
+              </KleanText>
+              {state.unmapped.map((item) => (
+                <IngredientRow
+                  key={item.unmappedId}
+                  label={item.rawLabel}
+                  rawLabel={item.rawLabel}
+                  confidence={item.confidence}
+                  uncertaintyNote={item.uncertaintyNote}
+                  estimatedNutrition
+                  selected={!!state.selection[item.unmappedId]}
+                  onToggle={() => flow.toggleSelection(item.unmappedId)}
+                  testID={`fridge-row-${item.unmappedId}`}
+                />
+              ))}
+            </View>
+          )}
+
+          {flow.selectedIds.length === 0 && flow.selectedUnmappedLabels.length === 0 && (
             <KleanText variant="caption" color={colors.muted}>
               {t('vision.fridge.results.noneSelectedHint')}
             </KleanText>
@@ -538,7 +589,13 @@ export function FridgeVisionScreen() {
             {t('vision.fridge.results.savedBody')}
           </KleanText>
           <PillButton
+            label={t('vision.fridge.results.chooseRecipeCta')}
+            onPress={handleChooseRecipe}
+            testID="fridge-choose-recipe"
+          />
+          <PillButton
             label={t('onboarding.next')}
+            variant="ghost"
             onPress={handleSkip}
             testID="fridge-saved-continue"
           />

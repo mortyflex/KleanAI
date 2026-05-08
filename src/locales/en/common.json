@@ -279,6 +279,17 @@
       "scanCta": "Scan my fridge",
       "updateCta": "Update my fridge"
     },
+    "today": {
+      "kicker": "Today",
+      "zeroGuilt": "Real food, zero guilt. Klean adapts whenever life gets messy.",
+      "mealsTitle": "Today's meals",
+      "mealsSubtitleNoFridge": "Tap one to see ideas. Scan your fridge to make them frigde-aware.",
+      "mealsSubtitleWithFridge": "Each idea is biased by what you confirmed in your fridge.",
+      "changeCta": "Change",
+      "adaptCta": "Adapt with my fridge",
+      "slotEmptyTitle": "Nothing planned yet",
+      "slotEmptyBody": "Pick a recipe to lock in this slot."
+    },
     "plan": {
       "title": "Today's plan",
       "subtitle": "A simple target. Not a strict diet.",
@@ -574,7 +585,11 @@
         "savedTitle": "Fridge saved",
         "savedBody": "Your meal suggestions will adapt to what you confirmed.",
         "noneSelectedHint": "Pick at least one item or skip — we'll fall back to general suggestions otherwise.",
-        "skipCta": "Skip for now"
+        "skipCta": "Skip for now",
+        "chooseRecipeCta": "Pick a recipe now",
+        "estimatedNutritionBadge": "Detected, nutrition estimated",
+        "unmappedSectionTitle": "Detected, not in our catalog",
+        "unmappedSectionBody": "Confirm them and we'll send them to the AI when generating recipes."
       }
     },
     "ingredients": {
@@ -603,6 +618,474 @@
       "olive_oil": "Olive oil",
       "almonds": "Almonds",
       "avocado": "Avocado"
+    }
+  },
+  "recipes": {
+    "mealChoice": {
+      "title": "What do you want to cook?",
+      "subtitleNoFridge": "Pick a meal type and we'll suggest matching recipes.",
+      "subtitleWithFridge_one": "We'll bias the picks toward the {{count}} ingredient you just confirmed.",
+      "subtitleWithFridge_other": "We'll bias the picks toward the {{count}} ingredients you just confirmed.",
+      "fullDayLabel": "Or",
+      "fullDayTitle": "Plan my whole day",
+      "fullDayBody": "We'll generate breakfast, lunch, dinner and a snack — swap any meal afterwards.",
+      "fullDayCta": "Plan my full day",
+      "backCta": "Back"
+    },
+    "list": {
+      "title": "Recipes for you",
+      "subtitle": "Up to 3 picks blending our catalog with AI suggestions when needed.",
+      "loading": "Looking for the best matches…",
+      "emptyTitle": "Nothing matches yet",
+      "emptyBody": "Confirm a few ingredients in your fridge and we'll tailor recipes around them.",
+      "scanFridgeCta": "Scan my fridge",
+      "backCta": "Back"
+    },
+    "fullDay": {
+      "title": "Your day, ready",
+      "subtitle": "One recipe per slot. Swap any meal you'd rather change.",
+      "loading": "Building your day…",
+      "slotEmpty": "No matching recipe — try scanning more ingredients.",
+      "swapCta": "Swap",
+      "acceptCta": "Use this whole day",
+      "backCta": "Back"
+    },
+    "card": {
+      "viewCta": "View recipe",
+      "chooseCta": "Choose",
+      "haveAlready": "You already have: {{items}}",
+      "stillMissing": "Missing: {{items}}"
+    },
+    "detail": {
+      "timeLabel": "Time",
+      "minutesValue": "{{minutes}} min",
+      "kcalLabel": "Calories",
+      "proteinLabel": "Protein",
+      "difficultyLabel": "Level",
+      "ingredientsLabel": "Ingredients",
+      "optionalLabel": "Optional add-ons",
+      "stepsLabel": "Steps",
+      "whyItFitsLabel": "Why it fits your day",
+      "chooseCta": "Choose this recipe",
+      "backCta": "Back",
+      "unavailableTitle": "Recipe not available",
+      "unavailableBody": "We couldn't find this recipe. Head back to the list and pick another."
+    },
+    "estimates": {
+      "kcalApprox": "~{{kcal}} kcal",
+      "proteinApprox": "~{{grams}} g protein",
+      "disclaimer": "Estimates only — adjust to your portions and preferences."
+    },
+    "badges": {
+      "aiSuggested": "AI suggested",
+      "goodFridgeMatch": "Great fridge match"
+    },
+    "tags": {
+      "high_protein": "High-protein",
+      "quick": "Quick",
+      "low_calorie": "Light",
+      "mass_gain": "Mass gain",
+      "recomposition": "Recomposition",
+      "vegetarian": "Vegetarian",
+      "budget": "Budget",
+      "no_cook": "No cooking"
+    },
+    "difficulty": {
+      "easy": "Easy",
+      "medium": "Medium"
+    },
+    "matchReasons": {
+      "allInFridge": "All in your fridge",
+      "mostInFridge": "Most ingredients in your fridge",
+      "quick": "Quick to make",
+      "highProtein": "High in protein",
+      "fitsWeightLoss": "Fits weight loss",
+      "fitsMassGain": "Fits muscle gain",
+      "fitsRecomposition": "Fits recomposition",
+      "fitsMaintain": "Fits maintenance",
+      "aiSuggested": "AI suggestion"
+    },
+    "items": {
+      "oatmeal_berries_breakfast": {
+        "title": "Oatmeal with berries",
+        "description": "Rolled oats simmered with milk or water, topped with fresh berries.",
+        "steps": {
+          "1": "Cook the rolled oats in milk or water until creamy.",
+          "2": "Stir in a pinch of cinnamon and a drizzle of honey if you like.",
+          "3": "Top with fresh berries and crushed almonds, then serve warm."
+        }
+      },
+      "greek_yogurt_protein_bowl": {
+        "title": "Greek yogurt protein bowl",
+        "description": "Thick Greek yogurt with berries, oats and almonds for a high-protein start.",
+        "steps": {
+          "1": "Spoon Greek yogurt into a bowl.",
+          "2": "Top with berries, oats and a handful of almonds.",
+          "3": "Drizzle with honey and enjoy."
+        }
+      },
+      "tofu_veg_scramble": {
+        "title": "Tofu & vegetable scramble",
+        "description": "Crumbled tofu with spinach, tomato and bell pepper — fluffy and protein-packed.",
+        "steps": {
+          "1": "Crumble firm tofu into a hot non-stick pan with olive oil.",
+          "2": "Add chopped tomato, bell pepper and spinach.",
+          "3": "Season with turmeric, salt and pepper.",
+          "4": "Stir until everything is just warmed through."
+        }
+      },
+      "eggs_avocado_breakfast": {
+        "title": "Eggs & avocado plate",
+        "description": "Two eggs your way with smashed avocado on the side.",
+        "steps": {
+          "1": "Cook the eggs as you like — soft-boiled, scrambled or fried.",
+          "2": "Smash half an avocado with a pinch of salt and lemon.",
+          "3": "Plate together and enjoy."
+        }
+      },
+      "scrambled_eggs_spinach": {
+        "title": "Scrambled eggs with spinach",
+        "description": "Soft scrambled eggs folded with wilted spinach.",
+        "steps": {
+          "1": "Whisk the eggs with a splash of milk and salt.",
+          "2": "Soften the spinach in olive oil.",
+          "3": "Pour in the eggs and stir gently until just set."
+        }
+      },
+      "cottage_oats_pancakes": {
+        "title": "Cottage cheese & oats pancakes",
+        "description": "Protein-rich pancakes blended from oats, eggs and cottage cheese.",
+        "steps": {
+          "1": "Blend oats, cottage cheese and eggs until smooth.",
+          "2": "Cook small pancakes on a non-stick pan over medium heat.",
+          "3": "Flip when bubbles form on top.",
+          "4": "Serve with berries and a banana sliced on top."
+        }
+      },
+      "banana_oats_protein": {
+        "title": "Banana protein oats",
+        "description": "Filling oats blended with banana and Greek yogurt for muscle days.",
+        "steps": {
+          "1": "Cook the oats in milk until creamy.",
+          "2": "Stir in mashed banana and a spoon of Greek yogurt off the heat.",
+          "3": "Top with crushed almonds and serve."
+        }
+      },
+      "no_cook_fruit_bowl": {
+        "title": "No-cook fruit & nuts bowl",
+        "description": "An apple, a banana, berries and almonds — ready in two minutes.",
+        "steps": {
+          "1": "Slice the apple and banana into a bowl.",
+          "2": "Add berries and a handful of almonds — done."
+        }
+      },
+      "avocado_toast_classic": {
+        "title": "Classic avocado toast",
+        "description": "Sourdough or wholegrain bread topped with smashed avocado.",
+        "steps": {
+          "1": "Toast the bread until golden.",
+          "2": "Smash the avocado with lemon, salt and a drop of olive oil, then spread on top."
+        }
+      },
+      "salmon_avocado_breakfast": {
+        "title": "Salmon, avocado & eggs",
+        "description": "Smoked salmon, sliced avocado and soft-boiled eggs — premium protein start.",
+        "steps": {
+          "1": "Soft-boil the eggs (6 minutes) and peel them.",
+          "2": "Slice the avocado and arrange with the salmon.",
+          "3": "Halve the eggs on top, season with pepper and serve."
+        }
+      },
+      "eggs_brown_rice_breakfast": {
+        "title": "Eggs & brown rice breakfast",
+        "description": "Warm brown rice topped with two eggs and wilted spinach — Asian-style.",
+        "steps": {
+          "1": "Reheat the brown rice with a splash of water.",
+          "2": "Wilt the spinach in olive oil.",
+          "3": "Top the rice with eggs and spinach, season and enjoy."
+        }
+      },
+      "chicken_rice_lunch": {
+        "title": "Chicken & brown rice bowl",
+        "description": "Grilled chicken breast with brown rice and steamed broccoli.",
+        "steps": {
+          "1": "Season the chicken with salt, pepper and a drizzle of olive oil.",
+          "2": "Grill or pan-fry until cooked through.",
+          "3": "Steam the broccoli until just tender.",
+          "4": "Slice the chicken and plate with the rice and broccoli."
+        }
+      },
+      "lentil_quinoa_lunch": {
+        "title": "Lentil & quinoa salad",
+        "description": "Protein-rich vegetarian bowl with tomato and a lemon dressing.",
+        "steps": {
+          "1": "Cook the quinoa and the lentils separately.",
+          "2": "Mix with diced tomato.",
+          "3": "Dress with olive oil, lemon, salt and pepper."
+        }
+      },
+      "salmon_sweet_potato_lunch": {
+        "title": "Salmon & sweet potato",
+        "description": "Baked salmon with roasted sweet potato and wilted spinach.",
+        "steps": {
+          "1": "Roast the sweet potato cubes at 200°C for 25 minutes.",
+          "2": "Bake the salmon at the same temperature for 12 minutes.",
+          "3": "Wilt the spinach with a touch of olive oil.",
+          "4": "Plate everything together."
+        }
+      },
+      "tofu_stir_fry_lunch": {
+        "title": "Tofu stir-fry",
+        "description": "Tofu, brown rice, bell pepper and broccoli with soy sauce.",
+        "steps": {
+          "1": "Cube the tofu and pan-fry until golden.",
+          "2": "Add the bell pepper and broccoli and stir-fry briskly.",
+          "3": "Splash in soy sauce and serve over the rice.",
+          "4": "Finish with sesame seeds if you have any."
+        }
+      },
+      "tuna_quinoa_bowl": {
+        "title": "Tuna & quinoa bowl",
+        "description": "Quick high-protein bowl with tuna, quinoa, tomato and pepper.",
+        "steps": {
+          "1": "Combine the cooked quinoa with diced tomato and pepper.",
+          "2": "Top with drained tuna.",
+          "3": "Drizzle olive oil and lemon, then serve."
+        }
+      },
+      "chicken_quinoa_lunch": {
+        "title": "Chicken & quinoa plate",
+        "description": "Grilled chicken on a bed of quinoa with broccoli.",
+        "steps": {
+          "1": "Cook the quinoa according to the packet.",
+          "2": "Grill the seasoned chicken until cooked.",
+          "3": "Steam the broccoli and plate everything together."
+        }
+      },
+      "chickpea_buddha_bowl": {
+        "title": "Chickpea Buddha bowl",
+        "description": "Roasted sweet potato, chickpeas, spinach and avocado.",
+        "steps": {
+          "1": "Roast the sweet potato at 200°C for 25 minutes.",
+          "2": "Pan-roast the chickpeas with olive oil and spices.",
+          "3": "Assemble over a bed of spinach.",
+          "4": "Top with sliced avocado and a squeeze of lemon."
+        }
+      },
+      "beef_rice_lunch": {
+        "title": "Beef & brown rice bowl",
+        "description": "Lean beef with brown rice and broccoli — solid mass-gain plate.",
+        "steps": {
+          "1": "Sear the beef strips in a hot pan with olive oil.",
+          "2": "Steam the broccoli until tender.",
+          "3": "Plate with the warm brown rice.",
+          "4": "Season with soy sauce or pepper."
+        }
+      },
+      "turkey_veg_wrap": {
+        "title": "Turkey & veggie wrap",
+        "description": "Turkey, tomato and bell pepper rolled in a wholegrain wrap.",
+        "steps": {
+          "1": "Warm the wrap briefly.",
+          "2": "Layer turkey, tomato and pepper.",
+          "3": "Roll up tightly and slice in half."
+        }
+      },
+      "veggie_quinoa_bowl_lunch": {
+        "title": "Veggie quinoa bowl",
+        "description": "Quinoa with chickpeas, spinach and tomato — fully plant-based.",
+        "steps": {
+          "1": "Mix the cooked quinoa with chickpeas.",
+          "2": "Add chopped tomato and a generous handful of spinach.",
+          "3": "Dress with olive oil, lemon and salt."
+        }
+      },
+      "turkey_meatballs_dinner": {
+        "title": "Turkey meatballs in tomato sauce",
+        "description": "Lean turkey meatballs simmered in a quick tomato sauce.",
+        "steps": {
+          "1": "Mix the ground turkey with herbs and salt and shape into meatballs.",
+          "2": "Brown them in a pan with olive oil.",
+          "3": "Add crushed tomatoes and simmer for 12 minutes.",
+          "4": "Serve over wholegrain pasta or with a side salad."
+        }
+      },
+      "chickpea_curry_dinner": {
+        "title": "Chickpea curry",
+        "description": "Chickpeas, spinach and tomato in a fragrant curry sauce served with rice.",
+        "steps": {
+          "1": "Sauté onion, garlic and curry spices in olive oil.",
+          "2": "Add the tomato and simmer for 5 minutes.",
+          "3": "Stir in the chickpeas and spinach.",
+          "4": "Serve over the brown rice."
+        }
+      },
+      "grilled_chicken_veg_dinner": {
+        "title": "Grilled chicken & veg",
+        "description": "Lean grilled chicken with broccoli and bell pepper.",
+        "steps": {
+          "1": "Season and grill the chicken until just cooked.",
+          "2": "Quickly grill or steam the vegetables.",
+          "3": "Plate with a drizzle of olive oil."
+        }
+      },
+      "baked_salmon_broccoli_dinner": {
+        "title": "Baked salmon & broccoli",
+        "description": "Oven-baked salmon with broccoli and sweet potato.",
+        "steps": {
+          "1": "Roast cubed sweet potato at 200°C for 25 minutes.",
+          "2": "Bake the salmon for 12 minutes at the same temperature.",
+          "3": "Steam the broccoli until tender.",
+          "4": "Plate with a drizzle of olive oil and lemon."
+        }
+      },
+      "beef_sweet_potato_dinner": {
+        "title": "Beef & sweet potato",
+        "description": "Lean beef strips with roasted sweet potato and spinach.",
+        "steps": {
+          "1": "Roast the sweet potato cubes at 200°C for 25 minutes.",
+          "2": "Sear the beef in a very hot pan with olive oil.",
+          "3": "Wilt the spinach with garlic.",
+          "4": "Plate together."
+        }
+      },
+      "tofu_curry_dinner": {
+        "title": "Tofu curry",
+        "description": "Tofu, spinach and tomato in a creamy curry sauce, served with rice.",
+        "steps": {
+          "1": "Sauté the tofu cubes until golden.",
+          "2": "Add tomato and curry spices, simmer briefly.",
+          "3": "Stir in the spinach until wilted.",
+          "4": "Serve over the brown rice."
+        }
+      },
+      "eggs_veg_dinner_bowl": {
+        "title": "Eggs & veggie rice bowl",
+        "description": "Brown rice topped with eggs, spinach and avocado — comforting and quick.",
+        "steps": {
+          "1": "Reheat the brown rice.",
+          "2": "Soft-fry the eggs in olive oil.",
+          "3": "Top the rice with spinach, eggs and sliced avocado."
+        }
+      },
+      "salmon_quinoa_dinner": {
+        "title": "Salmon, quinoa & broccoli",
+        "description": "Pan-seared salmon over quinoa with steamed broccoli.",
+        "steps": {
+          "1": "Cook the quinoa.",
+          "2": "Sear the salmon skin-down for 4 minutes, flip and finish.",
+          "3": "Plate with the steamed broccoli and a drizzle of olive oil."
+        }
+      },
+      "lentil_stew_dinner": {
+        "title": "Lentil stew",
+        "description": "Slow-simmered lentil stew with sweet potato, spinach and tomato.",
+        "steps": {
+          "1": "Sauté garlic and onion in olive oil.",
+          "2": "Add the cubed sweet potato, tomato and lentils with water or stock.",
+          "3": "Simmer until the lentils are tender (25 minutes).",
+          "4": "Stir in the spinach at the very end."
+        }
+      },
+      "chicken_sweet_potato_dinner": {
+        "title": "Chicken & sweet potato",
+        "description": "Roasted chicken with sweet potato and broccoli.",
+        "steps": {
+          "1": "Cube and roast the sweet potato at 200°C for 25 minutes.",
+          "2": "Roast or grill the chicken until just cooked.",
+          "3": "Steam the broccoli.",
+          "4": "Plate everything with olive oil and herbs."
+        }
+      },
+      "tuna_pasta_dinner": {
+        "title": "Tuna pasta",
+        "description": "Quick wholegrain pasta with tuna, tomato and a touch of olive oil.",
+        "steps": {
+          "1": "Cook the pasta al dente.",
+          "2": "Stir in tomato sauce and the drained tuna.",
+          "3": "Drizzle olive oil and serve."
+        }
+      },
+      "fruit_almonds_snack": {
+        "title": "Fruit & almonds",
+        "description": "An apple with a small handful of almonds — simple and filling.",
+        "steps": {
+          "1": "Wash and slice the apple.",
+          "2": "Pair with a small handful of almonds."
+        }
+      },
+      "cottage_cheese_fruit_snack": {
+        "title": "Cottage cheese & fruit",
+        "description": "Cottage cheese with banana, berries and a touch of crunch.",
+        "steps": {
+          "1": "Spoon cottage cheese into a small bowl.",
+          "2": "Top with sliced banana, berries and almonds."
+        }
+      },
+      "edamame_snack": {
+        "title": "Edamame",
+        "description": "A bowl of edamame with a pinch of salt — easy plant protein.",
+        "steps": {
+          "1": "Boil the edamame for 4 minutes.",
+          "2": "Drain, sprinkle with salt and serve in their pods."
+        }
+      },
+      "banana_almond_butter_snack": {
+        "title": "Banana & almond butter",
+        "description": "Banana with a generous spoon of almond butter — quick mass-gain snack.",
+        "steps": {
+          "1": "Slice the banana lengthwise.",
+          "2": "Spread almond butter on top."
+        }
+      },
+      "greek_yogurt_berries_snack": {
+        "title": "Greek yogurt & berries",
+        "description": "Greek yogurt with berries — high-protein, low-calorie.",
+        "steps": {
+          "1": "Spoon Greek yogurt into a bowl.",
+          "2": "Top with berries and a drizzle of honey."
+        }
+      },
+      "hard_boiled_eggs_snack": {
+        "title": "Hard-boiled eggs",
+        "description": "Two boiled eggs with salt and pepper — pure protein.",
+        "steps": {
+          "1": "Boil the eggs for 9 minutes.",
+          "2": "Cool, peel and season."
+        }
+      },
+      "tuna_crackers_snack": {
+        "title": "Tuna on crackers",
+        "description": "Drained tuna on wholegrain crackers — high-protein, portable.",
+        "steps": {
+          "1": "Drain the tuna and mix with a little olive oil.",
+          "2": "Spoon onto wholegrain crackers."
+        }
+      },
+      "cottage_oats_snack": {
+        "title": "Cottage cheese & oats",
+        "description": "Cottage cheese with oats and berries — slow-release energy.",
+        "steps": {
+          "1": "Mix cottage cheese with oats in a bowl.",
+          "2": "Top with berries and serve."
+        }
+      },
+      "avocado_egg_snack": {
+        "title": "Avocado & egg",
+        "description": "Half an avocado with a hard-boiled egg — solid recomp snack.",
+        "steps": {
+          "1": "Slice the avocado.",
+          "2": "Pair with a halved hard-boiled egg, salt and pepper."
+        }
+      },
+      "apple_almond_butter_snack": {
+        "title": "Apple & almond butter",
+        "description": "Sliced apple with almond butter — sweet and crunchy.",
+        "steps": {
+          "1": "Slice the apple.",
+          "2": "Dip into almond butter."
+        }
+      }
     }
   },
   "auth": {

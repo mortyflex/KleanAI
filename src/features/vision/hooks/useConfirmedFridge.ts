@@ -4,12 +4,17 @@ import {
   getConfirmedFridge,
   saveConfirmedFridge,
   clearConfirmedFridge,
+  type SaveConfirmedFridgeInput,
 } from '../store/fridge-storage';
 
 interface UseConfirmedFridgeResult {
   loading: boolean;
   ingredientIds: IngredientId[] | null;
-  save: (ids: IngredientId[]) => Promise<void>;
+  /** Free-text labels the user confirmed even though they're not in the catalog. */
+  unmappedLabels: string[];
+  save: (
+    input: SaveConfirmedFridgeInput | IngredientId[],
+  ) => Promise<void>;
   reset: () => Promise<void>;
   reload: () => Promise<void>;
 }
@@ -17,12 +22,14 @@ interface UseConfirmedFridgeResult {
 export function useConfirmedFridge(): UseConfirmedFridgeResult {
   const [loading, setLoading] = useState(true);
   const [ingredientIds, setIngredientIds] = useState<IngredientId[] | null>(null);
+  const [unmappedLabels, setUnmappedLabels] = useState<string[]>([]);
 
   const reload = useCallback(async () => {
     setLoading(true);
     try {
       const record = await getConfirmedFridge();
       setIngredientIds(record?.ingredientIds ?? null);
+      setUnmappedLabels(record?.unmappedLabels ?? []);
     } finally {
       setLoading(false);
     }
@@ -32,15 +39,27 @@ export function useConfirmedFridge(): UseConfirmedFridgeResult {
     reload().catch(() => {});
   }, [reload]);
 
-  const save = useCallback(async (ids: IngredientId[]) => {
-    const record = await saveConfirmedFridge(ids);
-    setIngredientIds(record.ingredientIds);
-  }, []);
+  const save = useCallback(
+    async (input: SaveConfirmedFridgeInput | IngredientId[]) => {
+      const record = await saveConfirmedFridge(input);
+      setIngredientIds(record.ingredientIds);
+      setUnmappedLabels(record.unmappedLabels);
+    },
+    [],
+  );
 
   const reset = useCallback(async () => {
     await clearConfirmedFridge();
     setIngredientIds(null);
+    setUnmappedLabels([]);
   }, []);
 
-  return { loading, ingredientIds, save, reset, reload };
+  return {
+    loading,
+    ingredientIds,
+    unmappedLabels,
+    save,
+    reset,
+    reload,
+  };
 }

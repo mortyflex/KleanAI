@@ -126,9 +126,32 @@ export interface DetectedIngredient {
   uncertaintyNote?: string;
 }
 
+/**
+ * Detection that survived the confidence threshold but does NOT match any
+ * entry in the internal ingredient catalog. We keep these so the AI recipe
+ * generator can still take them into account when the user confirms them.
+ *
+ * Nutritional precision is intentionally lower than for `DetectedIngredient`
+ * — the UI labels them as "estimated".
+ */
+export interface UnmappedIngredient {
+  /** Stable id derived from the normalized label — safe to use as a React key. */
+  unmappedId: string;
+  /** Original AI label, surfaced to the user as-is. */
+  rawLabel: string;
+  /** Coarse category the AI guessed — never trusted for filtering, only displayed. */
+  category?: IngredientCategory;
+  confidence: number;
+  quantity?: {
+    amount: number;
+    unit: IngredientQuantityUnit;
+  };
+  uncertaintyNote?: string;
+}
+
 export interface AILogEntry {
   id: string;
-  feature: 'gym_vision' | 'fridge_vision';
+  feature: 'gym_vision' | 'fridge_vision' | 'recipe_generation';
   providerId: AIProviderId;
   modelId: string;
   promptVersion: string;
@@ -140,9 +163,65 @@ export interface AILogEntry {
   createdAt: string;
 }
 
+/**
+ * Request shape for AI-generated complementary recipes. The internal recipe
+ * engine fills in slots first; only the gap (max 3 - internal hits) is asked
+ * of the AI provider.
+ */
+export interface AIRecipeRequest {
+  promptVersion: string;
+  /**
+   * Internal ingredient ids the user has confirmed — already mapped to the
+   * catalog so they can be resolved to localized names by the provider.
+   */
+  mappedIngredientIds: IngredientId[];
+  /** Free-text labels the user confirmed but that aren't in our catalog. */
+  unmappedIngredientLabels: string[];
+  goal: 'lose_weight' | 'gain_muscle' | 'maintain' | 'recomposition';
+  restrictions: string[];
+  mealType: 'breakfast' | 'lunch' | 'dinner' | 'snack';
+  /** Number of recipes the caller wants — generator may return fewer. */
+  desiredCount: number;
+  targetKcal?: number;
+  targetProteinG?: number;
+  /** ISO language tag (e.g. "fr", "en") — generator returns text in this language. */
+  language?: string;
+}
+
+/**
+ * Raw recipe shape returned by the AI. Validated by Zod before use; never
+ * trusted as-is. The hybrid service applies the deterministic restriction
+ * filter on top before surfacing items to the UI.
+ */
+export interface AIRecipeRaw {
+  title: string;
+  description: string;
+  ingredientLabels: string[];
+  steps: string[];
+  prepTimeMinutes: number;
+  difficulty: 'easy' | 'medium';
+  estimatedCalories: number;
+  estimatedProteinG: number;
+  estimatedCarbsG: number;
+  estimatedFatG: number;
+  tags?: string[];
+}
+
+export interface AIRecipesResponseRaw {
+  schemaVersion: '1';
+  recipes: AIRecipeRaw[];
+  modelNotes?: string;
+}
+
 export interface AIProvider {
   readonly id: AIProviderId;
   readonly modelId: string;
   analyzeGymImages(req: GymVisionRequest): Promise<GymVisionResponseRaw>;
   analyzeFridgeImages(req: FridgeVisionRequest): Promise<FridgeVisionResponseRaw>;
+  /**
+   * Optional — providers that don't implement recipe generation cause the
+   * hybrid service to fall back to internal-only suggestions, which is also
+   * the desired behavior in CI / tests by default.
+   */
+  generateRecipeSuggestions?(req: AIRecipeRequest): Promise<AIRecipesResponseRaw>;
 }

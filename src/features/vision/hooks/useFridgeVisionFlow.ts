@@ -3,6 +3,7 @@ import type {
   AIRequestImage,
   DetectedIngredient,
   IngredientId,
+  UnmappedIngredient,
 } from '../../../types/ai.types';
 import {
   analyzeFridgeImages,
@@ -20,7 +21,12 @@ export interface FridgeVisionFlowState {
   stage: FridgeVisionStage;
   images: AIRequestImage[];
   detected: DetectedIngredient[];
-  /** Map of internalId -> selected? — defaults to true for everything detected. */
+  unmapped: UnmappedIngredient[];
+  /**
+   * Selection map keyed by `internalId` for mapped detections and by
+   * `unmappedId` for unmapped ones. Defaults to true for everything the AI
+   * surfaced — the user can always uncheck items they don't actually have.
+   */
   selection: Record<string, boolean>;
   failureReason: FridgeVisionFailureReason | 'no_detections' | null;
   /** Raw error text from the provider — surfaced in `__DEV__` for debugging. */
@@ -31,14 +37,18 @@ type Action =
   | { type: 'add_image'; image: AIRequestImage }
   | { type: 'remove_image'; uri: string }
   | { type: 'analyze_started' }
-  | { type: 'analyze_succeeded'; detected: DetectedIngredient[] }
+  | {
+      type: 'analyze_succeeded';
+      detected: DetectedIngredient[];
+      unmapped: UnmappedIngredient[];
+    }
   | { type: 'analyze_no_detections' }
   | {
       type: 'analyze_failed';
       reason: FridgeVisionFailureReason;
       details?: string;
     }
-  | { type: 'toggle_selection'; internalId: IngredientId }
+  | { type: 'toggle_selection'; selectionKey: string }
   | { type: 'select_all' }
   | { type: 'clear_all' }
   | { type: 'mark_saved' }
@@ -48,14 +58,21 @@ const initialState: FridgeVisionFlowState = {
   stage: 'idle',
   images: [],
   detected: [],
+  unmapped: [],
   selection: {},
   failureReason: null,
   failureDetails: null,
 };
 
-function buildSelection(detected: DetectedIngredient[]): Record<string, boolean> {
-  // Everything detected is selected by default — uncheck what isn't really there.
-  return Object.fromEntries(detected.map((d) => [d.internalId, true]));
+function buildSelection(
+  detected: DetectedIngredient[],
+  unmapped: UnmappedIngredient[],
+): Record<string, boolean> {
+  // Everything surfaced is selected by default — uncheck what isn't really there.
+  return {
+    ...Object.fromEntries(detected.map((d) => [d.internalId, true])),
+    ...Object.fromEntries(unmapped.map((u) => [u.unmappedId, true])),
+  };
 }
 
 export function fridgeVisionReducer(
@@ -83,7 +100,8 @@ export function fridgeVisionReducer(
         ...state,
         stage: 'results',
         detected: action.detected,
-        selection: buildSelection(action.detected),
+        unmapped: action.unmapped,
+        selection: buildSelection(action.detected, action.unmapped),
         failureReason: null,
         failureDetails: null,
       };
@@ -92,6 +110,7 @@ export function fridgeVisionReducer(
         ...state,
         stage: 'error',
         detected: [],
+        unmapped: [],
         selection: {},
         failureReason: 'no_detections',
         failureDetails: null,
@@ -101,6 +120,7 @@ export function fridgeVisionReducer(
         ...state,
         stage: 'error',
         detected: [],
+        unmapped: [],
         selection: {},
         failureReason: action.reason,
         failureDetails: action.details ?? null,
@@ -110,15 +130,21 @@ export function fridgeVisionReducer(
         ...state,
         selection: {
           ...state.selection,
-          [action.internalId]: !state.selection[action.internalId],
+          [action.selectionKey]: !state.selection[action.selectionKey],
         },
       };
     case 'select_all':
-      return { ...state, selection: buildSelection(state.detected) };
+      return {
+        ...state,
+        selection: buildSelection(state.detected, state.unmapped),
+      };
     case 'clear_all':
       return {
         ...state,
-        selection: Object.fromEntries(state.detected.map((d) => [d.internalId, false])),
+        selection: {
+          ...Object.fromEntries(state.detected.map((d) => [d.internalId, false])),
+          ...Object.fromEntries(state.unmapped.map((u) => [u.unmappedId, false])),
+        },
       };
     case 'mark_saved':
       return { ...state, stage: 'saved' };
@@ -137,17 +163,26 @@ export function selectedIngredientIds(
     .map((d) => d.internalId);
 }
 
+export function selectedUnmappedLabels(
+  state: FridgeVisionFlowState,
+): string[] {
+  return state.unmapped
+    .filter((u) => state.selection[u.unmappedId])
+    .map((u) => u.rawLabel);
+}
+
 export interface UseFridgeVisionFlowApi {
   state: FridgeVisionFlowState;
   addImage: (image: AIRequestImage) => void;
   removeImage: (uri: string) => void;
   analyze: () => Promise<void>;
-  toggleSelection: (id: IngredientId) => void;
+  toggleSelection: (selectionKey: string) => void;
   selectAll: () => void;
   clearAll: () => void;
   markSaved: () => void;
   reset: () => void;
   selectedIds: IngredientId[];
+  selectedUnmappedLabels: string[];
 }
 
 export function useFridgeVisionFlow(): UseFridgeVisionFlowApi {
@@ -164,11 +199,15 @@ export function useFridgeVisionFlow(): UseFridgeVisionFlowApi {
       });
       return;
     }
-    if (result.detected.length === 0) {
+    if (result.detected.length === 0 && result.unmapped.length === 0) {
       dispatch({ type: 'analyze_no_detections' });
       return;
     }
-    dispatch({ type: 'analyze_succeeded', detected: result.detected });
+    dispatch({
+      type: 'analyze_succeeded',
+      detected: result.detected,
+      unmapped: result.unmapped,
+    });
   }, [state.images]);
 
   return {
@@ -176,11 +215,13 @@ export function useFridgeVisionFlow(): UseFridgeVisionFlowApi {
     addImage: (image) => dispatch({ type: 'add_image', image }),
     removeImage: (uri) => dispatch({ type: 'remove_image', uri }),
     analyze,
-    toggleSelection: (id) => dispatch({ type: 'toggle_selection', internalId: id }),
+    toggleSelection: (selectionKey) =>
+      dispatch({ type: 'toggle_selection', selectionKey }),
     selectAll: () => dispatch({ type: 'select_all' }),
     clearAll: () => dispatch({ type: 'clear_all' }),
     markSaved: () => dispatch({ type: 'mark_saved' }),
     reset: () => dispatch({ type: 'reset' }),
     selectedIds: selectedIngredientIds(state),
+    selectedUnmappedLabels: selectedUnmappedLabels(state),
   };
 }

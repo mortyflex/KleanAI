@@ -71,10 +71,13 @@ export const MOCK_FRIDGE_VISION_RESPONSE: FridgeVisionResponseRaw = {
       confidence: 0.41,
       uncertaintyNote: 'Unclear label, partially obscured.',
     },
-    // Unknown-to-us label without a mapping — must be dropped after mapping.
+    // Above the threshold but absent from the catalog — surfaces as an
+    // "unmapped" item so the user can confirm it for the AI recipe generator.
     {
-      label: 'Decorative magnet',
-      confidence: 0.99,
+      label: 'Ketchup',
+      confidence: 0.78,
+      category: 'condiment',
+      aliases: ['sauce ketchup'],
     },
   ],
   modelNotes: 'Mock response — no real model was called.',

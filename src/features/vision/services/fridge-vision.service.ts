@@ -2,13 +2,14 @@ import type {
   AIProvider,
   AIRequestImage,
   DetectedIngredient,
+  UnmappedIngredient,
 } from '../../../types/ai.types';
 import { getAIProvider } from '../../../lib/ai';
 import { recordAILog, summarizeDetected } from '../../../lib/ai/logs';
 import { parseFridgeVisionResponse } from '../utils/parse-fridge-vision';
 import {
   DEFAULT_FRIDGE_CONFIDENCE_THRESHOLD,
-  mapIngredientDetections,
+  partitionIngredientDetections,
 } from '../utils/ingredient-mapping';
 
 export const FRIDGE_VISION_PROMPT_VERSION = 'fridge-vision/v1';
@@ -21,6 +22,12 @@ export type FridgeVisionFailureReason =
 export interface FridgeVisionSuccess {
   ok: true;
   detected: DetectedIngredient[];
+  /**
+   * Detections above the confidence threshold but unknown to the internal
+   * catalog. Surfaced so the user can confirm them and so the AI recipe
+   * generator can take them into account.
+   */
+  unmapped: UnmappedIngredient[];
   rawCount: number;
 }
 
@@ -90,7 +97,10 @@ export async function analyzeFridgeImages(
     return { ok: false, reason: parseResult.reason, details: parseResult.details };
   }
 
-  const detected = mapIngredientDetections(parseResult.data.detected, threshold);
+  const partition = partitionIngredientDetections(
+    parseResult.data.detected,
+    threshold,
+  );
 
   recordAILog({
     feature: 'fridge_vision',
@@ -99,9 +109,17 @@ export async function analyzeFridgeImages(
     promptVersion: FRIDGE_VISION_PROMPT_VERSION,
     latencyMs: Date.now() - startedAt,
     imageCount: opts.images.length,
-    outputSummary: summarizeDetected(parseResult.data.detected.length, detected.length),
+    outputSummary: summarizeDetected(
+      parseResult.data.detected.length,
+      partition.mapped.length,
+    ),
     succeeded: true,
   });
 
-  return { ok: true, detected, rawCount: parseResult.data.detected.length };
+  return {
+    ok: true,
+    detected: partition.mapped,
+    unmapped: partition.unmapped,
+    rawCount: parseResult.data.detected.length,
+  };
 }

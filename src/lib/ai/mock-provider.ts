@@ -1,5 +1,7 @@
 import type {
   AIProvider,
+  AIRecipeRequest,
+  AIRecipesResponseRaw,
   FridgeVisionRequest,
   FridgeVisionResponseRaw,
   GymVisionRequest,
@@ -7,6 +9,7 @@ import type {
 } from '../../types/ai.types';
 import { MOCK_GYM_VISION_RESPONSE } from './mock-gym-vision';
 import { MOCK_FRIDGE_VISION_RESPONSE } from './mock-fridge-vision';
+import { buildMockRecipeResponse } from './mock-recipe-suggestions';
 
 /**
  * Mock AI provider — returns a fixed structured response so the rest of the
@@ -29,5 +32,13 @@ export class MockAIProvider implements AIProvider {
   ): Promise<FridgeVisionResponseRaw> {
     await new Promise((resolve) => setTimeout(resolve, 250));
     return MOCK_FRIDGE_VISION_RESPONSE;
+  }
+
+  async generateRecipeSuggestions(
+    req: AIRecipeRequest,
+  ): Promise<AIRecipesResponseRaw> {
+    // Tiny delay so the UI loading state has a chance to render in dev.
+    await new Promise((resolve) => setTimeout(resolve, 150));
+    return buildMockRecipeResponse(req);
   }
 }

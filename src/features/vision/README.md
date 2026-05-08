@@ -164,3 +164,32 @@ no Edge Function or Gemini call is ever made by `npm test`.
 
 In every case the picked image is kept in state so the user can retry or
 swap photos without re-picking from the library.
+
+## Fridge Vision — Phase 12.3 (unmapped ingredients)
+
+Phase 12.3 stops dropping AI detections that don't match an entry of the
+internal ingredient catalog. The pipeline now returns two lists from a
+single analysis:
+
+- **mapped** — the existing `DetectedIngredient[]`. Every entry resolves to
+  a known `IngredientId` and is safe to use by the deterministic meal
+  suggestion / scoring engines.
+- **unmapped** — `UnmappedIngredient[]`. Detections that passed the
+  confidence threshold but don't match the catalog. The UI labels them with
+  a discreet "Detected, nutrition estimated" badge.
+
+### What changes for users
+
+- Confirming an unmapped item still persists it (under
+  `@klean_confirmed_fridge.unmappedLabels`) so it survives a restart.
+- Confirmed unmapped labels are forwarded to the AI recipe generator —
+  Gemini can now suggest a recipe around e.g. "ketchup" or "harissa" even
+  though those ingredients are not in the catalog.
+- Mapped ingredients still drive the deterministic engine (catalog lookups,
+  goal-aware scoring, daily nutrition totals).
+
+### What stays deterministic
+
+Restrictions, calorie/protein floors and the goal classifier never depend
+on unmapped ingredients — those signals are always derived from the mapped
+catalog or from the user's profile.

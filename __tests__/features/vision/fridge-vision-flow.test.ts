@@ -1,14 +1,19 @@
 import {
   fridgeVisionReducer,
   selectedIngredientIds,
+  selectedUnmappedLabels,
   type FridgeVisionFlowState,
 } from '../../../src/features/vision/hooks/useFridgeVisionFlow';
-import type { DetectedIngredient } from '../../../src/types/ai.types';
+import type {
+  DetectedIngredient,
+  UnmappedIngredient,
+} from '../../../src/types/ai.types';
 
 const makeInitialState = (): FridgeVisionFlowState => ({
   stage: 'idle',
   images: [],
   detected: [],
+  unmapped: [],
   selection: {},
   failureReason: null,
   failureDetails: null,
@@ -26,6 +31,15 @@ const sampleDetected: DetectedIngredient[] = [
     category: 'protein_egg',
     rawLabel: 'Eggs',
     confidence: 0.85,
+  },
+];
+
+const sampleUnmapped: UnmappedIngredient[] = [
+  {
+    unmappedId: 'unmapped:ketchup',
+    rawLabel: 'Ketchup',
+    category: 'condiment',
+    confidence: 0.78,
   },
 ];
 
@@ -74,6 +88,7 @@ describe('fridgeVisionReducer', () => {
     const state = fridgeVisionReducer(makeInitialState(), {
       type: 'analyze_succeeded',
       detected: sampleDetected,
+      unmapped: [],
     });
     expect(state.stage).toBe('results');
     expect(state.detected).toEqual(sampleDetected);
@@ -81,6 +96,17 @@ describe('fridgeVisionReducer', () => {
       chicken_breast: true,
       eggs: true,
     });
+  });
+
+  it('analyze_succeeded also selects unmapped detections by default', () => {
+    const state = fridgeVisionReducer(makeInitialState(), {
+      type: 'analyze_succeeded',
+      detected: sampleDetected,
+      unmapped: sampleUnmapped,
+    });
+    expect(state.unmapped).toEqual(sampleUnmapped);
+    expect(state.selection['unmapped:ketchup']).toBe(true);
+    expect(selectedUnmappedLabels(state)).toEqual(['Ketchup']);
   });
 
   it('analyze_no_detections moves to error with the no_detections reason', () => {
@@ -102,30 +128,54 @@ describe('fridgeVisionReducer', () => {
     expect(state.failureDetails).toBe('detected.0.confidence: out of range');
   });
 
-  it('toggle_selection flips a single id', () => {
+  it('toggle_selection flips a single key (mapped or unmapped)', () => {
     const initial: FridgeVisionFlowState = {
       ...makeInitialState(),
       detected: sampleDetected,
-      selection: { chicken_breast: true, eggs: true },
+      unmapped: sampleUnmapped,
+      selection: {
+        chicken_breast: true,
+        eggs: true,
+        'unmapped:ketchup': true,
+      },
     };
     const next = fridgeVisionReducer(initial, {
       type: 'toggle_selection',
-      internalId: 'eggs',
+      selectionKey: 'eggs',
     });
     expect(next.selection.eggs).toBe(false);
     expect(next.selection.chicken_breast).toBe(true);
+
+    const flippedUnmapped = fridgeVisionReducer(next, {
+      type: 'toggle_selection',
+      selectionKey: 'unmapped:ketchup',
+    });
+    expect(flippedUnmapped.selection['unmapped:ketchup']).toBe(false);
   });
 
-  it('select_all and clear_all toggle every id', () => {
+  it('select_all and clear_all toggle every key incl. unmapped ones', () => {
     const initial: FridgeVisionFlowState = {
       ...makeInitialState(),
       detected: sampleDetected,
-      selection: { chicken_breast: false, eggs: false },
+      unmapped: sampleUnmapped,
+      selection: {
+        chicken_breast: false,
+        eggs: false,
+        'unmapped:ketchup': false,
+      },
     };
     const allOn = fridgeVisionReducer(initial, { type: 'select_all' });
-    expect(allOn.selection).toEqual({ chicken_breast: true, eggs: true });
+    expect(allOn.selection).toEqual({
+      chicken_breast: true,
+      eggs: true,
+      'unmapped:ketchup': true,
+    });
     const allOff = fridgeVisionReducer(allOn, { type: 'clear_all' });
-    expect(allOff.selection).toEqual({ chicken_breast: false, eggs: false });
+    expect(allOff.selection).toEqual({
+      chicken_breast: false,
+      eggs: false,
+      'unmapped:ketchup': false,
+    });
   });
 
   it('mark_saved moves to the saved stage', () => {
