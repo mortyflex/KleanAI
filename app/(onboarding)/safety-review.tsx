@@ -13,6 +13,7 @@ import { Card } from '../../src/components/ui/card';
 import { hasBlockingFlags, calorieFloor } from '../../src/utils/safety';
 import { classifyGoal } from '../../src/utils/goal-classification';
 import { suggestSaferAlternatives } from '../../src/utils/timeframe';
+import { useAuth } from '../../src/features/auth';
 import type { GoalClassificationKind, SafetyFlag } from '../../src/types/profile.types';
 
 const TOTAL_STEPS = 10;
@@ -45,6 +46,7 @@ export default function SafetyReviewScreen() {
   const { t } = useTranslation('common');
   const router = useRouter();
   const { profile, updateProfile } = useOnboarding();
+  const { status, user } = useAuth();
 
   const data = useMemo(() => {
     const targetTimeframeWeeks = profile.targetTimeframe?.durationWeeks;
@@ -97,7 +99,14 @@ export default function SafetyReviewScreen() {
       ambitionAccepted: kind === 'ambitious',
       isComplete: true,
     });
-    router.push('/(onboarding)/summary');
+    // Account creation happens *before* the summary so the "step 10/10 — your
+    // plan is ready" screen is only ever shown to a signed-in user. Already
+    // signed-in users go straight to the summary.
+    if (status === 'unauthenticated' || !user) {
+      router.push('/(auth)/register?intent=save-onboarding');
+    } else {
+      router.push('/(onboarding)/summary');
+    }
   };
 
   const handleFollowKlean = () => {

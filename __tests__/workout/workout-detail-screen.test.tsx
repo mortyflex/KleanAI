@@ -2,7 +2,26 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import '../../src/lib/i18n';
+
+// useWorkoutSession reads from AuthProvider; this screen test doesn't mount one.
+// Stub useAuth so the hook always sees an authenticated user.
+jest.mock('../../src/features/auth', () => ({
+  useAuth: () => ({ user: { id: 'test-user' } }),
+}));
+
+// Replace the sync service so screen interactions never hit Supabase.
+jest.mock(
+  '../../src/features/workout/services/workout-sync',
+  () => ({
+    queueWorkoutSessionSync: jest
+      .fn()
+      .mockReturnValue(new Promise<never>(() => {})),
+  }),
+);
+
+// eslint-disable-next-line import/first
 import { OnboardingProvider } from '../../src/features/onboarding/onboarding-context';
+// eslint-disable-next-line import/first
 import WorkoutDetailScreen from '../../app/workout/[weekDayIndex]';
 
 const mockBack = jest.fn();

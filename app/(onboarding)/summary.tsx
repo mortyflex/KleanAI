@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import { useOnboarding } from '../../src/features/onboarding/onboarding-context';
@@ -40,9 +40,7 @@ export default function SummaryScreen() {
   const router = useRouter();
   const { profile } = useOnboarding();
   const { status, user } = useAuth();
-  const { autoSave } = useLocalSearchParams<{ autoSave?: string }>();
   const [saving, setSaving] = useState(false);
-  const autoSaveTriggered = useRef(false);
 
   const isBlocked = hasBlockingFlags(profile.safetyFlags ?? []);
 
@@ -134,25 +132,15 @@ export default function SummaryScreen() {
 
   const handleFollowProgram = () => {
     if (status === 'loading') return;
+    // Safety net — the safety-review screen now gates account creation, so
+    // an unauthenticated user should never reach the summary. If they do,
+    // bounce them to the sign-up screen instead of silently failing.
     if (status === 'unauthenticated' || !user) {
-      // New users always go to dedicated post-onboarding sign-up screen,
-      // not login. Returning users sign in via the auth landing screen
-      // before starting onboarding, so they should never land here.
-      router.push('/(auth)/register?intent=save-onboarding');
+      router.replace('/(auth)/register?intent=save-onboarding');
       return;
     }
     persistAndContinue(user.id);
   };
-
-  useEffect(() => {
-    if (autoSave !== '1') return;
-    if (autoSaveTriggered.current) return;
-    if (status !== 'authenticated' || !user) return;
-    autoSaveTriggered.current = true;
-    persistAndContinue(user.id);
-    // persistAndContinue is stable enough for this single-shot effect.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoSave, status, user]);
 
   const handleEdit = () => {
     router.push('/(onboarding)/goal');

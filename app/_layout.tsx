@@ -10,6 +10,7 @@ import {
 } from "@expo-google-fonts/plus-jakarta-sans";
 import { OnboardingProvider } from "../src/features/onboarding/onboarding-context";
 import { AuthProvider } from "../src/features/auth";
+import { useSyncBootstrap } from "../src/features/sync";
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
@@ -28,6 +29,7 @@ export default function RootLayout() {
 
   return (
     <AuthProvider>
+      <SyncBootstrap />
       <OnboardingProvider>
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="index" />
@@ -36,8 +38,16 @@ export default function RootLayout() {
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="workout" />
           <Stack.Screen name="smoothing" />
+          <Stack.Screen name="vision" />
         </Stack>
       </OnboardingProvider>
     </AuthProvider>
   );
+}
+
+// Sibling of <Stack>: it renders nothing but pulls auth state via context to
+// drain the offline queue when the user signs in or the app foregrounds.
+function SyncBootstrap() {
+  useSyncBootstrap();
+  return null;
 }

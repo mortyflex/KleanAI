@@ -24,6 +24,19 @@ export interface EnvSource {
   EXPO_PUBLIC_SUPABASE_ANON_KEY?: string;
 }
 
+export type AIProviderMode = "mock" | "edge-function";
+
+/**
+ * Reads the optional AI provider mode from `EXPO_PUBLIC_AI_PROVIDER`. Defaults
+ * to `mock` so local development works without any extra setup. Set to
+ * `edge-function` once the Supabase Edge Function `analyze-fridge-images` is
+ * deployed and `GEMINI_API_KEY` is configured server-side.
+ */
+export function getAIProviderMode(): AIProviderMode {
+  const raw = process.env.EXPO_PUBLIC_AI_PROVIDER;
+  return raw === "edge-function" ? "edge-function" : "mock";
+}
+
 export class MissingEnvError extends Error {
   readonly issues: string[];
   constructor(issues: string[]) {

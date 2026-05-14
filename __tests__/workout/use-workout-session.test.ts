@@ -1,9 +1,36 @@
 import { renderHook, act, waitFor } from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// useAuth is called inside the hook; in unit tests we don't mount AuthProvider,
+// so we stub it with a fixed authenticated user. Keeping `user` non-null lets
+// the sync path execute, which is the very thing we want to assert.
+jest.mock('../../src/features/auth', () => ({
+  useAuth: () => ({ user: { id: 'test-user' } }),
+}));
+
+// The sync service reaches out to Supabase via getSupabase(); we replace the
+// whole service so tests stay deterministic and never hit the network.
+jest.mock(
+  '../../src/features/workout/services/workout-sync',
+  () => ({
+    queueWorkoutSessionSync: jest.fn().mockResolvedValue({ outcome: 'synced' }),
+  }),
+);
+
+// eslint-disable-next-line import/first
 import { useWorkoutSession } from '../../src/features/workout/hooks/useWorkoutSession';
+// eslint-disable-next-line import/first
 import * as storage from '../../src/features/workout/store/workout-session-storage';
+// eslint-disable-next-line import/first
+import { queueWorkoutSessionSync } from '../../src/features/workout/services/workout-sync';
+// eslint-disable-next-line import/first
 import type { WorkoutDay } from '../../src/types/workout.types';
+// eslint-disable-next-line import/first
 import type { WorkoutSessionRecord } from '../../src/types/workout-session.types';
+
+const mockedQueueSync = queueWorkoutSessionSync as jest.MockedFunction<
+  typeof queueWorkoutSessionSync
+>;
 
 const MOCK_DAY: WorkoutDay = {
   id: 'day-0',
@@ -40,6 +67,12 @@ const MOCK_DAY: WorkoutDay = {
 describe('useWorkoutSession', () => {
   beforeEach(async () => {
     await AsyncStorage.clear();
+    mockedQueueSync.mockReset();
+    // Default: never resolve. Tests that care about the post-sync transition
+    // (synced / failed) override this in their own `it` block. This keeps
+    // the "syncStatus becomes pending" assertions deterministic — without it,
+    // the microtask from .then() could flip the state before the assertion.
+    mockedQueueSync.mockReturnValue(new Promise<never>(() => {}));
   });
 
   describe('initial state', () => {
@@ -166,6 +199,57 @@ describe('useWorkoutSession', () => {
     });
   });
 
+  describe('auto-complete on last toggle', () => {
+    it('flips status to completed once every exercise is ticked', async () => {
+      const { result } = renderHook(() => useWorkoutSession(MOCK_DAY));
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      act(() => { result.current.toggleExercise('bench_press'); });
+      expect(result.current.status).toBe('in_progress');
+
+      act(() => { result.current.toggleExercise('barbell_row'); });
+
+      await waitFor(() => expect(result.current.status).toBe('completed'));
+      expect(result.current.exercises.every((e) => e.done)).toBe(true);
+    });
+
+    it('records a finishedAt timestamp on auto-complete', async () => {
+      const { result } = renderHook(() => useWorkoutSession(MOCK_DAY));
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      act(() => { result.current.toggleExercise('bench_press'); });
+      act(() => { result.current.toggleExercise('barbell_row'); });
+
+      await waitFor(async () => {
+        const saved = await storage.getSession('day-0');
+        expect(saved?.status).toBe('completed');
+        expect(saved?.finishedAt).toBeDefined();
+      });
+    });
+
+    it('does NOT auto-complete a saved session loaded from storage', async () => {
+      const saved: WorkoutSessionRecord = {
+        dayId: 'day-0',
+        weekDayIndex: 0,
+        status: 'in_progress',
+        syncStatus: 'pending',
+        // All exercises already done from a previous run, but no fresh user
+        // interaction → we must not retroactively flip to completed.
+        exercises: MOCK_DAY.exercises.map((e) => ({ ...e, done: true })),
+        startedAt: '2026-05-05T08:00:00.000Z',
+        updatedAt: '2026-05-05T08:00:00.000Z',
+      };
+      await storage.saveSession(saved);
+
+      const { result } = renderHook(() => useWorkoutSession(MOCK_DAY));
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      // Give any latent effect a chance to run before asserting
+      await new Promise((r) => setTimeout(r, 10));
+      expect(result.current.status).toBe('in_progress');
+    });
+  });
+
   describe('finishWorkout', () => {
     it('sets status to completed', async () => {
       const { result } = renderHook(() => useWorkoutSession(MOCK_DAY));
@@ -174,6 +258,25 @@ describe('useWorkoutSession', () => {
       act(() => { result.current.finishWorkout(); });
 
       expect(result.current.status).toBe('completed');
+    });
+
+    it('ticks every remaining exercise when finishing early', async () => {
+      const { result } = renderHook(() => useWorkoutSession(MOCK_DAY));
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      act(() => { result.current.finishWorkout(); });
+
+      expect(result.current.exercises.every((e) => e.done)).toBe(true);
+    });
+
+    it('keeps already-done exercises done (idempotent)', async () => {
+      const { result } = renderHook(() => useWorkoutSession(MOCK_DAY));
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      act(() => { result.current.toggleExercise('bench_press'); });
+      act(() => { result.current.finishWorkout(); });
+
+      expect(result.current.exercises.every((e) => e.done)).toBe(true);
     });
 
     it('sets syncStatus to pending', async () => {
@@ -282,6 +385,84 @@ describe('useWorkoutSession', () => {
       await waitFor(() => expect(result.current.isLoading).toBe(false));
 
       expect(result.current.syncStatus).toBe('synced');
+    });
+  });
+
+  describe('sync outcome transitions', () => {
+    it('transitions to synced when the queue reports success', async () => {
+      mockedQueueSync.mockResolvedValueOnce({ outcome: 'synced' });
+
+      const { result } = renderHook(() => useWorkoutSession(MOCK_DAY));
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      act(() => { result.current.finishWorkout(); });
+
+      await waitFor(() => expect(result.current.syncStatus).toBe('synced'));
+      expect(mockedQueueSync).toHaveBeenCalledTimes(1);
+    });
+
+    it('transitions to failed and surfaces the error message from the queue', async () => {
+      mockedQueueSync.mockResolvedValueOnce({
+        outcome: 'failed',
+        error: 'invalid input syntax for type uuid',
+      });
+
+      const { result } = renderHook(() => useWorkoutSession(MOCK_DAY));
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      act(() => { result.current.finishWorkout(); });
+
+      await waitFor(() => expect(result.current.syncStatus).toBe('failed'));
+      expect(result.current.lastSyncError).toBe('invalid input syntax for type uuid');
+    });
+
+    it('transitions to failed when the queue throws', async () => {
+      mockedQueueSync.mockRejectedValueOnce(new Error('network down'));
+
+      const { result } = renderHook(() => useWorkoutSession(MOCK_DAY));
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      act(() => { result.current.toggleExercise('bench_press'); });
+
+      await waitFor(() => expect(result.current.syncStatus).toBe('failed'));
+      expect(result.current.lastSyncError).toBe('network down');
+    });
+
+    it('resetSession wipes local storage and rolls state back to in_progress', async () => {
+      mockedQueueSync.mockResolvedValueOnce({ outcome: 'synced' });
+
+      const { result } = renderHook(() => useWorkoutSession(MOCK_DAY));
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      act(() => { result.current.toggleExercise('bench_press'); });
+      act(() => { result.current.finishWorkout(); });
+      await waitFor(() => expect(result.current.status).toBe('completed'));
+
+      act(() => { result.current.resetSession(); });
+
+      expect(result.current.status).toBe('in_progress');
+      expect(result.current.syncStatus).toBe('local');
+      expect(result.current.exercises.every((e) => !e.done)).toBe(true);
+
+      await waitFor(async () => {
+        const saved = await storage.getSession('day-0');
+        expect(saved).toBeNull();
+      });
+    });
+
+    it('retrySync re-queues the session and reports synced', async () => {
+      mockedQueueSync.mockResolvedValueOnce({ outcome: 'failed', error: 'first try' });
+      mockedQueueSync.mockResolvedValueOnce({ outcome: 'synced' });
+
+      const { result } = renderHook(() => useWorkoutSession(MOCK_DAY));
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      act(() => { result.current.finishWorkout(); });
+      await waitFor(() => expect(result.current.syncStatus).toBe('failed'));
+
+      act(() => { result.current.retrySync(); });
+      await waitFor(() => expect(result.current.syncStatus).toBe('synced'));
+      expect(mockedQueueSync).toHaveBeenCalledTimes(2);
     });
   });
 });

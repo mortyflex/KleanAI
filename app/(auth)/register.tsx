@@ -7,12 +7,19 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "../../src/features/auth";
 import { KleanText } from "../../src/components/ui/klean-text";
 import { PillButton } from "../../src/components/ui/pill-button";
+import { PasswordField } from "../../src/components/ui/password-field";
 import { colors, radii } from "../../src/design/tokens";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MIN_PASSWORD = 8;
 
 const BENEFIT_KEYS = ["save", "track", "sync", "adapt", "resume"] as const;
+
+interface RegisterErrors {
+  email?: string;
+  password?: string;
+  passwordConfirm?: string;
+}
 
 /**
  * Post-onboarding account creation. Reached after the user completes the
@@ -22,6 +29,10 @@ const BENEFIT_KEYS = ["save", "track", "sync", "adapt", "resume"] as const;
  * track progress, future smart adjustments) and intentionally does NOT
  * surface a "sign in" CTA — existing users should arrive here only via the
  * landing screen, never by going through the onboarding again.
+ *
+ * Both password fields have an eye toggle so the user can verify what they
+ * typed, and a confirm-password field guards against typo'd passwords the
+ * user can't reproduce later.
  */
 export default function RegisterScreen() {
   const { t } = useTranslation("common");
@@ -30,20 +41,23 @@ export default function RegisterScreen() {
   const { signUp } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>(
-    {},
-  );
+  const [errors, setErrors] = useState<RegisterErrors>({});
 
   const isPostOnboarding = intent === "save-onboarding";
 
   const validate = (): boolean => {
-    const next: { email?: string; password?: string } = {};
+    const next: RegisterErrors = {};
     if (!email.trim()) next.email = t("auth.errors.emailRequired");
     else if (!EMAIL_RE.test(email.trim())) next.email = t("auth.errors.emailInvalid");
     if (!password) next.password = t("auth.errors.passwordRequired");
     else if (password.length < MIN_PASSWORD)
       next.password = t("auth.errors.passwordTooShort");
+    if (!passwordConfirm)
+      next.passwordConfirm = t("auth.errors.passwordConfirmRequired");
+    else if (password && password !== passwordConfirm)
+      next.passwordConfirm = t("auth.errors.passwordMismatch");
     setErrors(next);
     return Object.keys(next).length === 0;
   };
@@ -53,11 +67,13 @@ export default function RegisterScreen() {
     if (!validate()) return;
     setSubmitting(true);
     try {
-      const user = await signUp(email.trim(), password);
-      // If Supabase email confirmation is on, no session is returned. We can
-      // still flow forward — the next time the user opens the app with the
-      // confirmation link they'll already be signed in.
-      if (!user) {
+      const { session } = await signUp(email.trim(), password);
+      // No session = either email confirmation is required, or the email is
+      // already registered (Supabase intentionally hides that case). Either
+      // way we MUST stop here — navigating forward without a session would
+      // bounce the user straight back through the auth gate, creating a
+      // confusing register/summary loop.
+      if (!session) {
         Alert.alert(
           t("auth.register.checkEmailTitle"),
           t("auth.register.checkEmailBody"),
@@ -65,7 +81,9 @@ export default function RegisterScreen() {
         return;
       }
       if (isPostOnboarding) {
-        router.replace("/(onboarding)/summary?autoSave=1");
+        // Show the "step 10/10 — your plan is ready" recap. The user reviews
+        // it and presses "Follow this program" to persist + enter the app.
+        router.replace("/(onboarding)/summary");
       } else {
         router.replace("/(tabs)");
       }
@@ -163,24 +181,31 @@ export default function RegisterScreen() {
         )}
 
         <View style={{ gap: 16 }}>
-          <Field
+          <EmailField
             testID="register-email-input"
             label={t("auth.fields.email")}
             value={email}
             onChangeText={setEmail}
-            autoCapitalize="none"
-            keyboardType="email-address"
             placeholder={t("auth.fields.emailPlaceholder")}
             error={errors.email}
           />
-          <Field
+          <PasswordField
             testID="register-password-input"
+            toggleTestID="register-password-toggle"
             label={t("auth.fields.password")}
             value={password}
             onChangeText={setPassword}
-            secureTextEntry
             placeholder={t("auth.fields.passwordPlaceholder")}
             error={errors.password}
+          />
+          <PasswordField
+            testID="register-password-confirm-input"
+            toggleTestID="register-password-confirm-toggle"
+            label={t("auth.fields.passwordConfirm")}
+            value={passwordConfirm}
+            onChangeText={setPasswordConfirm}
+            placeholder={t("auth.fields.passwordConfirmPlaceholder")}
+            error={errors.passwordConfirm}
           />
         </View>
 
@@ -213,19 +238,16 @@ export default function RegisterScreen() {
   );
 }
 
-interface FieldProps {
+interface EmailFieldProps {
   label: string;
   value: string;
   onChangeText: (v: string) => void;
   placeholder?: string;
-  secureTextEntry?: boolean;
-  autoCapitalize?: "none" | "sentences" | "words" | "characters";
-  keyboardType?: "default" | "email-address";
   error?: string;
   testID?: string;
 }
 
-function Field({ label, error, testID, ...rest }: FieldProps) {
+function EmailField({ label, error, testID, ...rest }: EmailFieldProps) {
   return (
     <View style={{ gap: 6 }}>
       <KleanText variant="label" color={colors.ink}>
@@ -234,6 +256,9 @@ function Field({ label, error, testID, ...rest }: FieldProps) {
       <TextInput
         testID={testID}
         {...rest}
+        autoCapitalize="none"
+        autoCorrect={false}
+        keyboardType="email-address"
         placeholderTextColor={colors.muted}
         style={{
           backgroundColor: colors.card,

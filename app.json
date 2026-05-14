@@ -30,7 +30,14 @@
     "plugins": [
       "expo-router",
       "expo-localization",
-      "expo-font"
+      "expo-font",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Klean AI uses your photo library so you can pick a picture of your fridge or pantry for ingredient detection.",
+          "cameraPermission": "Klean AI uses the camera so you can take a photo of your fridge or pantry for ingredient detection."
+        }
+      ]
     ]
   }
 }

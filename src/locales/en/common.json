@@ -204,6 +204,12 @@
       "completedBanner": "Session complete!",
       "missedBanner": "No worries — every day is a fresh start.",
       "savedLocally": "Saved locally",
+      "syncing": "Syncing…",
+      "synced": "Synced",
+      "syncFailed": "Sync failed — tap to retry",
+      "retrySync": "Retry sync",
+      "reset": "Reset session",
+      "resetHint": "Wipes the local entry. The next finish or miss will overwrite it.",
       "completedChip": "Done",
       "missedChip": "Missed"
     },
@@ -259,13 +265,134 @@
     "macros": {
       "protein": "Protein",
       "carbs": "Carbs",
-      "fat": "Fat"
+      "fat": "Fat",
+      "proteinUnit": "{{grams}} g protein"
     },
     "meals": {
-      "title": "Meals",
-      "logFood": "Log food",
-      "notLogged": "Not logged yet",
       "kcalUnit": "kcal"
+    },
+    "fridgeScan": {
+      "title": "Your fridge",
+      "emptyBody": "Show us what's on your shelves and we'll tailor today's ideas around it.",
+      "confirmedBody_one": "{{count}} ingredient confirmed — meals adapt to what you have.",
+      "confirmedBody_other": "{{count}} ingredients confirmed — meals adapt to what you have.",
+      "scanCta": "Scan my fridge",
+      "updateCta": "Update my fridge",
+      "cardAccessibility": "Open my confirmed fridge"
+    },
+    "today": {
+      "kicker": "Today",
+      "zeroGuilt": "Real food, zero guilt. Klean adapts whenever life gets messy.",
+      "mealsTitle": "Today's meals",
+      "mealsSubtitleNoFridge": "Tap one to see ideas. Scan your fridge to make them frigde-aware.",
+      "mealsSubtitleWithFridge": "Each idea is biased by what you confirmed in your fridge.",
+      "viewRecipeCta": "View recipe",
+      "adaptCta": "Adapt with my fridge",
+      "changeRecipeCta": "Change recipe",
+      "staleRecipeTitle": "May no longer match your fridge",
+      "staleRecipeBody": "You re-scanned your fridge since picking this AI recipe — it might not be doable anymore. It's still here, but you can swap it for a fresh suggestion.",
+      "slotEmptyTitle": "Nothing planned yet",
+      "slotEmptyBody": "Pick a recipe to lock in this slot."
+    },
+    "plan": {
+      "title": "Today's plan",
+      "subtitle": "A simple target. Not a strict diet.",
+      "estimateLabel": "Estimate from your profile",
+      "incompleteTitle": "Finish your profile",
+      "incompleteBody": "We'll show your daily plan once your goal and metrics are set."
+    },
+    "suggestions": {
+      "title": "Simple ideas",
+      "subtitle": "Pick what fits your day. Tap once you've eaten — your daily total adapts.",
+      "kcalLine": "{{kcal}} kcal · {{protein}} g protein",
+      "markCta": "I ate this",
+      "markLabel": "Mark this meal as eaten",
+      "unmarkCta": "Undo",
+      "unmarkLabel": "Remove this meal from today's total",
+      "noResultsTitle": "Nothing to suggest right now",
+      "noResultsBody": "Your dietary preferences filter out our default ideas. We'll add more soon.",
+      "meals": {
+        "oatmeal_berries": {
+          "title": "Oatmeal with berries",
+          "body": "Rolled oats, mixed berries, a spoon of nut butter."
+        },
+        "greek_yogurt_bowl": {
+          "title": "Greek yogurt bowl",
+          "body": "Greek yogurt, granola, fruit, a drizzle of honey."
+        },
+        "tofu_scramble": {
+          "title": "Tofu scramble",
+          "body": "Crumbled tofu, turmeric, spinach, cherry tomatoes."
+        },
+        "eggs_avocado_toast": {
+          "title": "Eggs & avocado toast",
+          "body": "Two eggs, mashed avocado on whole-grain toast."
+        },
+        "chicken_rice_bowl": {
+          "title": "Chicken & rice bowl",
+          "body": "Grilled chicken, rice, roasted veg, lemon."
+        },
+        "lentil_quinoa_salad": {
+          "title": "Lentil & quinoa salad",
+          "body": "Lentils, quinoa, cucumber, tomato, olive oil."
+        },
+        "salmon_sweet_potato": {
+          "title": "Salmon & sweet potato",
+          "body": "Baked salmon, sweet potato, steamed greens."
+        },
+        "tofu_stir_fry": {
+          "title": "Tofu stir-fry",
+          "body": "Tofu, mixed vegetables, soy sauce, brown rice."
+        },
+        "turkey_meatballs": {
+          "title": "Turkey meatballs & pasta",
+          "body": "Lean turkey meatballs, whole-grain pasta, tomato sauce."
+        },
+        "chickpea_curry": {
+          "title": "Chickpea curry",
+          "body": "Chickpeas, tomato, coconut milk, basmati rice."
+        },
+        "grilled_chicken_veg": {
+          "title": "Grilled chicken & veg",
+          "body": "Grilled chicken breast, mixed vegetables, olive oil."
+        },
+        "fruit_almonds": {
+          "title": "Fruit & almonds",
+          "body": "An apple or banana with a small handful of almonds."
+        },
+        "cottage_cheese_fruit": {
+          "title": "Cottage cheese & fruit",
+          "body": "Cottage cheese with fresh fruit and a sprinkle of seeds."
+        },
+        "edamame": {
+          "title": "Edamame",
+          "body": "A bowl of edamame with a pinch of salt."
+        }
+      }
+    },
+    "events": {
+      "title": "How did today go?",
+      "subtitle": "One tap. No judgment, no guilt.",
+      "followed_plan": {
+        "label": "Followed plan",
+        "message": "Nice — staying on plan is the win we keep building on."
+      },
+      "excess_food": {
+        "label": "Ate a bit extra",
+        "message": "All good. We'll spread it gently over the next 2–3 days."
+      },
+      "skipped_meal": {
+        "label": "Skipped a meal",
+        "message": "We won't compensate by cutting more. Eat normally next meal."
+      },
+      "ordered_food": {
+        "label": "Ordered out",
+        "message": "Enjoyed it. We'll absorb it gently across the next few days."
+      },
+      "alcohol": {
+        "label": "Drank alcohol",
+        "message": "No drama. We'll smooth it across the next 2–3 days."
+      }
     },
     "hydration": {
       "title": "Hydration",
@@ -365,18 +492,662 @@
       }
     }
   },
+  "vision": {
+    "gym": {
+      "title": "Scan your gym",
+      "subtitle": "Show us your gear and we'll tailor your program around it.",
+      "intro": "Add a few photos of the equipment you have access to. We'll detect what's there — you stay in control.",
+      "addPhotosCta": "Add photos",
+      "addMorePhotosCta": "Add more",
+      "imagesSelected_one": "{{count}} photo ready",
+      "imagesSelected_other": "{{count}} photos ready",
+      "noImagesHint": "Pick at least one photo to start the scan.",
+      "analyzeCta": "Detect equipment",
+      "analyzing": "Looking at your gear…",
+      "retryCta": "Try again",
+      "removePhoto": "Remove",
+      "mockNotice": "Demo mode — using sample images for now.",
+      "errors": {
+        "providerTitle": "Couldn't reach the AI",
+        "providerBody": "Something went wrong on our side. Please try again in a moment.",
+        "schemaTitle": "Unexpected response",
+        "schemaBody": "We couldn't understand the AI's reply. We'll try a different prompt next time.",
+        "noDetectionsTitle": "Nothing recognised",
+        "noDetectionsBody": "We didn't spot any familiar equipment. Try clearer or closer photos."
+      },
+      "results": {
+        "title": "We spotted these",
+        "subtitle": "Uncheck anything that isn't really available — we'll plan around your selection.",
+        "confidence": "{{percent}}% sure",
+        "rawLabel": "Detected as: {{label}}",
+        "selectAll": "Select all",
+        "clearAll": "Clear all",
+        "addManualHint": "Missing something? You can add it manually next.",
+        "saveCta": "Save my equipment",
+        "savedTitle": "Equipment saved",
+        "savedBody": "Your workout will adapt to the gear you confirmed.",
+        "noneSelectedHint": "Pick at least one item or skip — your plan stays bodyweight-only otherwise.",
+        "skipCta": "Skip for now"
+      }
+    },
+    "equipment": {
+      "barbell": "Barbell & rack",
+      "dumbbell": "Dumbbells",
+      "cable": "Cable machine",
+      "machine": "Selectorized machine",
+      "pull_up_bar": "Pull-up bar",
+      "resistance_band": "Resistance bands",
+      "bodyweight": "Bodyweight"
+    },
+    "fridge": {
+      "title": "Scan your fridge",
+      "subtitle": "Show us what you've got and we'll suggest meals around it.",
+      "intro": "Add a few photos of your fridge or pantry. We'll spot ingredients — you stay in control.",
+      "addPhotosCta": "Add photos",
+      "addMorePhotosCta": "Add more",
+      "takePhotoCta": "Take a photo",
+      "pickFromLibraryCta": "Pick from library",
+      "useMockImageCta": "Use a demo image",
+      "imagesSelected_one": "{{count}} photo ready",
+      "imagesSelected_other": "{{count}} photos ready",
+      "noImagesHint": "Pick at least one photo to start the scan.",
+      "analyzeCta": "Detect ingredients",
+      "analyzing": "Looking at your shelves…",
+      "retryCta": "Try again",
+      "removePhoto": "Remove",
+      "replacePhoto": "Replace",
+      "previewAlt": "Preview of your fridge photo",
+      "mockNotice": "Test mode — your photos are real, but the AI analysis still uses a sample response.",
+      "providerBadgeMock": "AI mode: mock (sample response)",
+      "providerBadgeGemini": "AI mode: Gemini (real analysis)",
+      "demoImageBadge": "Demo image",
+      "permissionDeniedTitle": "Permission needed",
+      "permissionDeniedBody": "Allow Klean AI to access your photos or camera in Settings to scan your fridge.",
+      "pickerUnavailableTitle": "Picker unavailable",
+      "pickerUnavailableBody": "We couldn't open the camera or photo library. Try again or use a demo image.",
+      "stepHint": "Step {{current}} of {{total}}",
+      "howItWorksTitle": "How it works",
+      "howItWorksStep1": "Pick a real photo of your fridge or pantry.",
+      "howItWorksStep2": "We detect ingredients — you confirm what's actually there.",
+      "howItWorksStep3": "Your meal suggestions adapt to the food you have.",
+      "errors": {
+        "providerTitle": "Couldn't reach the AI",
+        "providerBody": "Something went wrong on our side. Please try again in a moment.",
+        "schemaTitle": "Unexpected response",
+        "schemaBody": "We couldn't understand the AI's reply. We'll try a different prompt next time.",
+        "noDetectionsTitle": "Nothing recognised",
+        "noDetectionsBody": "We didn't spot any familiar ingredients. Try clearer or closer photos."
+      },
+      "results": {
+        "title": "We spotted these",
+        "subtitle": "Uncheck anything that isn't really there — we'll tailor your meal suggestions to what's left.",
+        "confidence": "{{percent}}% sure",
+        "rawLabel": "Detected as: {{label}}",
+        "selectAll": "Select all",
+        "clearAll": "Clear all",
+        "saveCta": "Save my fridge",
+        "savedTitle": "Fridge saved",
+        "savedBody": "Your meal suggestions will adapt to what you confirmed.",
+        "noneSelectedHint": "Pick at least one item or skip — we'll fall back to general suggestions otherwise.",
+        "skipCta": "Skip for now",
+        "chooseRecipeCta": "Pick a recipe now",
+        "estimatedNutritionBadge": "Detected, nutrition estimated",
+        "unmappedSectionTitle": "Detected, not in our catalog",
+        "unmappedSectionBody": "Confirm them and we'll send them to the AI when generating recipes."
+      }
+    },
+    "confirmedFridge": {
+      "title": "My confirmed fridge",
+      "subtitle_one": "{{count}} item available for your recipes.",
+      "subtitle_other": "{{count}} items available for your recipes.",
+      "emptyTitle": "Your fridge is empty",
+      "emptyBody": "Scan your fridge to confirm what you have on hand.",
+      "loading": "Loading your ingredients…",
+      "mappedSection": "From our catalog",
+      "unmappedSection": "Detected, nutrition estimated",
+      "removeCta": "Remove",
+      "removeAccessibility": "Remove {{label}}",
+      "rescanCta": "Scan again",
+      "clearAllCta": "Clear all",
+      "backCta": "Back"
+    },
+    "ingredients": {
+      "chicken_breast": "Chicken breast",
+      "turkey": "Turkey",
+      "beef": "Beef",
+      "salmon": "Salmon",
+      "tuna": "Tuna",
+      "eggs": "Eggs",
+      "greek_yogurt": "Greek yogurt",
+      "cottage_cheese": "Cottage cheese",
+      "tofu": "Tofu",
+      "lentils": "Lentils",
+      "chickpeas": "Chickpeas",
+      "brown_rice": "Brown rice",
+      "quinoa": "Quinoa",
+      "oats": "Oats",
+      "sweet_potato": "Sweet potato",
+      "spinach": "Spinach",
+      "broccoli": "Broccoli",
+      "tomato": "Tomato",
+      "bell_pepper": "Bell pepper",
+      "banana": "Banana",
+      "apple": "Apple",
+      "berries": "Berries",
+      "olive_oil": "Olive oil",
+      "almonds": "Almonds",
+      "avocado": "Avocado"
+    }
+  },
+  "recipes": {
+    "mealChoice": {
+      "title": "What do you want to cook?",
+      "subtitleNoFridge": "Pick a meal type and we'll suggest matching recipes.",
+      "subtitleWithFridge_one": "We'll bias the picks toward the {{count}} ingredient you just confirmed.",
+      "subtitleWithFridge_other": "We'll bias the picks toward the {{count}} ingredients you just confirmed.",
+      "fullDayLabel": "Or",
+      "fullDayTitle": "Plan my whole day",
+      "fullDayBody": "We'll generate breakfast, lunch, dinner and a snack — swap any meal afterwards.",
+      "fullDayCta": "Plan my full day",
+      "backCta": "Back"
+    },
+    "list": {
+      "title": "Recipes for you",
+      "subtitle": "Up to 3 picks blending our catalog with AI suggestions when needed.",
+      "loading": "Looking for the best matches…",
+      "emptyTitle": "Nothing matches yet",
+      "emptyBody": "Confirm a few ingredients in your fridge and we'll tailor recipes around them.",
+      "scanFridgeCta": "Scan my fridge",
+      "backCta": "Back",
+      "aiUnavailableTitle": "No AI recipe right now",
+      "aiUnavailableBody": "We couldn't build a sensible AI recipe with what you've confirmed. Showing catalog picks — try scanning more ingredients to unlock more ideas.",
+      "regenerateAiCta": "Get another AI recipe",
+      "regeneratingAiCta": "Generating…",
+      "regenerateAiHint": "These suggestions are cached — opening this list again won't call the AI. Tap above only when you want a fresh AI idea."
+    },
+    "fullDay": {
+      "title": "Your day, ready",
+      "subtitle": "One recipe per slot. Swap any meal you'd rather change.",
+      "loading": "Building your day…",
+      "slotEmpty": "No matching recipe — try scanning more ingredients.",
+      "swapCta": "Swap",
+      "acceptCta": "Use this whole day",
+      "backCta": "Back"
+    },
+    "card": {
+      "viewCta": "View recipe",
+      "chooseCta": "Choose",
+      "haveAlready": "You already have: {{items}}",
+      "stillMissing": "Missing: {{items}}",
+      "aiUsesYourFridge": "Uses ingredients from your fridge that are outside our catalog.",
+      "calorieNotice": "~{{kcal}} kcal — a bit higher than usual. Watch your portions."
+    },
+    "detail": {
+      "timeLabel": "Time",
+      "minutesValue": "{{minutes}} min",
+      "kcalLabel": "Calories",
+      "proteinLabel": "Protein",
+      "difficultyLabel": "Level",
+      "ingredientsLabel": "Ingredients",
+      "optionalLabel": "Optional add-ons",
+      "stepsLabel": "Steps",
+      "whyItFitsLabel": "Why it fits your day",
+      "chooseCta": "Choose this recipe",
+      "backCta": "Back",
+      "unavailableTitle": "Recipe not available",
+      "unavailableBody": "We couldn't find this recipe. Head back to the list and pick another."
+    },
+    "estimates": {
+      "kcalApprox": "~{{kcal}} kcal",
+      "proteinApprox": "~{{grams}} g protein",
+      "disclaimer": "Estimates only — adjust to your portions and preferences."
+    },
+    "badges": {
+      "aiSuggested": "AI suggested",
+      "goodFridgeMatch": "Great fridge match"
+    },
+    "tags": {
+      "high_protein": "High-protein",
+      "quick": "Quick",
+      "low_calorie": "Light",
+      "mass_gain": "Mass gain",
+      "recomposition": "Recomposition",
+      "vegetarian": "Vegetarian",
+      "budget": "Budget",
+      "no_cook": "No cooking"
+    },
+    "difficulty": {
+      "easy": "Easy",
+      "medium": "Medium"
+    },
+    "units": {
+      "g": "{{amount}} g",
+      "ml": "{{amount}} ml",
+      "piece_one": "{{count}} piece",
+      "piece_other": "{{count}} pieces",
+      "tbsp_one": "{{count}} tbsp",
+      "tbsp_other": "{{count}} tbsp",
+      "tsp_one": "{{count}} tsp",
+      "tsp_other": "{{count}} tsp",
+      "slice_one": "{{count}} slice",
+      "slice_other": "{{count}} slices",
+      "cup_one": "{{count}} cup",
+      "cup_other": "{{count}} cups",
+      "pinch_one": "{{count}} pinch",
+      "pinch_other": "{{count}} pinches"
+    },
+    "matchReasons": {
+      "allInFridge": "All in your fridge",
+      "mostInFridge": "Most ingredients in your fridge",
+      "quick": "Quick to make",
+      "highProtein": "High in protein",
+      "fitsWeightLoss": "Fits weight loss",
+      "fitsMassGain": "Fits muscle gain",
+      "fitsRecomposition": "Fits recomposition",
+      "fitsMaintain": "Fits maintenance",
+      "aiSuggested": "AI suggestion"
+    },
+    "items": {
+      "oatmeal_berries_breakfast": {
+        "title": "Oatmeal with berries",
+        "description": "Rolled oats simmered with milk or water, topped with fresh berries.",
+        "steps": {
+          "1": "Cook the rolled oats in milk or water until creamy.",
+          "2": "Stir in a pinch of cinnamon and a drizzle of honey if you like.",
+          "3": "Top with fresh berries and crushed almonds, then serve warm."
+        }
+      },
+      "greek_yogurt_protein_bowl": {
+        "title": "Greek yogurt protein bowl",
+        "description": "Thick Greek yogurt with berries, oats and almonds for a high-protein start.",
+        "steps": {
+          "1": "Spoon Greek yogurt into a bowl.",
+          "2": "Top with berries, oats and a handful of almonds.",
+          "3": "Drizzle with honey and enjoy."
+        }
+      },
+      "tofu_veg_scramble": {
+        "title": "Tofu & vegetable scramble",
+        "description": "Crumbled tofu with spinach, tomato and bell pepper — fluffy and protein-packed.",
+        "steps": {
+          "1": "Crumble firm tofu into a hot non-stick pan with olive oil.",
+          "2": "Add chopped tomato, bell pepper and spinach.",
+          "3": "Season with turmeric, salt and pepper.",
+          "4": "Stir until everything is just warmed through."
+        }
+      },
+      "eggs_avocado_breakfast": {
+        "title": "Eggs & avocado plate",
+        "description": "Two eggs your way with smashed avocado on the side.",
+        "steps": {
+          "1": "Cook the eggs as you like — soft-boiled, scrambled or fried.",
+          "2": "Smash half an avocado with a pinch of salt and lemon.",
+          "3": "Plate together and enjoy."
+        }
+      },
+      "scrambled_eggs_spinach": {
+        "title": "Scrambled eggs with spinach",
+        "description": "Soft scrambled eggs folded with wilted spinach.",
+        "steps": {
+          "1": "Whisk the eggs with a splash of milk and salt.",
+          "2": "Soften the spinach in olive oil.",
+          "3": "Pour in the eggs and stir gently until just set."
+        }
+      },
+      "cottage_oats_pancakes": {
+        "title": "Cottage cheese & oats pancakes",
+        "description": "Protein-rich pancakes blended from oats, eggs and cottage cheese.",
+        "steps": {
+          "1": "Blend oats, cottage cheese and eggs until smooth.",
+          "2": "Cook small pancakes on a non-stick pan over medium heat.",
+          "3": "Flip when bubbles form on top.",
+          "4": "Serve with berries and a banana sliced on top."
+        }
+      },
+      "banana_oats_protein": {
+        "title": "Banana protein oats",
+        "description": "Filling oats blended with banana and Greek yogurt for muscle days.",
+        "steps": {
+          "1": "Cook the oats in milk until creamy.",
+          "2": "Stir in mashed banana and a spoon of Greek yogurt off the heat.",
+          "3": "Top with crushed almonds and serve."
+        }
+      },
+      "no_cook_fruit_bowl": {
+        "title": "No-cook fruit & nuts bowl",
+        "description": "An apple, a banana, berries and almonds — ready in two minutes.",
+        "steps": {
+          "1": "Slice the apple and banana into a bowl.",
+          "2": "Add berries and a handful of almonds — done."
+        }
+      },
+      "avocado_toast_classic": {
+        "title": "Classic avocado toast",
+        "description": "Sourdough or wholegrain bread topped with smashed avocado.",
+        "steps": {
+          "1": "Toast the bread until golden.",
+          "2": "Smash the avocado with lemon, salt and a drop of olive oil, then spread on top."
+        }
+      },
+      "salmon_avocado_breakfast": {
+        "title": "Salmon, avocado & eggs",
+        "description": "Smoked salmon, sliced avocado and soft-boiled eggs — premium protein start.",
+        "steps": {
+          "1": "Soft-boil the eggs (6 minutes) and peel them.",
+          "2": "Slice the avocado and arrange with the salmon.",
+          "3": "Halve the eggs on top, season with pepper and serve."
+        }
+      },
+      "eggs_brown_rice_breakfast": {
+        "title": "Eggs & brown rice breakfast",
+        "description": "Warm brown rice topped with two eggs and wilted spinach — Asian-style.",
+        "steps": {
+          "1": "Reheat the brown rice with a splash of water.",
+          "2": "Wilt the spinach in olive oil.",
+          "3": "Top the rice with eggs and spinach, season and enjoy."
+        }
+      },
+      "chicken_rice_lunch": {
+        "title": "Chicken & brown rice bowl",
+        "description": "Grilled chicken breast with brown rice and steamed broccoli.",
+        "steps": {
+          "1": "Season the chicken with salt, pepper and a drizzle of olive oil.",
+          "2": "Grill or pan-fry until cooked through.",
+          "3": "Steam the broccoli until just tender.",
+          "4": "Slice the chicken and plate with the rice and broccoli."
+        }
+      },
+      "lentil_quinoa_lunch": {
+        "title": "Lentil & quinoa salad",
+        "description": "Protein-rich vegetarian bowl with tomato and a lemon dressing.",
+        "steps": {
+          "1": "Cook the quinoa and the lentils separately.",
+          "2": "Mix with diced tomato.",
+          "3": "Dress with olive oil, lemon, salt and pepper."
+        }
+      },
+      "salmon_sweet_potato_lunch": {
+        "title": "Salmon & sweet potato",
+        "description": "Baked salmon with roasted sweet potato and wilted spinach.",
+        "steps": {
+          "1": "Roast the sweet potato cubes at 200°C for 25 minutes.",
+          "2": "Bake the salmon at the same temperature for 12 minutes.",
+          "3": "Wilt the spinach with a touch of olive oil.",
+          "4": "Plate everything together."
+        }
+      },
+      "tofu_stir_fry_lunch": {
+        "title": "Tofu stir-fry",
+        "description": "Tofu, brown rice, bell pepper and broccoli with soy sauce.",
+        "steps": {
+          "1": "Cube the tofu and pan-fry until golden.",
+          "2": "Add the bell pepper and broccoli and stir-fry briskly.",
+          "3": "Splash in soy sauce and serve over the rice.",
+          "4": "Finish with sesame seeds if you have any."
+        }
+      },
+      "tuna_quinoa_bowl": {
+        "title": "Tuna & quinoa bowl",
+        "description": "Quick high-protein bowl with tuna, quinoa, tomato and pepper.",
+        "steps": {
+          "1": "Combine the cooked quinoa with diced tomato and pepper.",
+          "2": "Top with drained tuna.",
+          "3": "Drizzle olive oil and lemon, then serve."
+        }
+      },
+      "chicken_quinoa_lunch": {
+        "title": "Chicken & quinoa plate",
+        "description": "Grilled chicken on a bed of quinoa with broccoli.",
+        "steps": {
+          "1": "Cook the quinoa according to the packet.",
+          "2": "Grill the seasoned chicken until cooked.",
+          "3": "Steam the broccoli and plate everything together."
+        }
+      },
+      "chickpea_buddha_bowl": {
+        "title": "Chickpea Buddha bowl",
+        "description": "Roasted sweet potato, chickpeas, spinach and avocado.",
+        "steps": {
+          "1": "Roast the sweet potato at 200°C for 25 minutes.",
+          "2": "Pan-roast the chickpeas with olive oil and spices.",
+          "3": "Assemble over a bed of spinach.",
+          "4": "Top with sliced avocado and a squeeze of lemon."
+        }
+      },
+      "beef_rice_lunch": {
+        "title": "Beef & brown rice bowl",
+        "description": "Lean beef with brown rice and broccoli — solid mass-gain plate.",
+        "steps": {
+          "1": "Sear the beef strips in a hot pan with olive oil.",
+          "2": "Steam the broccoli until tender.",
+          "3": "Plate with the warm brown rice.",
+          "4": "Season with soy sauce or pepper."
+        }
+      },
+      "turkey_veg_wrap": {
+        "title": "Turkey & veggie wrap",
+        "description": "Turkey, tomato and bell pepper rolled in a wholegrain wrap.",
+        "steps": {
+          "1": "Warm the wrap briefly.",
+          "2": "Layer turkey, tomato and pepper.",
+          "3": "Roll up tightly and slice in half."
+        }
+      },
+      "veggie_quinoa_bowl_lunch": {
+        "title": "Veggie quinoa bowl",
+        "description": "Quinoa with chickpeas, spinach and tomato — fully plant-based.",
+        "steps": {
+          "1": "Mix the cooked quinoa with chickpeas.",
+          "2": "Add chopped tomato and a generous handful of spinach.",
+          "3": "Dress with olive oil, lemon and salt."
+        }
+      },
+      "turkey_meatballs_dinner": {
+        "title": "Turkey meatballs in tomato sauce",
+        "description": "Lean turkey meatballs simmered in a quick tomato sauce.",
+        "steps": {
+          "1": "Mix the ground turkey with herbs and salt and shape into meatballs.",
+          "2": "Brown them in a pan with olive oil.",
+          "3": "Add crushed tomatoes and simmer for 12 minutes.",
+          "4": "Serve over wholegrain pasta or with a side salad."
+        }
+      },
+      "chickpea_curry_dinner": {
+        "title": "Chickpea curry",
+        "description": "Chickpeas, spinach and tomato in a fragrant curry sauce served with rice.",
+        "steps": {
+          "1": "Sauté onion, garlic and curry spices in olive oil.",
+          "2": "Add the tomato and simmer for 5 minutes.",
+          "3": "Stir in the chickpeas and spinach.",
+          "4": "Serve over the brown rice."
+        }
+      },
+      "grilled_chicken_veg_dinner": {
+        "title": "Grilled chicken & veg",
+        "description": "Lean grilled chicken with broccoli and bell pepper.",
+        "steps": {
+          "1": "Season and grill the chicken until just cooked.",
+          "2": "Quickly grill or steam the vegetables.",
+          "3": "Plate with a drizzle of olive oil."
+        }
+      },
+      "baked_salmon_broccoli_dinner": {
+        "title": "Baked salmon & broccoli",
+        "description": "Oven-baked salmon with broccoli and sweet potato.",
+        "steps": {
+          "1": "Roast cubed sweet potato at 200°C for 25 minutes.",
+          "2": "Bake the salmon for 12 minutes at the same temperature.",
+          "3": "Steam the broccoli until tender.",
+          "4": "Plate with a drizzle of olive oil and lemon."
+        }
+      },
+      "beef_sweet_potato_dinner": {
+        "title": "Beef & sweet potato",
+        "description": "Lean beef strips with roasted sweet potato and spinach.",
+        "steps": {
+          "1": "Roast the sweet potato cubes at 200°C for 25 minutes.",
+          "2": "Sear the beef in a very hot pan with olive oil.",
+          "3": "Wilt the spinach with garlic.",
+          "4": "Plate together."
+        }
+      },
+      "tofu_curry_dinner": {
+        "title": "Tofu curry",
+        "description": "Tofu, spinach and tomato in a creamy curry sauce, served with rice.",
+        "steps": {
+          "1": "Sauté the tofu cubes until golden.",
+          "2": "Add tomato and curry spices, simmer briefly.",
+          "3": "Stir in the spinach until wilted.",
+          "4": "Serve over the brown rice."
+        }
+      },
+      "eggs_veg_dinner_bowl": {
+        "title": "Eggs & veggie rice bowl",
+        "description": "Brown rice topped with eggs, spinach and avocado — comforting and quick.",
+        "steps": {
+          "1": "Reheat the brown rice.",
+          "2": "Soft-fry the eggs in olive oil.",
+          "3": "Top the rice with spinach, eggs and sliced avocado."
+        }
+      },
+      "salmon_quinoa_dinner": {
+        "title": "Salmon, quinoa & broccoli",
+        "description": "Pan-seared salmon over quinoa with steamed broccoli.",
+        "steps": {
+          "1": "Cook the quinoa.",
+          "2": "Sear the salmon skin-down for 4 minutes, flip and finish.",
+          "3": "Plate with the steamed broccoli and a drizzle of olive oil."
+        }
+      },
+      "lentil_stew_dinner": {
+        "title": "Lentil stew",
+        "description": "Slow-simmered lentil stew with sweet potato, spinach and tomato.",
+        "steps": {
+          "1": "Sauté garlic and onion in olive oil.",
+          "2": "Add the cubed sweet potato, tomato and lentils with water or stock.",
+          "3": "Simmer until the lentils are tender (25 minutes).",
+          "4": "Stir in the spinach at the very end."
+        }
+      },
+      "chicken_sweet_potato_dinner": {
+        "title": "Chicken & sweet potato",
+        "description": "Roasted chicken with sweet potato and broccoli.",
+        "steps": {
+          "1": "Cube and roast the sweet potato at 200°C for 25 minutes.",
+          "2": "Roast or grill the chicken until just cooked.",
+          "3": "Steam the broccoli.",
+          "4": "Plate everything with olive oil and herbs."
+        }
+      },
+      "tuna_pasta_dinner": {
+        "title": "Tuna pasta",
+        "description": "Quick wholegrain pasta with tuna, tomato and a touch of olive oil.",
+        "steps": {
+          "1": "Cook the pasta al dente.",
+          "2": "Stir in tomato sauce and the drained tuna.",
+          "3": "Drizzle olive oil and serve."
+        }
+      },
+      "fruit_almonds_snack": {
+        "title": "Fruit & almonds",
+        "description": "An apple with a small handful of almonds — simple and filling.",
+        "steps": {
+          "1": "Wash and slice the apple.",
+          "2": "Pair with a small handful of almonds."
+        }
+      },
+      "cottage_cheese_fruit_snack": {
+        "title": "Cottage cheese & fruit",
+        "description": "Cottage cheese with banana, berries and a touch of crunch.",
+        "steps": {
+          "1": "Spoon cottage cheese into a small bowl.",
+          "2": "Top with sliced banana, berries and almonds."
+        }
+      },
+      "edamame_snack": {
+        "title": "Edamame",
+        "description": "A bowl of edamame with a pinch of salt — easy plant protein.",
+        "steps": {
+          "1": "Boil the edamame for 4 minutes.",
+          "2": "Drain, sprinkle with salt and serve in their pods."
+        }
+      },
+      "banana_almond_butter_snack": {
+        "title": "Banana & almond butter",
+        "description": "Banana with a generous spoon of almond butter — quick mass-gain snack.",
+        "steps": {
+          "1": "Slice the banana lengthwise.",
+          "2": "Spread almond butter on top."
+        }
+      },
+      "greek_yogurt_berries_snack": {
+        "title": "Greek yogurt & berries",
+        "description": "Greek yogurt with berries — high-protein, low-calorie.",
+        "steps": {
+          "1": "Spoon Greek yogurt into a bowl.",
+          "2": "Top with berries and a drizzle of honey."
+        }
+      },
+      "hard_boiled_eggs_snack": {
+        "title": "Hard-boiled eggs",
+        "description": "Two boiled eggs with salt and pepper — pure protein.",
+        "steps": {
+          "1": "Boil the eggs for 9 minutes.",
+          "2": "Cool, peel and season."
+        }
+      },
+      "tuna_crackers_snack": {
+        "title": "Tuna on crackers",
+        "description": "Drained tuna on wholegrain crackers — high-protein, portable.",
+        "steps": {
+          "1": "Drain the tuna and mix with a little olive oil.",
+          "2": "Spoon onto wholegrain crackers."
+        }
+      },
+      "cottage_oats_snack": {
+        "title": "Cottage cheese & oats",
+        "description": "Cottage cheese with oats and berries — slow-release energy.",
+        "steps": {
+          "1": "Mix cottage cheese with oats in a bowl.",
+          "2": "Top with berries and serve."
+        }
+      },
+      "avocado_egg_snack": {
+        "title": "Avocado & egg",
+        "description": "Half an avocado with a hard-boiled egg — solid recomp snack.",
+        "steps": {
+          "1": "Slice the avocado.",
+          "2": "Pair with a halved hard-boiled egg, salt and pepper."
+        }
+      },
+      "apple_almond_butter_snack": {
+        "title": "Apple & almond butter",
+        "description": "Sliced apple with almond butter — sweet and crunchy.",
+        "steps": {
+          "1": "Slice the apple.",
+          "2": "Dip into almond butter."
+        }
+      }
+    }
+  },
   "auth": {
     "fields": {
       "email": "Email",
       "emailPlaceholder": "you@example.com",
       "password": "Password",
-      "passwordPlaceholder": "At least 8 characters"
+      "passwordPlaceholder": "At least 8 characters",
+      "passwordConfirm": "Confirm password",
+      "passwordConfirmPlaceholder": "Type your password again",
+      "passwordShow": "Show",
+      "passwordHide": "Hide"
     },
     "errors": {
       "emailRequired": "Please enter your email.",
       "emailInvalid": "That doesn't look like a valid email.",
       "passwordRequired": "Please enter a password.",
-      "passwordTooShort": "Password must be at least 8 characters."
+      "passwordTooShort": "Password must be at least 8 characters.",
+      "passwordConfirmRequired": "Please confirm your password.",
+      "passwordMismatch": "Passwords don't match. Try again."
     },
     "login": {
       "title": "Welcome back",

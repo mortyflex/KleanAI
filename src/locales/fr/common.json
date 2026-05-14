@@ -205,6 +205,12 @@
       "completedBanner": "Séance terminée !",
       "missedBanner": "Pas de souci — chaque jour est un nouveau départ.",
       "savedLocally": "Enregistré localement",
+      "syncing": "Synchronisation…",
+      "synced": "Synchronisé",
+      "syncFailed": "Échec de la synchro — appuie pour réessayer",
+      "retrySync": "Réessayer la synchro",
+      "reset": "Réinitialiser la séance",
+      "resetHint": "Efface l'entrée locale. La prochaine séance terminée ou manquée écrasera l'historique.",
       "completedChip": "Terminée",
       "missedChip": "Manquée"
     },
@@ -260,13 +266,134 @@
     "macros": {
       "protein": "Protéines",
       "carbs": "Glucides",
-      "fat": "Lipides"
+      "fat": "Lipides",
+      "proteinUnit": "{{grams}} g de protéines"
     },
     "meals": {
-      "title": "Repas",
-      "logFood": "Enregistrer",
-      "notLogged": "Non enregistré",
       "kcalUnit": "kcal"
+    },
+    "fridgeScan": {
+      "title": "Ton frigo",
+      "emptyBody": "Montre-nous ce qu'il y a dans tes étagères et on adapte les idées du jour.",
+      "confirmedBody_one": "{{count}} ingrédient confirmé — les repas s'adaptent à ce que tu as.",
+      "confirmedBody_other": "{{count}} ingrédients confirmés — les repas s'adaptent à ce que tu as.",
+      "scanCta": "Scanner mon frigo",
+      "updateCta": "Mettre à jour mon frigo",
+      "cardAccessibility": "Ouvrir mon frigo confirmé"
+    },
+    "today": {
+      "kicker": "Aujourd'hui",
+      "zeroGuilt": "De vrais repas, sans culpabilité. Klean s'adapte quand la vie déborde.",
+      "mealsTitle": "Tes repas du jour",
+      "mealsSubtitleNoFridge": "Choisis un type de repas pour voir nos idées. Scanne ton frigo pour les adapter.",
+      "mealsSubtitleWithFridge": "Chaque idée est biaisée par ce que tu as confirmé dans ton frigo.",
+      "viewRecipeCta": "Voir la recette",
+      "adaptCta": "Adapter avec mon frigo",
+      "changeRecipeCta": "Changer de recette",
+      "staleRecipeTitle": "Plus forcément réalisable",
+      "staleRecipeBody": "Tu as re-scanné ton frigo depuis le choix de cette recette IA — elle n'est peut-être plus faisable. On te la laisse, mais tu peux la remplacer par une nouvelle suggestion.",
+      "slotEmptyTitle": "Rien de prévu",
+      "slotEmptyBody": "Choisis une recette pour caler ce repas."
+    },
+    "plan": {
+      "title": "Ton plan du jour",
+      "subtitle": "Un objectif simple. Pas un régime strict.",
+      "estimateLabel": "Estimation depuis ton profil",
+      "incompleteTitle": "Termine ton profil",
+      "incompleteBody": "On affichera ton plan dès que ton objectif et tes mesures sont saisis."
+    },
+    "suggestions": {
+      "title": "Idées simples",
+      "subtitle": "Choisis ce qui te va. Tape dès que c'est mangé — ton total du jour s'adapte.",
+      "kcalLine": "{{kcal}} kcal · {{protein}} g de protéines",
+      "markCta": "Je l'ai mangé",
+      "markLabel": "Marquer ce repas comme mangé",
+      "unmarkCta": "Annuler",
+      "unmarkLabel": "Retirer ce repas du total du jour",
+      "noResultsTitle": "Aucune idée à proposer pour l'instant",
+      "noResultsBody": "Tes préférences alimentaires excluent nos idées par défaut. On en ajoutera bientôt.",
+      "meals": {
+        "oatmeal_berries": {
+          "title": "Porridge aux fruits rouges",
+          "body": "Flocons d'avoine, fruits rouges, une cuillère de purée de noix."
+        },
+        "greek_yogurt_bowl": {
+          "title": "Bol de yaourt grec",
+          "body": "Yaourt grec, granola, fruits, un filet de miel."
+        },
+        "tofu_scramble": {
+          "title": "Tofu brouillé",
+          "body": "Tofu émietté, curcuma, épinards, tomates cerises."
+        },
+        "eggs_avocado_toast": {
+          "title": "Œufs & toast à l'avocat",
+          "body": "Deux œufs, avocat écrasé sur pain complet."
+        },
+        "chicken_rice_bowl": {
+          "title": "Bol poulet & riz",
+          "body": "Poulet grillé, riz, légumes rôtis, citron."
+        },
+        "lentil_quinoa_salad": {
+          "title": "Salade lentilles & quinoa",
+          "body": "Lentilles, quinoa, concombre, tomate, huile d'olive."
+        },
+        "salmon_sweet_potato": {
+          "title": "Saumon & patate douce",
+          "body": "Saumon au four, patate douce, légumes verts vapeur."
+        },
+        "tofu_stir_fry": {
+          "title": "Tofu sauté",
+          "body": "Tofu, légumes mélangés, sauce soja, riz complet."
+        },
+        "turkey_meatballs": {
+          "title": "Boulettes de dinde & pâtes",
+          "body": "Boulettes de dinde, pâtes complètes, sauce tomate."
+        },
+        "chickpea_curry": {
+          "title": "Curry de pois chiches",
+          "body": "Pois chiches, tomate, lait de coco, riz basmati."
+        },
+        "grilled_chicken_veg": {
+          "title": "Poulet grillé & légumes",
+          "body": "Blanc de poulet grillé, légumes, huile d'olive."
+        },
+        "fruit_almonds": {
+          "title": "Fruit & amandes",
+          "body": "Une pomme ou banane avec une poignée d'amandes."
+        },
+        "cottage_cheese_fruit": {
+          "title": "Fromage blanc & fruits",
+          "body": "Fromage blanc avec fruits frais et graines."
+        },
+        "edamame": {
+          "title": "Edamame",
+          "body": "Un bol d'edamame avec une pincée de sel."
+        }
+      }
+    },
+    "events": {
+      "title": "Comment s'est passée ta journée ?",
+      "subtitle": "Un tap. Sans jugement, sans culpabilité.",
+      "followed_plan": {
+        "label": "Plan respecté",
+        "message": "Bravo — rester sur le plan, c'est la victoire qu'on construit jour après jour."
+      },
+      "excess_food": {
+        "label": "Mangé un peu plus",
+        "message": "Pas de souci. On répartit ça en douceur sur 2–3 jours."
+      },
+      "skipped_meal": {
+        "label": "Repas sauté",
+        "message": "On ne compensera pas en coupant plus. Mange normalement au prochain repas."
+      },
+      "ordered_food": {
+        "label": "Commandé à emporter",
+        "message": "Profite. On lisse les calories en plus sur les prochains jours."
+      },
+      "alcohol": {
+        "label": "Bu de l'alcool",
+        "message": "Pas de drame. On absorbe ça gentiment sur 2–3 jours."
+      }
     },
     "hydration": {
       "title": "Hydratation",
@@ -366,18 +493,662 @@
       }
     }
   },
+  "vision": {
+    "gym": {
+      "title": "Scanne ta salle",
+      "subtitle": "Montre-nous ton matos et on adapte ton programme autour.",
+      "intro": "Ajoute quelques photos du matériel auquel tu as accès. On détecte ce qu'il y a — tu gardes la main.",
+      "addPhotosCta": "Ajouter des photos",
+      "addMorePhotosCta": "En ajouter",
+      "imagesSelected_one": "{{count}} photo prête",
+      "imagesSelected_other": "{{count}} photos prêtes",
+      "noImagesHint": "Choisis au moins une photo pour lancer le scan.",
+      "analyzeCta": "Détecter le matériel",
+      "analyzing": "On regarde ton matos…",
+      "retryCta": "Réessayer",
+      "removePhoto": "Retirer",
+      "mockNotice": "Mode démo — on utilise des images d'exemple pour l'instant.",
+      "errors": {
+        "providerTitle": "Impossible de joindre l'IA",
+        "providerBody": "Un souci de notre côté. Réessaie dans un instant.",
+        "schemaTitle": "Réponse inattendue",
+        "schemaBody": "On n'a pas compris la réponse de l'IA. On tentera un prompt différent la prochaine fois.",
+        "noDetectionsTitle": "Rien de reconnu",
+        "noDetectionsBody": "On n'a repéré aucun matériel familier. Essaie des photos plus nettes ou plus proches."
+      },
+      "results": {
+        "title": "Voici ce qu'on a vu",
+        "subtitle": "Décoche ce qui n'est pas vraiment dispo — on planifie autour de ta sélection.",
+        "confidence": "{{percent}}% sûr",
+        "rawLabel": "Détecté comme : {{label}}",
+        "selectAll": "Tout cocher",
+        "clearAll": "Tout décocher",
+        "addManualHint": "Il manque un truc ? Tu pourras l'ajouter à la main ensuite.",
+        "saveCta": "Enregistrer mon matériel",
+        "savedTitle": "Matériel enregistré",
+        "savedBody": "Ton entraînement s'adapte au matos confirmé.",
+        "noneSelectedHint": "Choisis au moins un élément ou passe — sinon ton plan reste en poids du corps.",
+        "skipCta": "Passer pour l'instant"
+      }
+    },
+    "equipment": {
+      "barbell": "Barre & rack",
+      "dumbbell": "Haltères",
+      "cable": "Machine à poulie",
+      "machine": "Machine guidée",
+      "pull_up_bar": "Barre de traction",
+      "resistance_band": "Élastiques",
+      "bodyweight": "Poids du corps"
+    },
+    "fridge": {
+      "title": "Scanne ton frigo",
+      "subtitle": "Montre-nous ce qu'il y a et on te suggère des repas autour.",
+      "intro": "Ajoute quelques photos de ton frigo ou de tes placards. On détecte les ingrédients — tu gardes la main.",
+      "addPhotosCta": "Ajouter des photos",
+      "addMorePhotosCta": "En ajouter",
+      "takePhotoCta": "Prendre une photo",
+      "pickFromLibraryCta": "Choisir dans la galerie",
+      "useMockImageCta": "Utiliser une image de démo",
+      "imagesSelected_one": "{{count}} photo prête",
+      "imagesSelected_other": "{{count}} photos prêtes",
+      "noImagesHint": "Choisis au moins une photo pour lancer le scan.",
+      "analyzeCta": "Détecter les ingrédients",
+      "analyzing": "On regarde tes étagères…",
+      "retryCta": "Réessayer",
+      "removePhoto": "Retirer",
+      "replacePhoto": "Remplacer",
+      "previewAlt": "Aperçu de ta photo de frigo",
+      "mockNotice": "Mode test : tes photos sont réelles, mais l'analyse IA utilise encore une réponse d'exemple.",
+      "providerBadgeMock": "Mode IA : mock (réponse d'exemple)",
+      "providerBadgeGemini": "Mode IA : Gemini (analyse réelle)",
+      "demoImageBadge": "Image de démo",
+      "permissionDeniedTitle": "Autorisation requise",
+      "permissionDeniedBody": "Autorise Klean AI à accéder à tes photos ou à ton appareil photo dans les Réglages pour scanner ton frigo.",
+      "pickerUnavailableTitle": "Sélecteur indisponible",
+      "pickerUnavailableBody": "Impossible d'ouvrir l'appareil photo ou la galerie. Réessaie ou utilise une image de démo.",
+      "stepHint": "Étape {{current}} sur {{total}}",
+      "howItWorksTitle": "Comment ça marche",
+      "howItWorksStep1": "Choisis une vraie photo de ton frigo ou tes placards.",
+      "howItWorksStep2": "On détecte les ingrédients — tu confirmes ce qui est vraiment là.",
+      "howItWorksStep3": "Tes suggestions de repas s'adaptent à ce que tu as.",
+      "errors": {
+        "providerTitle": "Impossible de joindre l'IA",
+        "providerBody": "Un souci de notre côté. Réessaie dans un instant.",
+        "schemaTitle": "Réponse inattendue",
+        "schemaBody": "On n'a pas compris la réponse de l'IA. On tentera un prompt différent la prochaine fois.",
+        "noDetectionsTitle": "Rien de reconnu",
+        "noDetectionsBody": "On n'a repéré aucun ingrédient familier. Essaie des photos plus nettes ou plus proches."
+      },
+      "results": {
+        "title": "Voici ce qu'on a vu",
+        "subtitle": "Décoche ce qui n'est pas vraiment là — on adapte les suggestions à ce qu'il te reste.",
+        "confidence": "{{percent}}% sûr",
+        "rawLabel": "Détecté comme : {{label}}",
+        "selectAll": "Tout cocher",
+        "clearAll": "Tout décocher",
+        "saveCta": "Enregistrer mon frigo",
+        "savedTitle": "Frigo enregistré",
+        "savedBody": "Tes suggestions de repas s'adaptent à ce que tu as confirmé.",
+        "noneSelectedHint": "Choisis au moins un élément ou passe — sinon on garde des suggestions générales.",
+        "skipCta": "Passer pour l'instant",
+        "chooseRecipeCta": "Choisir une recette maintenant",
+        "estimatedNutritionBadge": "Détecté, nutrition estimée",
+        "unmappedSectionTitle": "Détecté, hors catalogue",
+        "unmappedSectionBody": "Confirme-les et on les transmettra à l'IA quand on génère des recettes."
+      }
+    },
+    "confirmedFridge": {
+      "title": "Mon frigo confirmé",
+      "subtitle_one": "{{count}} ingrédient disponible pour tes recettes.",
+      "subtitle_other": "{{count}} ingrédients disponibles pour tes recettes.",
+      "emptyTitle": "Ton frigo est vide",
+      "emptyBody": "Scanne ton frigo pour confirmer ce que tu as.",
+      "loading": "Chargement de tes ingrédients…",
+      "mappedSection": "Depuis notre catalogue",
+      "unmappedSection": "Détectés, nutrition estimée",
+      "removeCta": "Retirer",
+      "removeAccessibility": "Retirer {{label}}",
+      "rescanCta": "Scanner à nouveau",
+      "clearAllCta": "Tout effacer",
+      "backCta": "Retour"
+    },
+    "ingredients": {
+      "chicken_breast": "Blanc de poulet",
+      "turkey": "Dinde",
+      "beef": "Bœuf",
+      "salmon": "Saumon",
+      "tuna": "Thon",
+      "eggs": "Œufs",
+      "greek_yogurt": "Yaourt grec",
+      "cottage_cheese": "Fromage blanc",
+      "tofu": "Tofu",
+      "lentils": "Lentilles",
+      "chickpeas": "Pois chiches",
+      "brown_rice": "Riz complet",
+      "quinoa": "Quinoa",
+      "oats": "Flocons d'avoine",
+      "sweet_potato": "Patate douce",
+      "spinach": "Épinards",
+      "broccoli": "Brocoli",
+      "tomato": "Tomate",
+      "bell_pepper": "Poivron",
+      "banana": "Banane",
+      "apple": "Pomme",
+      "berries": "Fruits rouges",
+      "olive_oil": "Huile d'olive",
+      "almonds": "Amandes",
+      "avocado": "Avocat"
+    }
+  },
+  "recipes": {
+    "mealChoice": {
+      "title": "Tu veux préparer quoi ?",
+      "subtitleNoFridge": "Choisis un type de repas et on te propose des recettes adaptées.",
+      "subtitleWithFridge_one": "On va biaiser les choix avec l'ingrédient que tu viens de confirmer.",
+      "subtitleWithFridge_other": "On va biaiser les choix avec les {{count}} ingrédients que tu viens de confirmer.",
+      "fullDayLabel": "Ou",
+      "fullDayTitle": "Planifier toute ma journée",
+      "fullDayBody": "On génère petit-déj, déjeuner, dîner et un en-cas — tu peux échanger ensuite.",
+      "fullDayCta": "Ma journée complète",
+      "backCta": "Retour"
+    },
+    "list": {
+      "title": "Recettes pour toi",
+      "subtitle": "Jusqu'à 3 idées, mêlant notre catalogue et l'IA quand il manque des options.",
+      "loading": "Recherche des meilleures correspondances…",
+      "emptyTitle": "Aucune correspondance",
+      "emptyBody": "Confirme quelques ingrédients dans ton frigo et on adapte les recettes.",
+      "scanFridgeCta": "Scanner mon frigo",
+      "backCta": "Retour",
+      "aiUnavailableTitle": "Pas de recette IA pour l'instant",
+      "aiUnavailableBody": "On n'a pas pu construire une recette IA cohérente avec ce que tu as confirmé. On affiche les recettes du catalogue — scanne quelques ingrédients en plus pour débloquer d'autres idées.",
+      "regenerateAiCta": "Une autre recette IA",
+      "regeneratingAiCta": "Génération…",
+      "regenerateAiHint": "Ces suggestions sont mises en cache — rouvrir cette liste ne relance pas l'IA. Touche ci-dessus seulement si tu veux une nouvelle idée IA."
+    },
+    "fullDay": {
+      "title": "Ta journée, prête",
+      "subtitle": "Une recette par repas. Échange ce que tu veux changer.",
+      "loading": "On construit ta journée…",
+      "slotEmpty": "Pas de recette compatible — essaie de scanner plus d'ingrédients.",
+      "swapCta": "Changer",
+      "acceptCta": "Adopter cette journée",
+      "backCta": "Retour"
+    },
+    "card": {
+      "viewCta": "Voir la recette",
+      "chooseCta": "Choisir",
+      "haveAlready": "Tu as déjà : {{items}}",
+      "stillMissing": "Manquent : {{items}}",
+      "aiUsesYourFridge": "Utilise des ingrédients de ton frigo hors de notre catalogue.",
+      "calorieNotice": "~{{kcal}} kcal — un peu plus que d'habitude. Pense à doser tes quantités."
+    },
+    "detail": {
+      "timeLabel": "Temps",
+      "minutesValue": "{{minutes}} min",
+      "kcalLabel": "Calories",
+      "proteinLabel": "Protéines",
+      "difficultyLabel": "Niveau",
+      "ingredientsLabel": "Ingrédients",
+      "optionalLabel": "À ajouter si tu veux",
+      "stepsLabel": "Étapes",
+      "whyItFitsLabel": "Pourquoi cette recette colle",
+      "chooseCta": "Choisir cette recette",
+      "backCta": "Retour",
+      "unavailableTitle": "Recette indisponible",
+      "unavailableBody": "Impossible de retrouver cette recette. Reviens à la liste et choisis-en une autre."
+    },
+    "estimates": {
+      "kcalApprox": "~{{kcal}} kcal",
+      "proteinApprox": "~{{grams}} g protéines",
+      "disclaimer": "Estimations — à ajuster selon les quantités et tes envies."
+    },
+    "badges": {
+      "aiSuggested": "Proposée par IA",
+      "goodFridgeMatch": "Bon match frigo"
+    },
+    "tags": {
+      "high_protein": "Protéiné",
+      "quick": "Rapide",
+      "low_calorie": "Léger",
+      "mass_gain": "Prise de masse",
+      "recomposition": "Recomposition",
+      "vegetarian": "Végétarien",
+      "budget": "Budget",
+      "no_cook": "Sans cuisson"
+    },
+    "difficulty": {
+      "easy": "Facile",
+      "medium": "Intermédiaire"
+    },
+    "units": {
+      "g": "{{amount}} g",
+      "ml": "{{amount}} ml",
+      "piece_one": "{{count}} pièce",
+      "piece_other": "{{count}} pièces",
+      "tbsp_one": "{{count}} c. à soupe",
+      "tbsp_other": "{{count}} c. à soupe",
+      "tsp_one": "{{count}} c. à café",
+      "tsp_other": "{{count}} c. à café",
+      "slice_one": "{{count}} tranche",
+      "slice_other": "{{count}} tranches",
+      "cup_one": "{{count}} tasse",
+      "cup_other": "{{count}} tasses",
+      "pinch_one": "{{count}} pincée",
+      "pinch_other": "{{count}} pincées"
+    },
+    "matchReasons": {
+      "allInFridge": "Tout est dans ton frigo",
+      "mostInFridge": "La plupart des ingrédients sont là",
+      "quick": "Rapide à préparer",
+      "highProtein": "Riche en protéines",
+      "fitsWeightLoss": "Adapté à la perte de poids",
+      "fitsMassGain": "Adapté à la prise de masse",
+      "fitsRecomposition": "Adapté à la recomposition",
+      "fitsMaintain": "Adapté à l'entretien",
+      "aiSuggested": "Suggestion IA"
+    },
+    "items": {
+      "oatmeal_berries_breakfast": {
+        "title": "Porridge aux fruits rouges",
+        "description": "Flocons d'avoine cuits dans du lait ou de l'eau, garnis de fruits rouges frais.",
+        "steps": {
+          "1": "Cuis les flocons d'avoine dans du lait ou de l'eau jusqu'à obtenir une texture crémeuse.",
+          "2": "Ajoute une pincée de cannelle et un filet de miel si tu veux.",
+          "3": "Garnis de fruits rouges et d'amandes concassées, puis sers tiède."
+        }
+      },
+      "greek_yogurt_protein_bowl": {
+        "title": "Bol protéiné yaourt grec",
+        "description": "Yaourt grec épais, fruits rouges, flocons d'avoine et amandes — bel apport en protéines.",
+        "steps": {
+          "1": "Verse le yaourt grec dans un bol.",
+          "2": "Ajoute fruits rouges, flocons d'avoine et amandes.",
+          "3": "Filet de miel et c'est prêt."
+        }
+      },
+      "tofu_veg_scramble": {
+        "title": "Tofu brouillé aux légumes",
+        "description": "Tofu émietté avec épinards, tomate et poivron — moelleux et protéiné.",
+        "steps": {
+          "1": "Émiette le tofu dans une poêle chaude avec un filet d'huile d'olive.",
+          "2": "Ajoute la tomate, le poivron et les épinards.",
+          "3": "Assaisonne avec curcuma, sel et poivre.",
+          "4": "Mélange jusqu'à ce que tout soit chaud."
+        }
+      },
+      "eggs_avocado_breakfast": {
+        "title": "Œufs & avocat",
+        "description": "Deux œufs comme tu préfères avec de l'avocat écrasé à côté.",
+        "steps": {
+          "1": "Cuis les œufs comme tu aimes — coque, brouillés ou au plat.",
+          "2": "Écrase un demi-avocat avec sel et citron.",
+          "3": "Sers ensemble et savoure."
+        }
+      },
+      "scrambled_eggs_spinach": {
+        "title": "Œufs brouillés aux épinards",
+        "description": "Œufs brouillés tout doux avec des épinards fondus.",
+        "steps": {
+          "1": "Bats les œufs avec un peu de lait et du sel.",
+          "2": "Fais tomber les épinards dans l'huile d'olive.",
+          "3": "Verse les œufs et mélange doucement jusqu'à prise."
+        }
+      },
+      "cottage_oats_pancakes": {
+        "title": "Pancakes fromage blanc & avoine",
+        "description": "Pancakes protéinés mixés à partir d'avoine, œufs et fromage blanc.",
+        "steps": {
+          "1": "Mixe avoine, fromage blanc et œufs jusqu'à obtenir une pâte lisse.",
+          "2": "Cuis de petits pancakes dans une poêle antiadhésive à feu moyen.",
+          "3": "Retourne dès que des bulles apparaissent.",
+          "4": "Sers avec fruits rouges et tranches de banane."
+        }
+      },
+      "banana_oats_protein": {
+        "title": "Avoine protéinée à la banane",
+        "description": "Avoine onctueuse mixée avec banane et yaourt grec — top les jours muscu.",
+        "steps": {
+          "1": "Cuis les flocons d'avoine dans du lait jusqu'à obtenir une texture crémeuse.",
+          "2": "Ajoute la banane écrasée et une cuillère de yaourt grec hors du feu.",
+          "3": "Garnis d'amandes concassées et sers."
+        }
+      },
+      "no_cook_fruit_bowl": {
+        "title": "Bol fruits & oléagineux sans cuisson",
+        "description": "Une pomme, une banane, des fruits rouges et des amandes — prêt en deux minutes.",
+        "steps": {
+          "1": "Coupe la pomme et la banane dans un bol.",
+          "2": "Ajoute les fruits rouges et une poignée d'amandes — c'est prêt."
+        }
+      },
+      "avocado_toast_classic": {
+        "title": "Tartine d'avocat classique",
+        "description": "Pain complet ou au levain garni d'avocat écrasé.",
+        "steps": {
+          "1": "Fais griller le pain.",
+          "2": "Écrase l'avocat avec citron, sel et un filet d'huile d'olive, puis tartine."
+        }
+      },
+      "salmon_avocado_breakfast": {
+        "title": "Saumon, avocat & œufs",
+        "description": "Saumon fumé, tranches d'avocat et œufs mollets — démarrage premium.",
+        "steps": {
+          "1": "Cuis les œufs mollets (6 minutes) et écale-les.",
+          "2": "Tranche l'avocat et dispose-le avec le saumon.",
+          "3": "Coupe les œufs en deux, poivre et sers."
+        }
+      },
+      "eggs_brown_rice_breakfast": {
+        "title": "Œufs & riz complet",
+        "description": "Riz complet chaud surmonté de deux œufs et d'épinards fondus — style asiatique.",
+        "steps": {
+          "1": "Réchauffe le riz complet avec un filet d'eau.",
+          "2": "Fais tomber les épinards dans l'huile d'olive.",
+          "3": "Pose œufs et épinards sur le riz, assaisonne et sers."
+        }
+      },
+      "chicken_rice_lunch": {
+        "title": "Bol poulet & riz complet",
+        "description": "Blanc de poulet grillé avec riz complet et brocoli vapeur.",
+        "steps": {
+          "1": "Assaisonne le poulet avec sel, poivre et un filet d'huile d'olive.",
+          "2": "Grille ou poêle-le jusqu'à cuisson complète.",
+          "3": "Vapeur le brocoli juste tendre.",
+          "4": "Tranche le poulet et dresse avec le riz et le brocoli."
+        }
+      },
+      "lentil_quinoa_lunch": {
+        "title": "Salade lentilles & quinoa",
+        "description": "Bol végétarien protéiné avec tomate et vinaigrette citron.",
+        "steps": {
+          "1": "Cuis le quinoa et les lentilles séparément.",
+          "2": "Mélange avec la tomate coupée en dés.",
+          "3": "Assaisonne huile d'olive, citron, sel et poivre."
+        }
+      },
+      "salmon_sweet_potato_lunch": {
+        "title": "Saumon & patate douce",
+        "description": "Saumon au four avec patate douce rôtie et épinards fondus.",
+        "steps": {
+          "1": "Rôtis les cubes de patate douce à 200°C pendant 25 minutes.",
+          "2": "Cuis le saumon à la même température 12 minutes.",
+          "3": "Fais tomber les épinards avec un filet d'huile d'olive.",
+          "4": "Dresse l'ensemble."
+        }
+      },
+      "tofu_stir_fry_lunch": {
+        "title": "Tofu sauté",
+        "description": "Tofu, riz complet, poivron et brocoli avec sauce soja.",
+        "steps": {
+          "1": "Coupe le tofu en cubes et fais-le revenir jusqu'à coloration.",
+          "2": "Ajoute poivron et brocoli, saute vivement.",
+          "3": "Verse la sauce soja et sers sur le riz.",
+          "4": "Finis avec quelques graines de sésame si tu en as."
+        }
+      },
+      "tuna_quinoa_bowl": {
+        "title": "Bol thon & quinoa",
+        "description": "Bol express et protéiné : thon, quinoa, tomate et poivron.",
+        "steps": {
+          "1": "Mélange le quinoa cuit avec la tomate et le poivron en dés.",
+          "2": "Ajoute le thon égoutté.",
+          "3": "Filet d'huile d'olive et de citron, sers."
+        }
+      },
+      "chicken_quinoa_lunch": {
+        "title": "Assiette poulet & quinoa",
+        "description": "Poulet grillé sur un lit de quinoa avec brocoli.",
+        "steps": {
+          "1": "Cuis le quinoa selon le paquet.",
+          "2": "Grille le poulet assaisonné jusqu'à cuisson complète.",
+          "3": "Vapeur le brocoli et dresse l'ensemble."
+        }
+      },
+      "chickpea_buddha_bowl": {
+        "title": "Buddha bowl pois chiches",
+        "description": "Patate douce rôtie, pois chiches, épinards et avocat.",
+        "steps": {
+          "1": "Rôtis la patate douce à 200°C pendant 25 minutes.",
+          "2": "Fais revenir les pois chiches avec huile d'olive et épices.",
+          "3": "Dresse sur un lit d'épinards.",
+          "4": "Ajoute l'avocat tranché et un trait de citron."
+        }
+      },
+      "beef_rice_lunch": {
+        "title": "Bol bœuf & riz complet",
+        "description": "Bœuf maigre avec riz complet et brocoli — assiette prise de masse.",
+        "steps": {
+          "1": "Saisi les lamelles de bœuf dans une poêle bien chaude avec huile d'olive.",
+          "2": "Vapeur le brocoli jusqu'à tendreté.",
+          "3": "Dresse avec le riz complet chaud.",
+          "4": "Assaisonne sauce soja ou poivre."
+        }
+      },
+      "turkey_veg_wrap": {
+        "title": "Wrap dinde & légumes",
+        "description": "Dinde, tomate et poivron roulés dans un wrap complet.",
+        "steps": {
+          "1": "Réchauffe le wrap brièvement.",
+          "2": "Dispose dinde, tomate et poivron.",
+          "3": "Roule serré et coupe en deux."
+        }
+      },
+      "veggie_quinoa_bowl_lunch": {
+        "title": "Bol veggie au quinoa",
+        "description": "Quinoa avec pois chiches, épinards et tomate — 100% végétal.",
+        "steps": {
+          "1": "Mélange le quinoa cuit avec les pois chiches.",
+          "2": "Ajoute la tomate en dés et une belle poignée d'épinards.",
+          "3": "Assaisonne huile d'olive, citron et sel."
+        }
+      },
+      "turkey_meatballs_dinner": {
+        "title": "Boulettes de dinde sauce tomate",
+        "description": "Boulettes de dinde mijotées dans une sauce tomate rapide.",
+        "steps": {
+          "1": "Mélange la dinde hachée avec herbes et sel, forme les boulettes.",
+          "2": "Dore-les dans une poêle avec un peu d'huile d'olive.",
+          "3": "Ajoute la tomate concassée, mijote 12 minutes.",
+          "4": "Sers avec des pâtes complètes ou une salade."
+        }
+      },
+      "chickpea_curry_dinner": {
+        "title": "Curry de pois chiches",
+        "description": "Pois chiches, épinards et tomate en sauce curry parfumée, servis avec du riz.",
+        "steps": {
+          "1": "Fais revenir oignon, ail et épices curry dans l'huile d'olive.",
+          "2": "Ajoute la tomate, mijote 5 minutes.",
+          "3": "Ajoute pois chiches et épinards.",
+          "4": "Sers sur le riz complet."
+        }
+      },
+      "grilled_chicken_veg_dinner": {
+        "title": "Poulet grillé & légumes",
+        "description": "Poulet maigre grillé avec brocoli et poivron.",
+        "steps": {
+          "1": "Assaisonne et grille le poulet jusqu'à cuisson juste.",
+          "2": "Grille ou vapeur les légumes rapidement.",
+          "3": "Dresse avec un filet d'huile d'olive."
+        }
+      },
+      "baked_salmon_broccoli_dinner": {
+        "title": "Saumon & brocoli au four",
+        "description": "Saumon au four avec brocoli et patate douce.",
+        "steps": {
+          "1": "Rôtis la patate douce à 200°C pendant 25 minutes.",
+          "2": "Cuis le saumon 12 minutes à la même température.",
+          "3": "Vapeur le brocoli jusqu'à tendreté.",
+          "4": "Dresse avec un filet d'huile d'olive et de citron."
+        }
+      },
+      "beef_sweet_potato_dinner": {
+        "title": "Bœuf & patate douce",
+        "description": "Lamelles de bœuf maigre avec patate douce rôtie et épinards.",
+        "steps": {
+          "1": "Rôtis la patate douce en cubes à 200°C pendant 25 minutes.",
+          "2": "Saisi le bœuf dans une poêle bien chaude avec huile d'olive.",
+          "3": "Fais tomber les épinards à l'ail.",
+          "4": "Dresse l'ensemble."
+        }
+      },
+      "tofu_curry_dinner": {
+        "title": "Curry de tofu",
+        "description": "Tofu, épinards et tomate en sauce curry crémeuse, servis avec du riz.",
+        "steps": {
+          "1": "Fais dorer les cubes de tofu.",
+          "2": "Ajoute la tomate et les épices curry, mijote brièvement.",
+          "3": "Incorpore les épinards jusqu'à ce qu'ils tombent.",
+          "4": "Sers sur le riz complet."
+        }
+      },
+      "eggs_veg_dinner_bowl": {
+        "title": "Bol œufs & riz aux légumes",
+        "description": "Riz complet surmonté d'œufs, épinards et avocat — réconfortant et rapide.",
+        "steps": {
+          "1": "Réchauffe le riz complet.",
+          "2": "Cuis les œufs au plat dans l'huile d'olive.",
+          "3": "Dresse riz, épinards, œufs et avocat tranché."
+        }
+      },
+      "salmon_quinoa_dinner": {
+        "title": "Saumon, quinoa & brocoli",
+        "description": "Saumon poêlé sur quinoa avec brocoli vapeur.",
+        "steps": {
+          "1": "Cuis le quinoa.",
+          "2": "Saisi le saumon côté peau 4 minutes, retourne et finis la cuisson.",
+          "3": "Dresse avec le brocoli vapeur et un filet d'huile d'olive."
+        }
+      },
+      "lentil_stew_dinner": {
+        "title": "Mijoté de lentilles",
+        "description": "Lentilles mijotées avec patate douce, épinards et tomate.",
+        "steps": {
+          "1": "Fais revenir ail et oignon dans l'huile d'olive.",
+          "2": "Ajoute la patate douce en cubes, la tomate et les lentilles avec eau ou bouillon.",
+          "3": "Mijote jusqu'à ce que les lentilles soient tendres (25 minutes).",
+          "4": "Incorpore les épinards en toute fin."
+        }
+      },
+      "chicken_sweet_potato_dinner": {
+        "title": "Poulet & patate douce",
+        "description": "Poulet rôti avec patate douce et brocoli.",
+        "steps": {
+          "1": "Coupe et rôtis la patate douce à 200°C pendant 25 minutes.",
+          "2": "Rôtis ou grille le poulet jusqu'à cuisson juste.",
+          "3": "Vapeur le brocoli.",
+          "4": "Dresse avec huile d'olive et herbes."
+        }
+      },
+      "tuna_pasta_dinner": {
+        "title": "Pâtes au thon",
+        "description": "Pâtes complètes rapides au thon, tomate et un filet d'huile d'olive.",
+        "steps": {
+          "1": "Cuis les pâtes al dente.",
+          "2": "Mélange-les avec la sauce tomate et le thon égoutté.",
+          "3": "Filet d'huile d'olive et sers."
+        }
+      },
+      "fruit_almonds_snack": {
+        "title": "Fruit & amandes",
+        "description": "Une pomme avec une petite poignée d'amandes — simple et rassasiant.",
+        "steps": {
+          "1": "Lave et tranche la pomme.",
+          "2": "Accompagne d'une petite poignée d'amandes."
+        }
+      },
+      "cottage_cheese_fruit_snack": {
+        "title": "Fromage blanc & fruits",
+        "description": "Fromage blanc avec banane, fruits rouges et un peu de croquant.",
+        "steps": {
+          "1": "Verse le fromage blanc dans un petit bol.",
+          "2": "Garnis de banane tranchée, fruits rouges et amandes."
+        }
+      },
+      "edamame_snack": {
+        "title": "Edamame",
+        "description": "Un bol d'edamame avec une pincée de sel — protéines végétales faciles.",
+        "steps": {
+          "1": "Cuis les edamame 4 minutes à l'eau bouillante.",
+          "2": "Égoutte, saupoudre de sel et sers en gousse."
+        }
+      },
+      "banana_almond_butter_snack": {
+        "title": "Banane & purée d'amandes",
+        "description": "Banane avec une grosse cuillère de purée d'amandes — rapide pour la prise de masse.",
+        "steps": {
+          "1": "Coupe la banane en deux dans la longueur.",
+          "2": "Tartine avec la purée d'amandes."
+        }
+      },
+      "greek_yogurt_berries_snack": {
+        "title": "Yaourt grec & fruits rouges",
+        "description": "Yaourt grec aux fruits rouges — protéiné et léger.",
+        "steps": {
+          "1": "Verse le yaourt grec dans un bol.",
+          "2": "Ajoute les fruits rouges et un filet de miel."
+        }
+      },
+      "hard_boiled_eggs_snack": {
+        "title": "Œufs durs",
+        "description": "Deux œufs durs avec sel et poivre — pure protéine.",
+        "steps": {
+          "1": "Cuis les œufs 9 minutes.",
+          "2": "Refroidis, écale, assaisonne."
+        }
+      },
+      "tuna_crackers_snack": {
+        "title": "Thon sur crackers",
+        "description": "Thon égoutté sur crackers complets — protéiné et nomade.",
+        "steps": {
+          "1": "Égoutte le thon et mélange-le avec un peu d'huile d'olive.",
+          "2": "Dépose sur des crackers complets."
+        }
+      },
+      "cottage_oats_snack": {
+        "title": "Fromage blanc & avoine",
+        "description": "Fromage blanc avec flocons d'avoine et fruits rouges — énergie longue durée.",
+        "steps": {
+          "1": "Mélange fromage blanc et flocons d'avoine.",
+          "2": "Garnis de fruits rouges et sers."
+        }
+      },
+      "avocado_egg_snack": {
+        "title": "Avocat & œuf",
+        "description": "Demi-avocat avec un œuf dur — en-cas recomposition solide.",
+        "steps": {
+          "1": "Tranche l'avocat.",
+          "2": "Accompagne d'un œuf dur coupé en deux, sel et poivre."
+        }
+      },
+      "apple_almond_butter_snack": {
+        "title": "Pomme & purée d'amandes",
+        "description": "Pomme tranchée avec purée d'amandes — sucré et croquant.",
+        "steps": {
+          "1": "Tranche la pomme.",
+          "2": "Trempe dans la purée d'amandes."
+        }
+      }
+    }
+  },
   "auth": {
     "fields": {
       "email": "E-mail",
       "emailPlaceholder": "toi@exemple.com",
       "password": "Mot de passe",
-      "passwordPlaceholder": "8 caractères minimum"
+      "passwordPlaceholder": "8 caractères minimum",
+      "passwordConfirm": "Confirme ton mot de passe",
+      "passwordConfirmPlaceholder": "Retape ton mot de passe",
+      "passwordShow": "Afficher",
+      "passwordHide": "Masquer"
     },
     "errors": {
       "emailRequired": "Merci d'entrer ton e-mail.",
       "emailInvalid": "Cet e-mail n'a pas l'air valide.",
       "passwordRequired": "Merci d'entrer un mot de passe.",
-      "passwordTooShort": "Le mot de passe doit faire au moins 8 caractères."
+      "passwordTooShort": "Le mot de passe doit faire au moins 8 caractères.",
+      "passwordConfirmRequired": "Merci de confirmer ton mot de passe.",
+      "passwordMismatch": "Les mots de passe ne correspondent pas. Réessaie."
     },
     "login": {
       "title": "Bon retour",
