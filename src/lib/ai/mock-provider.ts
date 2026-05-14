@@ -8,7 +8,7 @@ import type {
   GymVisionResponseRaw,
 } from '../../types/ai.types';
 import { MOCK_GYM_VISION_RESPONSE } from './mock-gym-vision';
-import { MOCK_FRIDGE_VISION_RESPONSE } from './mock-fridge-vision';
+import { buildMockFridgeResponse } from './mock-fridge-vision';
 import { buildMockRecipeResponse } from './mock-recipe-suggestions';
 
 /**
@@ -28,10 +28,10 @@ export class MockAIProvider implements AIProvider {
   }
 
   async analyzeFridgeImages(
-    _req: FridgeVisionRequest,
+    req: FridgeVisionRequest,
   ): Promise<FridgeVisionResponseRaw> {
     await new Promise((resolve) => setTimeout(resolve, 250));
-    return MOCK_FRIDGE_VISION_RESPONSE;
+    return buildMockFridgeResponse(req.locale);
   }
 
   async generateRecipeSuggestions(

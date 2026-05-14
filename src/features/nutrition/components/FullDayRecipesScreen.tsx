@@ -18,6 +18,7 @@ import {
 import { getFullDayRecipePlan } from '../utils/recipe-engine';
 import type { FullDayRecipePlan } from '../utils/recipe-engine';
 import type { MealType } from '../utils/meal-suggestions';
+import { buildFridgeFingerprint } from '../utils/fridge-fingerprint';
 
 const MEAL_LABEL_KEYS: Record<MealType, string> = {
   breakfast: 'meals.breakfast',
@@ -36,10 +37,16 @@ export function FullDayRecipesScreen() {
   const { t } = useTranslation('common');
   const router = useRouter();
   const { profile } = useOnboarding();
-  const { ingredientIds, loading: fridgeLoading } = useConfirmedFridge();
+  const { ingredientIds, unmappedLabels, loading: fridgeLoading } =
+    useConfirmedFridge();
   const today = useMemo(() => todayLogDate(), []);
   const resolveLabel = useCallback((key: string) => t(key), [t]);
   const { choose } = useChosenRecipes(today, resolveLabel);
+
+  const fridgeFingerprint = useMemo(
+    () => buildFridgeFingerprint(ingredientIds ?? [], unmappedLabels ?? []),
+    [ingredientIds, unmappedLabels],
+  );
 
   const [plan, setPlan] = useState<FullDayRecipePlan | null>(null);
   const [loading, setLoading] = useState(true);
@@ -72,10 +79,10 @@ export function FullDayRecipesScreen() {
     if (!plan) return;
     for (const slot of MEAL_ORDER) {
       const match = plan[slot];
-      if (match) await choose(slot, match.recipe);
+      if (match) await choose(slot, match.recipe, fridgeFingerprint);
     }
     router.replace('/(tabs)/nutrition');
-  }, [choose, plan, router]);
+  }, [choose, plan, router, fridgeFingerprint]);
 
   const handleSwap = useCallback(
     (mealType: MealType) => {

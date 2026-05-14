@@ -74,8 +74,17 @@ function migrateChosenMap(
 export interface UseChosenRecipesResult {
   chosen: ChosenRecipesMap;
   isLoading: boolean;
-  /** Set the chosen recipe for a meal slot. */
-  choose: (mealType: MealType, recipe: Recipe) => Promise<void>;
+  /**
+   * Set the chosen recipe for a meal slot. `fridgeFingerprint` is the
+   * fingerprint of the confirmed fridge at choose-time — stored on the
+   * snapshot so the Nutrition screen can later flag the recipe as stale once
+   * the fridge changes.
+   */
+  choose: (
+    mealType: MealType,
+    recipe: Recipe,
+    fridgeFingerprint?: string,
+  ) => Promise<void>;
   /** Remove the chosen recipe for a meal slot — falls back to the suggestion. */
   unchoose: (mealType: MealType) => Promise<void>;
   reload: () => Promise<void>;
@@ -86,6 +95,7 @@ export interface UseChosenRecipesResult {
 export function buildChosenRecipeSnapshot(
   recipe: Recipe,
   resolveLabel: (key: string) => string,
+  fridgeFingerprint?: string,
 ): ChosenRecipeSnapshot {
   if (recipe.source === 'internal') {
     return {
@@ -101,6 +111,7 @@ export function buildChosenRecipeSnapshot(
       prepTimeMinutes: recipe.prepTimeMinutes,
       tags: recipe.tags,
       chosenAt: new Date().toISOString(),
+      fridgeFingerprint,
     };
   }
   return {
@@ -116,6 +127,7 @@ export function buildChosenRecipeSnapshot(
     prepTimeMinutes: recipe.prepTimeMinutes,
     tags: recipe.tags,
     chosenAt: new Date().toISOString(),
+    fridgeFingerprint,
   };
 }
 
@@ -147,8 +159,16 @@ export function useChosenRecipes(
   }, [reload]);
 
   const choose = useCallback(
-    async (mealType: MealType, recipe: Recipe) => {
-      const snapshot = buildChosenRecipeSnapshot(recipe, resolveLabel);
+    async (
+      mealType: MealType,
+      recipe: Recipe,
+      fridgeFingerprint?: string,
+    ) => {
+      const snapshot = buildChosenRecipeSnapshot(
+        recipe,
+        resolveLabel,
+        fridgeFingerprint,
+      );
       const next = await setChosenRecipe(logDate, mealType, snapshot);
       setChosen(next);
     },

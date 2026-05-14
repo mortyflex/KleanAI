@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 
 import { Card } from '../../../components/ui/card';
 import { KleanText } from '../../../components/ui/klean-text';
@@ -9,6 +9,7 @@ import { PillButton } from '../../../components/ui/pill-button';
 import { colors, radii } from '../../../design/tokens';
 import type { IngredientId } from '../../../types/ai.types';
 import { useConfirmedFridge } from '../hooks/useConfirmedFridge';
+import { formatRawLabel } from '../utils/format-label';
 
 interface IngredientChipProps {
   label: string;
@@ -91,8 +92,17 @@ function IngredientRow({
 export function ConfirmedFridgeScreen() {
   const { t } = useTranslation('common');
   const router = useRouter();
-  const { ingredientIds, unmappedLabels, save, reset, loading } =
+  const { ingredientIds, unmappedLabels, save, reset, reload, loading } =
     useConfirmedFridge();
+
+  // Re-read storage on every focus so a fresh scan saved on the Fridge Vision
+  // screen is reflected here when the user navigates back — without it the
+  // screen kept showing the ingredients from the previous scan.
+  useFocusEffect(
+    useCallback(() => {
+      reload().catch(() => {});
+    }, [reload]),
+  );
 
   const ids = useMemo(() => ingredientIds ?? [], [ingredientIds]);
   const labels = useMemo(() => unmappedLabels ?? [], [unmappedLabels]);
@@ -194,7 +204,7 @@ export function ConfirmedFridgeScreen() {
           {labels.map((label) => (
             <IngredientRow
               key={label}
-              label={label}
+              label={formatRawLabel(label)}
               estimatedNutrition
               onRemove={() => handleRemoveUnmapped(label)}
               testID={`confirmed-remove-unmapped-${label}`}

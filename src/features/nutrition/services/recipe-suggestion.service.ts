@@ -71,6 +71,12 @@ export interface GenerateAIRecipesOptions {
   provider?: AIProvider;
   mealType: MealType;
   ingredientIds: IngredientId[];
+  /**
+   * Localized labels for `ingredientIds` — same length, same order. The UI
+   * builds these from `t('vision.ingredients.<id>')` so AI recipes never
+   * leak raw catalog ids like `greek_yogurt` into the user's screen.
+   */
+  ingredientLabels: string[];
   unmappedLabels: string[];
   goal: FitnessGoal;
   restrictions: DietaryRestriction[];
@@ -114,6 +120,7 @@ export async function generateAIRecipeSuggestions(
   const request: AIRecipeRequest = {
     promptVersion: RECIPE_GENERATION_PROMPT_VERSION,
     mappedIngredientIds: opts.ingredientIds,
+    mappedIngredientLabels: opts.ingredientLabels,
     unmappedIngredientLabels: opts.unmappedLabels,
     goal: opts.goal,
     restrictions: opts.restrictions,
@@ -257,6 +264,8 @@ export interface GetHybridRecipesOptions {
   provider?: AIProvider;
   mealType: MealType;
   ingredientIds: IngredientId[];
+  /** Localized labels for `ingredientIds`, same length and order. */
+  ingredientLabels?: string[];
   unmappedLabels?: string[];
   unmappedCategories?: IngredientCategory[];
   goal: FitnessGoal;
@@ -319,6 +328,7 @@ export async function getHybridRecipesForMealType(
     provider: opts.provider,
     mealType: opts.mealType,
     ingredientIds: opts.ingredientIds,
+    ingredientLabels: opts.ingredientLabels ?? opts.ingredientIds,
     unmappedLabels,
     goal: opts.goal,
     restrictions,

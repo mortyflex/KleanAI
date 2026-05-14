@@ -12,6 +12,7 @@ import { encodeImageToBase64 } from "./encode-image";
 import { buildMockRecipeResponse } from "./mock-recipe-suggestions";
 
 const FRIDGE_FUNCTION_PATH = "/functions/v1/analyze-fridge-images";
+const RECIPE_FUNCTION_PATH = "/functions/v1/generate-recipe-suggestions";
 
 export interface EdgeFunctionProviderOptions {
   /** Override the resolved Supabase URL — useful for tests / staging. */
@@ -59,31 +60,49 @@ export class EdgeFunctionAIProvider implements AIProvider {
   }
 
   /**
-   * Phase 12.3+: recipe generation uses the same client-side template as the
-   * mock provider until a dedicated `generate-recipe-suggestions` Edge
-   * Function is deployed. The template incorporates both mapped and unmapped
-   * ingredient labels, and respects the requested language — that is enough
-   * to give the user fridge-aware recipe ideas in production while we work
-   * on the real Gemini wiring.
-   *
-   * The hybrid service still applies the deterministic restriction filter
-   * on top, so this transitional implementation is safe.
+   * Calls the `generate-recipe-suggestions` Edge Function (real Gemini).
+   * Falls back to the local culinary-pattern engine when the function isn't
+   * reachable — typically because it has not been deployed yet, the network
+   * is down, or Gemini upstream is failing. The fallback respects the same
+   * safety rules (ingredient closure, restriction safety, sensible combos)
+   * so the user always sees safe output.
    */
   async generateRecipeSuggestions(
     req: AIRecipeRequest,
   ): Promise<AIRecipesResponseRaw> {
-    if (__DEV__) {
-      console.log(
-        "[EdgeFunctionAIProvider] generateRecipeSuggestions placeholder",
-        {
-          mealType: req.mealType,
-          mappedCount: req.mappedIngredientIds.length,
-          unmappedCount: req.unmappedIngredientLabels.length,
-          desiredCount: req.desiredCount,
+    const { baseUrl, anonKey } = this.resolveCredentials();
+    const url = `${baseUrl.replace(/\/+$/, "")}${RECIPE_FUNCTION_PATH}`;
+    const fetchImpl = this.options.fetchImpl ?? fetch;
+
+    try {
+      const response = await fetchImpl(url, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          apikey: anonKey,
+          authorization: `Bearer ${anonKey}`,
         },
-      );
+        body: JSON.stringify(req),
+      });
+
+      if (!response.ok) {
+        throw new Error(`edge-function status ${response.status}`);
+      }
+
+      const body = (await response.json()) as AIRecipesResponseRaw;
+      if (!body || body.schemaVersion !== "1") {
+        throw new Error("edge-function payload mismatch");
+      }
+      return body;
+    } catch (err) {
+      if (__DEV__) {
+        console.warn(
+          "[EdgeFunctionAIProvider] generateRecipeSuggestions falling back to local pattern engine",
+          err instanceof Error ? err.message : err,
+        );
+      }
+      return buildMockRecipeResponse(req);
     }
-    return buildMockRecipeResponse(req);
   }
 
   async analyzeFridgeImages(
@@ -109,7 +128,7 @@ export class EdgeFunctionAIProvider implements AIProvider {
           apikey: anonKey,
           authorization: `Bearer ${anonKey}`,
         },
-        body: JSON.stringify({ images }),
+        body: JSON.stringify({ images, locale: req.locale }),
       });
     } catch (err) {
       const message = err instanceof Error ? err.message : "network error";

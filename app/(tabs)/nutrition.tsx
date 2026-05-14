@@ -24,6 +24,7 @@ import {
 import { useChosenRecipes } from "../../src/features/nutrition/hooks/useChosenRecipes";
 import { MealSlotCard } from "../../src/features/nutrition/components/MealSlotCard";
 import { resolveSnapshotForDisplay } from "../../src/features/nutrition/utils/resolve-snapshot";
+import { buildFridgeFingerprint } from "../../src/features/nutrition/utils/fridge-fingerprint";
 import { useConfirmedFridge } from "../../src/features/vision/hooks/useConfirmedFridge";
 import type { MealType } from "../../src/features/nutrition/utils/meal-suggestions";
 
@@ -153,6 +154,14 @@ export default function NutritionScreen() {
   const consumedIds = useMemo(
     () => new Set(Object.keys(consumption.consumed)),
     [consumption.consumed],
+  );
+
+  // Fingerprint of the fridge as it stands right now. A chosen AI recipe
+  // whose stored fingerprint no longer matches this one was built around a
+  // fridge the user has since re-scanned — the slot card flags it.
+  const currentFridgeFingerprint = useMemo(
+    () => buildFridgeFingerprint(fridgeIds ?? [], fridgeUnmappedLabels ?? []),
+    [fridgeIds, fridgeUnmappedLabels],
   );
 
   const goToMealList = useCallback(
@@ -326,6 +335,13 @@ export default function NutritionScreen() {
           const suggestion = suggestions[mealType] ?? null;
           const eatenId = chosenRecipe?.recipeId ?? suggestion?.id;
           const eaten = eatenId ? consumedIds.has(eatenId) : false;
+          // An AI recipe is stale when it was chosen against a fridge that
+          // has since changed. Snapshots saved before fingerprints existed
+          // have no fingerprint — treated as unknown, never flagged stale.
+          const stale =
+            rawChosen?.source === "ai" &&
+            !!rawChosen.fridgeFingerprint &&
+            rawChosen.fridgeFingerprint !== currentFridgeFingerprint;
           return (
             <MealSlotCard
               key={mealType}
@@ -333,6 +349,7 @@ export default function NutritionScreen() {
               chosen={chosenRecipe}
               suggestion={suggestion}
               eaten={eaten}
+              stale={stale}
               onViewRecipe={() => goToRecipeView(mealType)}
               onAdaptWithFridge={() =>
                 fridgeReady ? goToMealList(mealType) : handleScanFridge()

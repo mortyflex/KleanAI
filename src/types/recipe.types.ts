@@ -153,4 +153,13 @@ export interface ChosenRecipeSnapshot {
   tags: RecipeTag[];
   /** ISO timestamp the user confirmed the choice. */
   chosenAt: string;
+  /**
+   * Fingerprint of the confirmed fridge at the moment the recipe was chosen
+   * (see `buildFridgeFingerprint`). When the live fridge fingerprint differs,
+   * an AI recipe may no longer be feasible — the Nutrition screen surfaces a
+   * non-blocking "may no longer match your fridge" warning. Optional so
+   * snapshots persisted before this field stay valid (treated as unknown,
+   * i.e. not flagged stale).
+   */
+  fridgeFingerprint?: string;
 }

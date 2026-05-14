@@ -43,6 +43,11 @@ export interface AnalyzeFridgeOptions {
   images: AIRequestImage[];
   provider?: AIProvider;
   confidenceThreshold?: number;
+  /**
+   * Forwarded to the AI provider so Gemini returns labels in the user's
+   * language. Defaults to undefined → provider falls back to English.
+   */
+  locale?: string;
 }
 
 /**
@@ -64,6 +69,7 @@ export async function analyzeFridgeImages(
     raw = await provider.analyzeFridgeImages({
       images: opts.images,
       promptVersion: FRIDGE_VISION_PROMPT_VERSION,
+      locale: opts.locale,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'unknown provider error';

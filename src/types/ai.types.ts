@@ -101,6 +101,13 @@ export interface FridgeVisionResponseRaw {
 export interface FridgeVisionRequest {
   images: AIRequestImage[];
   promptVersion: string;
+  /**
+   * BCP-47 / ISO language tag (e.g. `"fr"`, `"en"`). Forwarded to the edge
+   * function so Gemini returns labels in the user's language. The internal
+   * catalog has bilingual aliases, so French labels still map to the same
+   * `IngredientId` as their English counterparts.
+   */
+  locale?: string;
 }
 
 /**
@@ -175,6 +182,13 @@ export interface AIRecipeRequest {
    * catalog so they can be resolved to localized names by the provider.
    */
   mappedIngredientIds: IngredientId[];
+  /**
+   * Localized display labels for the mapped ingredients. Same length and
+   * order as `mappedIngredientIds`. Sent so the generator (template or LLM)
+   * can write the recipe in the user's language without leaking raw ids
+   * like `greek_yogurt` into the UI.
+   */
+  mappedIngredientLabels: string[];
   /** Free-text labels the user confirmed but that aren't in our catalog. */
   unmappedIngredientLabels: string[];
   goal: 'lose_weight' | 'gain_muscle' | 'maintain' | 'recomposition';

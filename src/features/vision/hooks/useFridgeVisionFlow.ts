@@ -1,4 +1,5 @@
 import { useCallback, useReducer } from 'react';
+import { useTranslation } from 'react-i18next';
 import type {
   AIRequestImage,
   DetectedIngredient,
@@ -187,10 +188,17 @@ export interface UseFridgeVisionFlowApi {
 
 export function useFridgeVisionFlow(): UseFridgeVisionFlowApi {
   const [state, dispatch] = useReducer(fridgeVisionReducer, initialState);
+  const { i18n } = useTranslation();
 
   const analyze = useCallback(async () => {
     dispatch({ type: 'analyze_started' });
-    const result = await analyzeFridgeImages({ images: state.images });
+    const result = await analyzeFridgeImages({
+      images: state.images,
+      // The edge function uses this to instruct Gemini to write labels in
+      // the user's language (FR / EN). Catalog mapping still works because
+      // the alias index is bilingual.
+      locale: i18n.language,
+    });
     if (!result.ok) {
       dispatch({
         type: 'analyze_failed',
@@ -208,7 +216,7 @@ export function useFridgeVisionFlow(): UseFridgeVisionFlowApi {
       detected: result.detected,
       unmapped: result.unmapped,
     });
-  }, [state.images]);
+  }, [state.images, i18n.language]);
 
   return {
     state,

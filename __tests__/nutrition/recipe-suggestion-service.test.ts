@@ -65,6 +65,7 @@ describe('generateAIRecipeSuggestions', () => {
       provider,
       mealType: 'lunch',
       ingredientIds: ['eggs'],
+      ingredientLabels: ['Eggs'],
       unmappedLabels: [],
       goal: 'maintain',
       restrictions: [],
@@ -80,6 +81,7 @@ describe('generateAIRecipeSuggestions', () => {
       provider,
       mealType: 'lunch',
       ingredientIds: ['tofu', 'quinoa'],
+      ingredientLabels: ['Tofu', 'Quinoa'],
       unmappedLabels: [],
       goal: 'maintain',
       restrictions: [],
@@ -93,6 +95,23 @@ describe('generateAIRecipeSuggestions', () => {
     }
   });
 
+  it('forwards the localized ingredient labels to the provider', async () => {
+    const spy = jest.fn(async () => validAIPayload());
+    const provider = makeProvider(spy);
+    await generateAIRecipeSuggestions({
+      provider,
+      mealType: 'lunch',
+      ingredientIds: ['greek_yogurt', 'tofu'],
+      ingredientLabels: ['Yaourt grec', 'Tofu'],
+      unmappedLabels: ['Ketchup'],
+      goal: 'maintain',
+      restrictions: [],
+      desiredCount: 1,
+      language: 'fr',
+    });
+    expect(spy).toHaveBeenCalled();
+  });
+
   it('returns invalid_schema for malformed AI responses', async () => {
     const provider = makeProvider(async () => ({
       schemaVersion: '1',
@@ -102,6 +121,7 @@ describe('generateAIRecipeSuggestions', () => {
       provider,
       mealType: 'lunch',
       ingredientIds: [],
+      ingredientLabels: [],
       unmappedLabels: [],
       goal: 'maintain',
       restrictions: [],
@@ -119,6 +139,7 @@ describe('generateAIRecipeSuggestions', () => {
       provider,
       mealType: 'lunch',
       ingredientIds: [],
+      ingredientLabels: [],
       unmappedLabels: [],
       goal: 'maintain',
       restrictions: [],
@@ -137,6 +158,7 @@ describe('generateAIRecipeSuggestions', () => {
       provider,
       mealType: 'lunch',
       ingredientIds: ['tofu'],
+      ingredientLabels: ['Tofu'],
       unmappedLabels: [],
       goal: 'maintain',
       restrictions: [],

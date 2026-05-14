@@ -29,6 +29,13 @@ interface MealSlotCardProps {
   /** Suggestion fallback when no chosen recipe — keeps the screen useful. */
   suggestion: MealSuggestion | null;
   eaten: boolean;
+  /**
+   * True when the chosen recipe was picked against a fridge that has since
+   * changed (the user re-scanned). The card keeps the recipe but surfaces a
+   * non-blocking "may no longer match your fridge" banner with a CTA to pick
+   * a fresh one.
+   */
+  stale?: boolean;
   /** "Voir la recette" — opens the detail view of the currently displayed recipe. */
   onViewRecipe: () => void;
   /** "Adapter avec mon frigo" — opens the recipe list biased by the user's fridge. */
@@ -48,6 +55,7 @@ export function MealSlotCard({
   chosen,
   suggestion,
   eaten,
+  stale = false,
   onViewRecipe,
   onAdaptWithFridge,
   onMarkEaten,
@@ -56,6 +64,9 @@ export function MealSlotCard({
 }: MealSlotCardProps) {
   const { t } = useTranslation('common');
   const palette = MEAL_PALETTE[mealType];
+  // The "may no longer match your fridge" banner only makes sense when there
+  // is actually a chosen recipe to warn about.
+  const showStaleBanner = stale && !!chosen;
 
   const title = chosen
     ? chosen.title
@@ -83,7 +94,11 @@ export function MealSlotCard({
         padding: 18,
         gap: 12,
         borderWidth: 1,
-        borderColor: eaten ? colors.mint : colors.border,
+        borderColor: eaten
+          ? colors.mint
+          : showStaleBanner
+            ? colors.amber
+            : colors.border,
       }}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
@@ -129,6 +144,44 @@ export function MealSlotCard({
           </View>
         )}
       </View>
+
+      {showStaleBanner && (
+        <View
+          testID={`${testID ?? 'meal-slot'}-stale`}
+          accessibilityRole="alert"
+          style={{
+            gap: 8,
+            padding: 12,
+            borderRadius: radii.chip,
+            backgroundColor: colors.amberLight,
+            borderWidth: 1,
+            borderColor: colors.amber,
+          }}
+        >
+          <KleanText variant="caption" color={colors.amber} weight="700">
+            {t('nutrition.today.staleRecipeTitle')}
+          </KleanText>
+          <KleanText variant="caption" color={colors.ink}>
+            {t('nutrition.today.staleRecipeBody')}
+          </KleanText>
+          <Pressable
+            onPress={onAdaptWithFridge}
+            accessibilityRole="button"
+            testID={`${testID ?? 'meal-slot'}-stale-change`}
+            style={{
+              alignSelf: 'flex-start',
+              paddingHorizontal: 12,
+              paddingVertical: 8,
+              borderRadius: radii.pill,
+              backgroundColor: colors.amber,
+            }}
+          >
+            <KleanText variant="label" color="#FFFFFF">
+              {t('nutrition.today.changeRecipeCta')}
+            </KleanText>
+          </Pressable>
+        </View>
+      )}
 
       <KleanText variant="caption" color={colors.muted}>
         {description}
@@ -204,7 +257,9 @@ export function MealSlotCard({
           }}
         >
           <KleanText variant="label" color={colors.brand}>
-            {t('nutrition.today.adaptCta')}
+            {chosen
+              ? t('nutrition.today.changeRecipeCta')
+              : t('nutrition.today.adaptCta')}
           </KleanText>
         </Pressable>
       </View>

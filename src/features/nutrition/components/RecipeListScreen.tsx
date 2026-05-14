@@ -24,6 +24,12 @@ import {
 } from '../utils/recipe-engine';
 import type { MealType } from '../utils/meal-suggestions';
 import { rememberRecipes } from '../utils/recent-recipes-cache';
+import { buildFridgeFingerprint } from '../utils/fridge-fingerprint';
+import {
+  buildRecipeCacheKey,
+  getCachedRecipeResult,
+  setCachedRecipeResult,
+} from '../store/recipe-cache';
 import { RecipeCard } from './RecipeCard';
 
 const MEAL_TITLE_KEYS: Record<MealType, string> = {
@@ -61,20 +67,77 @@ export function RecipeListScreen() {
 
   const [result, setResult] = useState<HybridRecipeResult | null>(null);
   const [loading, setLoading] = useState(true);
+  const [regenerating, setRegenerating] = useState(false);
+
+  // Fingerprint of the confirmed fridge — stored on the chosen recipe so the
+  // Nutrition screen can later flag it as "may no longer match your fridge".
+  const fridgeFingerprint = useMemo(
+    () => buildFridgeFingerprint(ingredientIds ?? [], unmappedLabels ?? []),
+    [ingredientIds, unmappedLabels],
+  );
+
+  /**
+   * Resolves the recipe list for this meal type. Reads the persistent cache
+   * first so opening the list (e.g. "Adapt with my fridge") costs **zero**
+   * AI calls. `force: true` bypasses the cache for an explicit regenerate —
+   * that is the only path that triggers a fresh Gemini call once a list has
+   * been cached. Either way the result is written back to the cache.
+   */
+  const loadRecipes = useCallback(
+    async (opts?: { force?: boolean }): Promise<HybridRecipeResult> => {
+      const ids = ingredientIds ?? [];
+      const unmapped = unmappedLabels ?? [];
+      const goal = profile.goal ?? 'maintain';
+      const restrictions = profile.dietaryRestrictions ?? [];
+      const cacheKey = buildRecipeCacheKey({
+        mealType,
+        ingredientIds: ids,
+        unmappedLabels: unmapped,
+        goal,
+        restrictions,
+        language: i18n.language,
+      });
+
+      if (!opts?.force) {
+        const cached = await getCachedRecipeResult(cacheKey);
+        if (cached) return cached;
+      }
+
+      // Resolve localized display labels here so the AI generator (mock or
+      // Gemini) writes the recipe in the user's language without ever
+      // touching internal catalog ids like `greek_yogurt`.
+      const labels = ids.map((id) =>
+        t(`vision.ingredients.${id}`, { defaultValue: id }),
+      );
+      const fresh = await getHybridRecipesForMealType({
+        mealType,
+        ingredientIds: ids,
+        ingredientLabels: labels,
+        unmappedLabels: unmapped,
+        goal,
+        restrictions,
+        limit: MAX_RECIPES_PER_MEAL_TYPE,
+        language: i18n.language,
+      });
+      await setCachedRecipeResult(cacheKey, fresh).catch(() => {});
+      return fresh;
+    },
+    [
+      mealType,
+      ingredientIds,
+      unmappedLabels,
+      profile.goal,
+      profile.dietaryRestrictions,
+      i18n.language,
+      t,
+    ],
+  );
 
   useEffect(() => {
     if (fridgeLoading) return;
     let cancelled = false;
     setLoading(true);
-    getHybridRecipesForMealType({
-      mealType,
-      ingredientIds: ingredientIds ?? [],
-      unmappedLabels: unmappedLabels ?? [],
-      goal: profile.goal ?? 'maintain',
-      restrictions: profile.dietaryRestrictions ?? [],
-      limit: MAX_RECIPES_PER_MEAL_TYPE,
-      language: i18n.language,
-    })
+    loadRecipes()
       .then((res) => {
         if (cancelled) return;
         rememberRecipes(mealType, res.matches.map((m) => m.recipe));
@@ -89,15 +152,20 @@ export function RecipeListScreen() {
     return () => {
       cancelled = true;
     };
-  }, [
-    fridgeLoading,
-    mealType,
-    ingredientIds,
-    unmappedLabels,
-    profile.goal,
-    profile.dietaryRestrictions,
-    i18n.language,
-  ]);
+  }, [fridgeLoading, loadRecipes, mealType]);
+
+  const handleRegenerate = useCallback(async () => {
+    setRegenerating(true);
+    try {
+      const fresh = await loadRecipes({ force: true });
+      rememberRecipes(mealType, fresh.matches.map((m) => m.recipe));
+      setResult(fresh);
+    } catch {
+      // Keep the current list on failure — the cached suggestions stay valid.
+    } finally {
+      setRegenerating(false);
+    }
+  }, [loadRecipes, mealType]);
 
   const handleViewRecipe = useCallback(
     (recipeId: string) => {
@@ -115,10 +183,10 @@ export function RecipeListScreen() {
         (m) => buildSelectionId(m.recipe) === recipeId,
       );
       if (!match) return;
-      await choose(mealType, match.recipe);
+      await choose(mealType, match.recipe, fridgeFingerprint);
       router.replace('/(tabs)/nutrition');
     },
-    [choose, mealType, result, router],
+    [choose, mealType, result, router, fridgeFingerprint],
   );
 
   return (
@@ -195,6 +263,25 @@ export function RecipeListScreen() {
               />
             );
           })}
+
+          {(result.aiCount > 0 || result.aiFailure) && (
+            <View style={{ gap: 6 }}>
+              <PillButton
+                label={
+                  regenerating
+                    ? t('recipes.list.regeneratingAiCta')
+                    : t('recipes.list.regenerateAiCta')
+                }
+                variant="outline"
+                onPress={handleRegenerate}
+                disabled={regenerating}
+                testID="recipes-regenerate-ai"
+              />
+              <KleanText variant="caption" color={colors.muted}>
+                {t('recipes.list.regenerateAiHint')}
+              </KleanText>
+            </View>
+          )}
         </View>
       )}
 

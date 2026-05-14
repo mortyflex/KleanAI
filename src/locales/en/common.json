@@ -288,6 +288,9 @@
       "mealsSubtitleWithFridge": "Each idea is biased by what you confirmed in your fridge.",
       "viewRecipeCta": "View recipe",
       "adaptCta": "Adapt with my fridge",
+      "changeRecipeCta": "Change recipe",
+      "staleRecipeTitle": "May no longer match your fridge",
+      "staleRecipeBody": "You re-scanned your fridge since picking this AI recipe — it might not be doable anymore. It's still here, but you can swap it for a fresh suggestion.",
       "slotEmptyTitle": "Nothing planned yet",
       "slotEmptyBody": "Pick a recipe to lock in this slot."
     },
@@ -656,8 +659,11 @@
       "emptyBody": "Confirm a few ingredients in your fridge and we'll tailor recipes around them.",
       "scanFridgeCta": "Scan my fridge",
       "backCta": "Back",
-      "aiUnavailableTitle": "AI suggestions unavailable",
-      "aiUnavailableBody": "We couldn't reach the AI for now — showing only catalog recipes. Your unmapped ingredients are still saved."
+      "aiUnavailableTitle": "No AI recipe right now",
+      "aiUnavailableBody": "We couldn't build a sensible AI recipe with what you've confirmed. Showing catalog picks — try scanning more ingredients to unlock more ideas.",
+      "regenerateAiCta": "Get another AI recipe",
+      "regeneratingAiCta": "Generating…",
+      "regenerateAiHint": "These suggestions are cached — opening this list again won't call the AI. Tap above only when you want a fresh AI idea."
     },
     "fullDay": {
       "title": "Your day, ready",

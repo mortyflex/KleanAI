@@ -289,6 +289,9 @@
       "mealsSubtitleWithFridge": "Chaque idée est biaisée par ce que tu as confirmé dans ton frigo.",
       "viewRecipeCta": "Voir la recette",
       "adaptCta": "Adapter avec mon frigo",
+      "changeRecipeCta": "Changer de recette",
+      "staleRecipeTitle": "Plus forcément réalisable",
+      "staleRecipeBody": "Tu as re-scanné ton frigo depuis le choix de cette recette IA — elle n'est peut-être plus faisable. On te la laisse, mais tu peux la remplacer par une nouvelle suggestion.",
       "slotEmptyTitle": "Rien de prévu",
       "slotEmptyBody": "Choisis une recette pour caler ce repas."
     },
@@ -657,8 +660,11 @@
       "emptyBody": "Confirme quelques ingrédients dans ton frigo et on adapte les recettes.",
       "scanFridgeCta": "Scanner mon frigo",
       "backCta": "Retour",
-      "aiUnavailableTitle": "Suggestions IA indisponibles",
-      "aiUnavailableBody": "Impossible de joindre l'IA pour l'instant — on n'affiche que les recettes du catalogue. Tes ingrédients hors catalogue sont toujours sauvegardés."
+      "aiUnavailableTitle": "Pas de recette IA pour l'instant",
+      "aiUnavailableBody": "On n'a pas pu construire une recette IA cohérente avec ce que tu as confirmé. On affiche les recettes du catalogue — scanne quelques ingrédients en plus pour débloquer d'autres idées.",
+      "regenerateAiCta": "Une autre recette IA",
+      "regeneratingAiCta": "Génération…",
+      "regenerateAiHint": "Ces suggestions sont mises en cache — rouvrir cette liste ne relance pas l'IA. Touche ci-dessus seulement si tu veux une nouvelle idée IA."
     },
     "fullDay": {
       "title": "Ta journée, prête",

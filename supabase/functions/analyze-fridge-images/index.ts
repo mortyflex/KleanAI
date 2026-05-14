@@ -26,21 +26,33 @@ const DEFAULT_GEMINI_MODEL = "gemini-flash-latest";
 const GEMINI_ENDPOINT = (model: string, apiKey: string) =>
   `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
-const PROMPT = `You are a vision assistant for a fitness nutrition app.
+function buildPrompt(locale?: string): string {
+  const isFr = (locale ?? "en").toLowerCase().startsWith("fr");
+  const langName = isFr ? "French (français)" : "English";
+  // The internal ingredient catalog has bilingual aliases (e.g. "blanc de
+  // poulet" matches the same id as "chicken breast"), so asking Gemini to
+  // respond in the user's language does NOT break the downstream mapping.
+  return `You are a vision assistant for a fitness nutrition app.
 Analyze the provided photo of a fridge or pantry. Detect ONLY foods that are
 clearly visible or strongly probable. Never invent ingredients. Never list
 non-food items.
 
+LANGUAGE
+Write every "label" and every "alias" in ${langName}. Do NOT mix languages.
+Examples for French: "blanc de poulet", "yaourt grec", "fruits rouges",
+"huile d'olive". Examples for English: "chicken breast", "greek yogurt",
+"berries", "olive oil".
+
 For each detected food, return:
-- label: short English label, no brand names
+- label: short ${langName} label, no brand names
 - confidence: number between 0 and 1
 - category: one of protein_meat, protein_fish, protein_egg, protein_dairy,
   protein_plant, carb_grain, carb_starchy, vegetable, fruit, fat_oil,
   condiment, beverage, other
-- aliases: optional alternative names, lowercase
+- aliases: optional alternative names in ${langName}, lowercase
 - quantity: optional, with amount (number) and unit (one of piece, pack,
   bottle, jar, g, ml, unknown). Omit if not visible.
-- uncertaintyNote: optional short note if you are unsure
+- uncertaintyNote: optional short note in ${langName} if you are unsure
 
 Respond with ONLY a JSON object that matches exactly:
 {
@@ -60,6 +72,7 @@ Respond with ONLY a JSON object that matches exactly:
 
 If nothing is recognisable, return an empty "detected" array. Do not wrap the
 JSON in markdown fences. Do not add any prose.`;
+}
 
 interface IncomingImage {
   data: string;
@@ -141,7 +154,7 @@ async function callGemini(
   apiKey: string,
   payload: IncomingPayload,
 ): Promise<{ ok: true; text: string } | { ok: false; reason: string; status: number }> {
-  const parts: unknown[] = [{ text: PROMPT }];
+  const parts: unknown[] = [{ text: buildPrompt(payload.locale) }];
   for (const img of payload.images) {
     parts.push({
       inlineData: {

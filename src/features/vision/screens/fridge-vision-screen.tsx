@@ -17,6 +17,7 @@ import {
   pickFridgeImage,
   type PickerOutcome,
 } from '../utils/image-picker';
+import { formatRawLabel } from '../utils/format-label';
 
 const labelKeyById: Record<string, string> = Object.fromEntries(
   INGREDIENT_CATALOG.map((e) => [e.internalId, e.labelKey]),
@@ -88,7 +89,7 @@ function IngredientRow({
           {label}
         </KleanText>
         <KleanText variant="caption" color={colors.muted}>
-          {t('vision.fridge.results.rawLabel', { label: rawLabel })}
+          {t('vision.fridge.results.rawLabel', { label: formatRawLabel(rawLabel) })}
         </KleanText>
         {estimatedNutrition ? (
           <View
@@ -548,7 +549,7 @@ export function FridgeVisionScreen() {
               {state.unmapped.map((item) => (
                 <IngredientRow
                   key={item.unmappedId}
-                  label={item.rawLabel}
+                  label={formatRawLabel(item.rawLabel)}
                   rawLabel={item.rawLabel}
                   confidence={item.confidence}
                   uncertaintyNote={item.uncertaintyNote}
